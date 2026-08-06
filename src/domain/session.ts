@@ -22,7 +22,9 @@ export interface BreakStep {
 export type SessionStep = ExerciseStep | BreakStep;
 
 /** Derives the only three executable exercise modes supported by the prototype. */
-export function deriveExerciseMode(exercise: Pick<Exercise, "tempoBpm" | "durationSec">): ExerciseMode {
+export function deriveExerciseMode(
+  exercise: Pick<Exercise, "tempoBpm" | "durationSec">,
+): ExerciseMode {
   if (exercise.tempoBpm !== null && exercise.durationSec !== null) {
     return "paced-timed";
   }

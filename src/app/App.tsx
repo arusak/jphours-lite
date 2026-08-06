@@ -7,7 +7,11 @@ import { LocalStorageRoutineRepository } from "../services/persistence/routine-r
 export function App() {
   const repository = useMemo(() => new LocalStorageRoutineRepository(), []);
   const [activeRoutine, setActiveRoutine] = useState<Routine | null>(null);
-  return activeRoutine
-    ? <SessionPlayer routine={activeRoutine} onExit={() => setActiveRoutine(null)} />
-    : <main className="app-shell"><RoutineEditor repository={repository} onStartSession={setActiveRoutine} /></main>;
+  return activeRoutine ? (
+    <SessionPlayer routine={activeRoutine} onExit={() => setActiveRoutine(null)} />
+  ) : (
+    <main className="app-shell">
+      <RoutineEditor repository={repository} onStartSession={setActiveRoutine} />
+    </main>
+  );
 }

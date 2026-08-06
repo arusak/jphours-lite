@@ -5,7 +5,10 @@ export class DebouncedRoutineSaver {
   private timeoutId: ReturnType<typeof setTimeout> | undefined;
   private pending: Routine | undefined;
 
-  constructor(private readonly repository: RoutineRepository, private readonly delayMs = 300) {}
+  constructor(
+    private readonly repository: RoutineRepository,
+    private readonly delayMs = 300,
+  ) {}
 
   schedule(routine: Routine): void {
     this.pending = routine;
@@ -21,5 +24,7 @@ export class DebouncedRoutineSaver {
     this.pending = undefined;
   }
 
-  dispose(): void { this.flush(); }
+  dispose(): void {
+    this.flush();
+  }
 }

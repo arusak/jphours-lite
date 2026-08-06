@@ -47,13 +47,27 @@ export class SessionRunner {
     return this.state;
   }
 
-  start(routine: Routine): void { this.dispatch({ type: "START", routine, now: this.clock.now() }); }
-  pause(): void { this.dispatch({ type: "PAUSE", now: this.clock.now() }); }
-  resume(): void { this.dispatch({ type: "RESUME", now: this.clock.now() }); }
-  skipStep(): void { this.dispatch({ type: "SKIP_STEP", now: this.clock.now() }); }
-  stop(): void { this.dispatch({ type: "STOP" }); }
-  appHidden(): void { this.dispatch({ type: "APP_HIDDEN", now: this.clock.now() }); }
-  appVisible(): void { this.dispatch({ type: "APP_VISIBLE" }); }
+  start(routine: Routine): void {
+    this.dispatch({ type: "START", routine, now: this.clock.now() });
+  }
+  pause(): void {
+    this.dispatch({ type: "PAUSE", now: this.clock.now() });
+  }
+  resume(): void {
+    this.dispatch({ type: "RESUME", now: this.clock.now() });
+  }
+  skipStep(): void {
+    this.dispatch({ type: "SKIP_STEP", now: this.clock.now() });
+  }
+  stop(): void {
+    this.dispatch({ type: "STOP" });
+  }
+  appHidden(): void {
+    this.dispatch({ type: "APP_HIDDEN", now: this.clock.now() });
+  }
+  appVisible(): void {
+    this.dispatch({ type: "APP_VISIBLE" });
+  }
 
   dispatch(command: SessionCommand): void {
     const previous = this.state;
@@ -63,16 +77,31 @@ export class SessionRunner {
 
     // START creates a new immutable snapshot, even when it happens to reuse an
     // exercise id, so its old callbacks/audio must never survive.
-    if (previousStep && (previousStep.id !== nextStep?.id || this.state.status !== "running" || command.type === "START")) {
+    if (
+      previousStep &&
+      (previousStep.id !== nextStep?.id ||
+        this.state.status !== "running" ||
+        command.type === "START")
+    ) {
       this.cancelTimers();
       this.hooks.onStepStop?.(previousStep, command.type);
     }
 
-    if (command.type === "STEP_WARNING" && previous.warningPlayedForStepId !== this.state.warningPlayedForStepId && nextStep) {
+    if (
+      command.type === "STEP_WARNING" &&
+      previous.warningPlayedForStepId !== this.state.warningPlayedForStepId &&
+      nextStep
+    ) {
       this.hooks.onWarning?.(nextStep);
     }
 
-    if (nextStep && this.state.status === "running" && (previousStep?.id !== nextStep.id || previous.status !== "running" || command.type === "START")) {
+    if (
+      nextStep &&
+      this.state.status === "running" &&
+      (previousStep?.id !== nextStep.id ||
+        previous.status !== "running" ||
+        command.type === "START")
+    ) {
       this.hooks.onStepStart?.(nextStep, this.state);
       this.scheduleCurrentStep();
     }
@@ -96,7 +125,11 @@ export class SessionRunner {
     if (!step || !isTimedStep(step) || endsAt === null) return;
 
     const remainingMs = Math.max(0, endsAt - this.clock.now());
-    if (step.kind === "exercise" && step.durationSec! * 1000 > warningLeadMs && this.state.warningPlayedForStepId !== step.id) {
+    if (
+      step.kind === "exercise" &&
+      step.durationSec! * 1000 > warningLeadMs &&
+      this.state.warningPlayedForStepId !== step.id
+    ) {
       const warningDelayMs = remainingMs - warningLeadMs;
       if (warningDelayMs > 0) {
         this.warningTimer = this.scheduler.setTimeout(() => {

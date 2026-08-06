@@ -1,4 +1,4 @@
-export type AudioCue = 'warning' | 'exercise-complete' | 'break-complete' | 'session-complete';
+export type AudioCue = "warning" | "exercise-complete" | "break-complete" | "session-complete";
 
 export interface MetronomeOptions {
   bpm: number;

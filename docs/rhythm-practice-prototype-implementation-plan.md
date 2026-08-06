@@ -16,12 +16,12 @@ The user also configures one break duration used between exercises.
 
 ### Supported exercise combinations
 
-| Title | BPM | Duration | Valid | Runtime behaviour |
-|---|---:|---:|---:|---|
-| Required | Set | Set | Yes | Metronome plus countdown |
-| Required | Empty | Set | Yes | Countdown without metronome |
-| Required | Empty | Empty | Yes | Manual, open-ended task |
-| Required | Set | Empty | No | Rejected in the prototype |
+| Title    |   BPM | Duration | Valid | Runtime behaviour           |
+| -------- | ----: | -------: | ----: | --------------------------- |
+| Required |   Set |      Set |   Yes | Metronome plus countdown    |
+| Required | Empty |      Set |   Yes | Countdown without metronome |
+| Required | Empty |    Empty |   Yes | Manual, open-ended task     |
+| Required |   Set |    Empty |    No | Rejected in the prototype   |
 
 Every active exercise has an **End/Skip exercise** button. The session itself has Pause/Resume and Stop controls.
 
@@ -199,10 +199,7 @@ export interface Exercise {
   durationSec: number | null;
 }
 
-export type ExerciseMode =
-  | "paced-timed"
-  | "free-timed"
-  | "open-ended";
+export type ExerciseMode = "paced-timed" | "free-timed" | "open-ended";
 
 export type SessionStep = ExerciseStep | BreakStep;
 
@@ -282,13 +279,7 @@ type SessionCommand =
 ### State
 
 ```ts
-type SessionStatus =
-  | "idle"
-  | "running"
-  | "paused"
-  | "completed"
-  | "stopped"
-  | "interrupted";
+type SessionStatus = "idle" | "running" | "paused" | "completed" | "stopped" | "interrupted";
 
 interface SessionState {
   status: SessionStatus;

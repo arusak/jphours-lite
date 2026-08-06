@@ -1,8 +1,4 @@
-import type {
-  AudioControllerOptions,
-  AudioCue,
-  MetronomeOptions,
-} from "./types";
+import type { AudioControllerOptions, AudioCue, MetronomeOptions } from "./types";
 
 const DEFAULT_POLL_MS = 25;
 const DEFAULT_SCHEDULE_AHEAD_SEC = 0.1;
@@ -36,13 +32,10 @@ export class AudioController {
 
   public constructor(options: AudioControllerOptions = {}) {
     this.contextFactory = options.contextFactory ?? defaultContextFactory;
-    this.setIntervalFn =
-      options.setIntervalFn ?? window.setInterval.bind(window);
-    this.clearIntervalFn =
-      options.clearIntervalFn ?? window.clearInterval.bind(window);
+    this.setIntervalFn = options.setIntervalFn ?? window.setInterval.bind(window);
+    this.clearIntervalFn = options.clearIntervalFn ?? window.clearInterval.bind(window);
     this.schedulerPollMs = options.schedulerPollMs ?? DEFAULT_POLL_MS;
-    this.scheduleAheadSec =
-      options.scheduleAheadSec ?? DEFAULT_SCHEDULE_AHEAD_SEC;
+    this.scheduleAheadSec = options.scheduleAheadSec ?? DEFAULT_SCHEDULE_AHEAD_SEC;
   }
 
   /** Must be called from a user gesture (for example, Start session). */
@@ -84,10 +77,7 @@ export class AudioController {
     this.cancelActiveSources();
     this.nextBeatTime = this.context!.currentTime + START_DELAY_SEC;
     this.scheduleBeats();
-    this.scheduler = this.setIntervalFn(
-      () => this.scheduleBeats(),
-      this.schedulerPollMs,
-    );
+    this.scheduler = this.setIntervalFn(() => this.scheduleBeats(), this.schedulerPollMs);
     return true;
   }
 
@@ -228,8 +218,7 @@ function defaultContextFactory(): AudioContext | undefined {
   const legacyWindow = window as typeof window & {
     webkitAudioContext?: typeof AudioContext;
   };
-  const Constructor =
-    legacyWindow.AudioContext ?? legacyWindow.webkitAudioContext;
+  const Constructor = legacyWindow.AudioContext ?? legacyWindow.webkitAudioContext;
   return Constructor ? new Constructor() : undefined;
 }
 

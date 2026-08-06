@@ -26,7 +26,8 @@ export const DEFAULT_BREAK_DURATION_SEC = 30;
 export const DEFAULT_WARNING_LEAD_TIME_SEC = 20;
 
 const createId = (): string =>
-  globalThis.crypto?.randomUUID?.() ?? `routine-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+  globalThis.crypto?.randomUUID?.() ??
+  `routine-${Date.now()}-${Math.random().toString(36).slice(2)}`;
 
 export function createExercise(overrides: Partial<Exercise> = {}): Exercise {
   return {

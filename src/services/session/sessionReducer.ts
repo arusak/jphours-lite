@@ -49,26 +49,30 @@ export function sessionReducer(state: SessionState, command: SessionCommand): Se
     case "SKIP_STEP":
       return state.status === "running" ? advance(state, command.now) : state;
     case "STEP_WARNING":
-      return canEmitForCurrentTimedStep(state, command.stepId) && state.warningPlayedForStepId !== command.stepId
+      return canEmitForCurrentTimedStep(state, command.stepId) &&
+        state.warningPlayedForStepId !== command.stepId
         ? { ...state, warningPlayedForStepId: command.stepId }
         : state;
     case "STEP_COMPLETED":
-      return canEmitForCurrentTimedStep(state, command.stepId) ? advance(state, command.now) : state;
+      return canEmitForCurrentTimedStep(state, command.stepId)
+        ? advance(state, command.now)
+        : state;
     case "STOP":
       return state.status === "idle" ? state : { ...initialSessionState, status: "stopped" };
   }
 }
 
 export function currentStep(state: SessionState): SessionStep | null {
-  return state.currentStepIndex === null ? null : state.steps[state.currentStepIndex] ?? null;
+  return state.currentStepIndex === null ? null : (state.steps[state.currentStepIndex] ?? null);
 }
 
 function pause(state: SessionState, now: number, status: "paused" | "interrupted"): SessionState {
   if (state.status !== "running") return state;
   const step = currentStep(state);
-  const remainingSec = step && isTimedStep(step) && state.currentStepEndsAt !== null
-    ? Math.max(0, (state.currentStepEndsAt - now) / 1000)
-    : null;
+  const remainingSec =
+    step && isTimedStep(step) && state.currentStepEndsAt !== null
+      ? Math.max(0, (state.currentStepEndsAt - now) / 1000)
+      : null;
   return {
     ...state,
     status,

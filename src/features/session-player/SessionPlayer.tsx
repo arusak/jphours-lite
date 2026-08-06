@@ -27,7 +27,8 @@ export function SessionPlayer({ routine, onExit }: SessionPlayerProps) {
     runner.current = new SessionRunner(undefined, undefined, {
       onStateChange: setState,
       onStepStart: (step) => {
-        if (step.kind === "exercise" && step.mode === "paced-timed" && step.tempoBpm) audio.startMetronome({ bpm: step.tempoBpm });
+        if (step.kind === "exercise" && step.mode === "paced-timed" && step.tempoBpm)
+          audio.startMetronome({ bpm: step.tempoBpm });
       },
       onStepStop: (step, reason) => {
         audio.stopMetronome();
@@ -63,32 +64,83 @@ export function SessionPlayer({ routine, onExit }: SessionPlayerProps) {
     });
   }, [audio, routine, wakeLock]);
 
-  const step = state.currentStepIndex === null ? null : state.steps[state.currentStepIndex] ?? null;
-  const next = state.currentStepIndex === null ? null : state.steps[state.currentStepIndex + 1] ?? null;
-  const remainingSec = state.currentStepEndsAt === null ? null : Math.max(0, Math.ceil((state.currentStepEndsAt - now) / 1000));
-  const elapsedSec = state.currentStepStartedAt === null ? 0 : Math.max(0, Math.floor((now - state.currentStepStartedAt) / 1000));
+  const step =
+    state.currentStepIndex === null ? null : (state.steps[state.currentStepIndex] ?? null);
+  const next =
+    state.currentStepIndex === null ? null : (state.steps[state.currentStepIndex + 1] ?? null);
+  const remainingSec =
+    state.currentStepEndsAt === null
+      ? null
+      : Math.max(0, Math.ceil((state.currentStepEndsAt - now) / 1000));
+  const elapsedSec =
+    state.currentStepStartedAt === null
+      ? 0
+      : Math.max(0, Math.floor((now - state.currentStepStartedAt) / 1000));
 
-  if (state.status === "completed") return <main className="session-player completion"><h1>Routine complete</h1><p>Nice work — every exercise is finished.</p><button onClick={onExit}>Return to editor</button></main>;
-  if (state.status === "stopped") return <main className="session-player completion"><h1>Session stopped</h1><button onClick={onExit}>Return to editor</button></main>;
+  if (state.status === "completed")
+    return (
+      <main className="session-player completion">
+        <h1>Routine complete</h1>
+        <p>Nice work — every exercise is finished.</p>
+        <button onClick={onExit}>Return to editor</button>
+      </main>
+    );
+  if (state.status === "stopped")
+    return (
+      <main className="session-player completion">
+        <h1>Session stopped</h1>
+        <button onClick={onExit}>Return to editor</button>
+      </main>
+    );
   if (!step) return null;
 
   const paused = state.status === "paused" || state.status === "interrupted";
-  const displaySeconds = paused && state.pausedRemainingSec !== null ? Math.ceil(state.pausedRemainingSec) : remainingSec;
+  const displaySeconds =
+    paused && state.pausedRemainingSec !== null
+      ? Math.ceil(state.pausedRemainingSec)
+      : remainingSec;
   const stepPosition = state.currentStepIndex ?? 0;
-  return <main className="session-player" aria-live="polite">
-    <p className="eyebrow">{step.kind === "break" ? "Break" : "Exercise"} {stepPosition + 1} of {state.steps.length}</p>
-    <h1>{step.kind === "break" ? "Break" : step.title}</h1>
-    {step.kind === "exercise" && <p>{step.mode.replace("-", " ")}{step.tempoBpm ? ` · ${step.tempoBpm} BPM` : ""}</p>}
-    <p className="timer">{displaySeconds === null ? formatTime(elapsedSec) : formatTime(displaySeconds)}</p>
-    <p>{displaySeconds === null ? "Elapsed" : "Remaining"}</p>
-    {next && <p className="next">Next: {next.kind === "break" ? "Break" : next.title}</p>}
-    {state.status === "interrupted" && <p role="alert">Session paused while the app was in the background.</p>}
-    <div className="player-controls">
-      {paused ? <button className="primary" onClick={() => runner.current?.resume()}>Resume</button> : <button className="primary" onClick={() => runner.current?.pause()}>Pause</button>}
-      {!paused && <button onClick={() => runner.current?.skipStep()}>{step.kind === "break" ? "Skip break" : "End / skip exercise"}</button>}
-      <button className="danger" onClick={() => runner.current?.stop()}>Stop session</button>
-    </div>
-  </main>;
+  return (
+    <main className="session-player" aria-live="polite">
+      <p className="eyebrow">
+        {step.kind === "break" ? "Break" : "Exercise"} {stepPosition + 1} of {state.steps.length}
+      </p>
+      <h1>{step.kind === "break" ? "Break" : step.title}</h1>
+      {step.kind === "exercise" && (
+        <p>
+          {step.mode.replace("-", " ")}
+          {step.tempoBpm ? ` · ${step.tempoBpm} BPM` : ""}
+        </p>
+      )}
+      <p className="timer">
+        {displaySeconds === null ? formatTime(elapsedSec) : formatTime(displaySeconds)}
+      </p>
+      <p>{displaySeconds === null ? "Elapsed" : "Remaining"}</p>
+      {next && <p className="next">Next: {next.kind === "break" ? "Break" : next.title}</p>}
+      {state.status === "interrupted" && (
+        <p role="alert">Session paused while the app was in the background.</p>
+      )}
+      <div className="player-controls">
+        {paused ? (
+          <button className="primary" onClick={() => runner.current?.resume()}>
+            Resume
+          </button>
+        ) : (
+          <button className="primary" onClick={() => runner.current?.pause()}>
+            Pause
+          </button>
+        )}
+        {!paused && (
+          <button onClick={() => runner.current?.skipStep()}>
+            {step.kind === "break" ? "Skip break" : "End / skip exercise"}
+          </button>
+        )}
+        <button className="danger" onClick={() => runner.current?.stop()}>
+          Stop session
+        </button>
+      </div>
+    </main>
+  );
 }
 
 function formatTime(seconds: number): string {

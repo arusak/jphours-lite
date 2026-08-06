@@ -15,7 +15,9 @@ export function migrateRoutine(value: unknown): Routine {
 }
 
 export class LocalStorageRoutineRepository implements RoutineRepository {
-  constructor(private readonly storage: Pick<Storage, "getItem" | "setItem"> = window.localStorage) {}
+  constructor(
+    private readonly storage: Pick<Storage, "getItem" | "setItem"> = window.localStorage,
+  ) {}
 
   load(): Routine {
     try {
@@ -34,5 +36,14 @@ export class LocalStorageRoutineRepository implements RoutineRepository {
 function isRoutineLike(value: unknown): value is Routine {
   if (typeof value !== "object" || value === null) return false;
   const candidate = value as Partial<Routine>;
-  return candidate.schemaVersion === ROUTINE_SCHEMA_VERSION && typeof candidate.id === "string" && typeof candidate.name === "string" && Array.isArray(candidate.exercises) && typeof candidate.defaultBreakDurationSec === "number" && typeof candidate.warningLeadTimeSec === "number" && candidate.autoAdvance === true && typeof candidate.updatedAt === "string";
+  return (
+    candidate.schemaVersion === ROUTINE_SCHEMA_VERSION &&
+    typeof candidate.id === "string" &&
+    typeof candidate.name === "string" &&
+    Array.isArray(candidate.exercises) &&
+    typeof candidate.defaultBreakDurationSec === "number" &&
+    typeof candidate.warningLeadTimeSec === "number" &&
+    candidate.autoAdvance === true &&
+    typeof candidate.updatedAt === "string"
+  );
 }

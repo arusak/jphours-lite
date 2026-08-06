@@ -31,7 +31,9 @@ class FakeTime implements Clock, TimeoutScheduler {
     this.timers.set(id, { at: this.value + delayMs, callback });
     return id;
   }
-  clearTimeout(handle: unknown): void { this.timers.delete(handle as number); }
+  clearTimeout(handle: unknown): void {
+    this.timers.delete(handle as number);
+  }
   advance(milliseconds: number): void {
     const target = this.value + milliseconds;
     while (true) {
@@ -47,11 +49,19 @@ class FakeTime implements Clock, TimeoutScheduler {
 
 describe("buildSessionSteps", () => {
   it("derives executable modes and only inserts intermediate non-zero breaks", () => {
-    const steps = buildSessionSteps(routine([
-      exercise("paced", 120, 30), exercise("free", null, 30), exercise("open", null, null),
-    ]));
-    expect(steps.map((step) => step.kind === "exercise" ? step.mode : step.kind)).toEqual([
-      "paced-timed", "break", "free-timed", "break", "open-ended",
+    const steps = buildSessionSteps(
+      routine([
+        exercise("paced", 120, 30),
+        exercise("free", null, 30),
+        exercise("open", null, null),
+      ]),
+    );
+    expect(steps.map((step) => (step.kind === "exercise" ? step.mode : step.kind))).toEqual([
+      "paced-timed",
+      "break",
+      "free-timed",
+      "break",
+      "open-ended",
     ]);
     expect(buildSessionSteps(routine([exercise("one", null, null)], 0))).toHaveLength(1);
   });
