@@ -64,6 +64,18 @@ export class AudioController {
     return true;
   }
 
+  /** Applies a session-only tempo and drops clicks queued at the old tempo. */
+  public updateMetronomeTempo(bpm: number): boolean {
+    if (!isValidBpm(bpm) || !this.metronome || !this.getContext()) return false;
+    this.clearScheduler();
+    this.cancelActiveSources();
+    this.metronome = { ...this.metronome, bpm };
+    this.nextBeatTime = this.context!.currentTime + START_DELAY_SEC;
+    this.scheduleBeats();
+    this.scheduler = this.setIntervalFn(() => this.scheduleBeats(), this.schedulerPollMs);
+    return true;
+  }
+
   /** Stops future scheduling and cancels clicks which have not started yet. */
   public pauseMetronome(): void {
     this.clearScheduler();
@@ -223,7 +235,7 @@ function defaultContextFactory(): AudioContext | undefined {
 }
 
 function isValidBpm(bpm: number): boolean {
-  return Number.isFinite(bpm) && bpm >= 30 && bpm <= 300;
+  return Number.isFinite(bpm) && bpm >= 20 && bpm <= 300;
 }
 
 function clampVolume(volume: number): number {

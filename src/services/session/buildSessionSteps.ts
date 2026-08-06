@@ -1,5 +1,5 @@
-import type { Routine } from "../../domain/routine";
-import { deriveExerciseMode, type ExerciseStep, type SessionStep } from "../../domain/session";
+import { deriveExerciseMode, type Routine } from "../../domain/routine";
+import type { ExerciseStep, SessionStep } from "../../domain/session";
 
 /**
  * Builds the immutable execution snapshot used by a running session.  It never
@@ -70,6 +70,4 @@ function assertExercise(exercise: Routine["exercises"][number]): void {
   ) {
     throw new Error("Timed exercise duration must be between 1 and 7200 seconds.");
   }
-  // This also deliberately rejects a tempo without a duration.
-  deriveExerciseMode(exercise);
 }

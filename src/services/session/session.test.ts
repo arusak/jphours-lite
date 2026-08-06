@@ -53,6 +53,7 @@ describe("buildSessionSteps", () => {
       routine([
         exercise("paced", 120, 30),
         exercise("free", null, 30),
+        exercise("paced-open", 90, null),
         exercise("open", null, null),
       ]),
     );
@@ -61,13 +62,19 @@ describe("buildSessionSteps", () => {
       "break",
       "free-timed",
       "break",
+      "paced-open-ended",
+      "break",
       "open-ended",
     ]);
     expect(buildSessionSteps(routine([exercise("one", null, null)], 0))).toHaveLength(1);
   });
 
-  it("rejects a tempo without a duration", () => {
-    expect(() => buildSessionSteps(routine([exercise("invalid", 100, null)]))).toThrow(/tempo/i);
+  it("constructs a paced open-ended step without a duration", () => {
+    expect(buildSessionSteps(routine([exercise("paced-open", 100, null)]))[0]).toMatchObject({
+      mode: "paced-open-ended",
+      tempoBpm: 100,
+      durationSec: null,
+    });
   });
 });
 
@@ -102,5 +109,57 @@ describe("SessionRunner", () => {
     runner.resume();
     time.advance(7_000);
     expect(runner.getState().status).toBe("completed");
+  });
+
+  it("freezes and preserves open-ended elapsed time across pause and resume", () => {
+    const time = new FakeTime();
+    const runner = new SessionRunner(time, time);
+    runner.start(routine([exercise("open", null, null)]));
+    time.advance(4_000);
+    runner.pause();
+    expect(runner.getState().pausedElapsedSec).toBe(4);
+    time.advance(10_000);
+    expect(runner.getState().pausedElapsedSec).toBe(4);
+    runner.resume();
+    time.advance(2_000);
+    expect((time.now() - runner.getState().currentStepStartedAt!) / 1000).toBe(6);
+  });
+
+  it("rewinds a break, replays it, and resumes with a fresh full exercise timer", () => {
+    const time = new FakeTime();
+    const stopped = vi.fn();
+    const runner = new SessionRunner(time, time, { onStepStop: stopped });
+    runner.start(routine([exercise("one", 120, 10), exercise("two", null, 10)], 5));
+    time.advance(10_000);
+    expect(runner.getState().currentStepIndex).toBe(1);
+
+    time.advance(2_000);
+    runner.rewindBreak();
+    expect(runner.getState()).toMatchObject({ currentStepIndex: 0, currentStepEndsAt: 22_000 });
+    expect(stopped).toHaveBeenLastCalledWith(
+      expect.objectContaining({ kind: "break" }),
+      "REWIND_BREAK",
+    );
+
+    time.advance(3_000);
+    runner.pause();
+    time.advance(20_000);
+    runner.resume();
+    time.advance(7_000);
+    expect(runner.getState().currentStepIndex).toBe(1);
+    time.advance(5_000);
+    expect(runner.getState().currentStepIndex).toBe(2);
+  });
+
+  it("cancels the stale break timer when rewinding", () => {
+    const time = new FakeTime();
+    const runner = new SessionRunner(time, time);
+    runner.start(routine([exercise("one", null, 1), exercise("two", null, 10)], 10));
+    time.advance(1_000);
+    runner.rewindBreak();
+    time.advance(1_000);
+    expect(runner.getState().currentStepIndex).toBe(1);
+    time.advance(9_000);
+    expect(runner.getState().currentStepIndex).toBe(1);
   });
 });

@@ -11,6 +11,7 @@ export interface SessionState {
   currentStepStartedAt: number | null;
   currentStepEndsAt: number | null;
   pausedRemainingSec: number | null;
+  pausedElapsedSec: number | null;
   warningPlayedForStepId: string | null;
 }
 
@@ -19,6 +20,7 @@ export type SessionCommand =
   | { type: "PAUSE"; now: number }
   | { type: "RESUME"; now: number }
   | { type: "SKIP_STEP"; now: number }
+  | { type: "REWIND_BREAK"; now: number }
   | { type: "STOP" }
   | { type: "STEP_WARNING"; stepId: string }
   | { type: "STEP_COMPLETED"; stepId: string; now: number }
@@ -32,6 +34,7 @@ export const initialSessionState: SessionState = {
   currentStepStartedAt: null,
   currentStepEndsAt: null,
   pausedRemainingSec: null,
+  pausedElapsedSec: null,
   warningPlayedForStepId: null,
 };
 
@@ -48,6 +51,8 @@ export function sessionReducer(state: SessionState, command: SessionCommand): Se
       return state;
     case "SKIP_STEP":
       return state.status === "running" ? advance(state, command.now) : state;
+    case "REWIND_BREAK":
+      return rewindBreak(state, command.now);
     case "STEP_WARNING":
       return canEmitForCurrentTimedStep(state, command.stepId) &&
         state.warningPlayedForStepId !== command.stepId
@@ -60,6 +65,16 @@ export function sessionReducer(state: SessionState, command: SessionCommand): Se
     case "STOP":
       return state.status === "idle" ? state : { ...initialSessionState, status: "stopped" };
   }
+}
+
+function rewindBreak(state: SessionState, now: number): SessionState {
+  const step = currentStep(state);
+  if (state.status !== "running" || step?.kind !== "break" || state.currentStepIndex === null) {
+    return state;
+  }
+  const precedingIndex = state.currentStepIndex - 1;
+  const precedingStep = state.steps[precedingIndex];
+  return precedingStep?.kind === "exercise" ? enterStep(state.steps, precedingIndex, now) : state;
 }
 
 export function currentStep(state: SessionState): SessionStep | null {
@@ -78,6 +93,10 @@ function pause(state: SessionState, now: number, status: "paused" | "interrupted
     status,
     currentStepEndsAt: null,
     pausedRemainingSec: remainingSec,
+    pausedElapsedSec:
+      state.currentStepStartedAt === null
+        ? 0
+        : Math.max(0, (now - state.currentStepStartedAt) / 1000),
   };
 }
 
@@ -89,9 +108,10 @@ function resume(state: SessionState, now: number): SessionState {
   return {
     ...state,
     status: "running",
-    currentStepStartedAt: now,
+    currentStepStartedAt: now - (state.pausedElapsedSec ?? 0) * 1000,
     currentStepEndsAt: remainingSec === null ? null : now + remainingSec * 1000,
     pausedRemainingSec: null,
+    pausedElapsedSec: null,
   };
 }
 
@@ -112,6 +132,7 @@ function enterStep(steps: SessionStep[], index: number, now: number): SessionSta
     currentStepStartedAt: now,
     currentStepEndsAt: durationSec === null ? null : now + durationSec * 1000,
     pausedRemainingSec: null,
+    pausedElapsedSec: null,
     warningPlayedForStepId: null,
   };
 }

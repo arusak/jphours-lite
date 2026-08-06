@@ -1,6 +1,6 @@
-import type { Exercise } from "./routine";
+import type { ExerciseMode } from "./routine";
 
-export type ExerciseMode = "paced-timed" | "free-timed" | "open-ended";
+export type { ExerciseMode } from "./routine";
 
 export interface ExerciseStep {
   id: string;
@@ -21,27 +21,8 @@ export interface BreakStep {
 
 export type SessionStep = ExerciseStep | BreakStep;
 
-/** Derives the only three executable exercise modes supported by the prototype. */
-export function deriveExerciseMode(
-  exercise: Pick<Exercise, "tempoBpm" | "durationSec">,
-): ExerciseMode {
-  if (exercise.tempoBpm !== null && exercise.durationSec !== null) {
-    return "paced-timed";
-  }
-
-  if (exercise.tempoBpm === null && exercise.durationSec !== null) {
-    return "free-timed";
-  }
-
-  if (exercise.tempoBpm === null && exercise.durationSec === null) {
-    return "open-ended";
-  }
-
-  throw new Error("An exercise with a tempo must have a duration.");
-}
-
 export function isTimedStep(step: SessionStep): boolean {
-  return step.kind === "break" || step.mode !== "open-ended";
+  return step.kind === "break" || step.durationSec !== null;
 }
 
 export function stepDurationSec(step: SessionStep): number | null {

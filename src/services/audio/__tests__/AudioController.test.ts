@@ -108,6 +108,46 @@ describe("AudioController", () => {
     expect(context.oscillators[0]?.stop).toHaveBeenCalled();
   });
 
+  it("changes live tempo from a clean beat boundary and retains the beat callback", () => {
+    const context = makeContext();
+    const intervals: Array<() => void> = [];
+    const clearIntervalFn = vi.fn();
+    const onBeatScheduled = vi.fn();
+    const controller = new AudioController({
+      contextFactory: () => context,
+      setIntervalFn: ((callback: () => void) => {
+        intervals.push(callback);
+        return intervals.length;
+      }) as typeof setInterval,
+      clearIntervalFn: clearIntervalFn as unknown as typeof clearInterval,
+    });
+    controller.startMetronome({ bpm: 120, onBeatScheduled });
+    const oldSource = context.oscillators[0]!;
+
+    context.now = 0.2;
+    expect(controller.updateMetronomeTempo(60)).toBe(true);
+    expect(clearIntervalFn).toHaveBeenCalledWith(1);
+    expect(oldSource.stop).toHaveBeenCalled();
+    expect(onBeatScheduled).toHaveBeenLastCalledWith({ beat: 1, time: 0.25 });
+
+    context.now = 1.2;
+    intervals.at(-1)!();
+    expect(onBeatScheduled).toHaveBeenLastCalledWith({ beat: 2, time: 1.25 });
+  });
+
+  it("rejects an invalid live tempo without disturbing the active metronome", () => {
+    const context = makeContext();
+    const clearIntervalFn = vi.fn();
+    const controller = new AudioController({
+      contextFactory: () => context,
+      setIntervalFn: vi.fn(() => 1) as unknown as typeof setInterval,
+      clearIntervalFn: clearIntervalFn as unknown as typeof clearInterval,
+    });
+    controller.startMetronome({ bpm: 120 });
+    expect(controller.updateMetronomeTempo(19)).toBe(false);
+    expect(clearIntervalFn).not.toHaveBeenCalled();
+  });
+
   it("keeps cue playback separate and gives each cue its own pitch pattern", () => {
     const context = makeContext();
     const controller = new AudioController({ contextFactory: () => context });
@@ -125,6 +165,6 @@ describe("AudioController", () => {
     expect(controller.playCue("warning")).toBe(false);
 
     const supported = new AudioController({ contextFactory: () => makeContext() });
-    expect(supported.startMetronome({ bpm: 29 })).toBe(false);
+    expect(supported.startMetronome({ bpm: 19 })).toBe(false);
   });
 });

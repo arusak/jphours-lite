@@ -3,7 +3,7 @@ import react from "@vitejs/plugin-react";
 import { VitePWA } from "vite-plugin-pwa";
 
 export default defineConfig({
-  base: "jphours-proto",
+  base: "/jphours-proto/",
   plugins: [
     react(),
     VitePWA({
@@ -45,7 +45,7 @@ export default defineConfig({
           },
         ],
       },
-      workbox: { navigateFallback: "/index.html" },
+      workbox: { navigateFallback: "/jphours-proto/index.html" },
     }),
   ],
   test: {

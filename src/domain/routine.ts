@@ -1,6 +1,6 @@
 export const ROUTINE_SCHEMA_VERSION = 1 as const;
 
-export type ExerciseMode = "paced-timed" | "free-timed" | "open-ended";
+export type ExerciseMode = "paced-timed" | "free-timed" | "paced-open-ended" | "open-ended";
 
 export interface Exercise {
   id: string;
@@ -53,8 +53,15 @@ export function createRoutine(overrides: Partial<Routine> = {}): Routine {
   };
 }
 
-export function exerciseMode(exercise: Pick<Exercise, "tempoBpm" | "durationSec">): ExerciseMode {
+/** The single mode derivation used by validation, editing, and session snapshots. */
+export function deriveExerciseMode(
+  exercise: Pick<Exercise, "tempoBpm" | "durationSec">,
+): ExerciseMode {
   if (exercise.tempoBpm !== null && exercise.durationSec !== null) return "paced-timed";
-  if (exercise.durationSec !== null) return "free-timed";
+  if (exercise.tempoBpm === null && exercise.durationSec !== null) return "free-timed";
+  if (exercise.tempoBpm !== null) return "paced-open-ended";
   return "open-ended";
 }
+
+/** @deprecated Use deriveExerciseMode. */
+export const exerciseMode = deriveExerciseMode;

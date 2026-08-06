@@ -1,21 +1,22 @@
 import { describe, expect, it } from "vitest";
-import { createExercise, exerciseMode } from "./routine";
+import { createExercise, deriveExerciseMode } from "./routine";
 import { isRoutineValid, validateExercise } from "./validation";
 import { createRoutine } from "./routine";
 
 describe("exercise mode", () => {
   it("derives each supported combination", () => {
-    expect(exerciseMode(createExercise({ tempoBpm: 80, durationSec: 60 }))).toBe("paced-timed");
-    expect(exerciseMode(createExercise({ durationSec: 60 }))).toBe("free-timed");
-    expect(exerciseMode(createExercise())).toBe("open-ended");
+    expect(deriveExerciseMode(createExercise({ tempoBpm: 80, durationSec: 60 }))).toBe(
+      "paced-timed",
+    );
+    expect(deriveExerciseMode(createExercise({ durationSec: 60 }))).toBe("free-timed");
+    expect(deriveExerciseMode(createExercise())).toBe("open-ended");
+    expect(deriveExerciseMode(createExercise({ tempoBpm: 80 }))).toBe("paced-open-ended");
   });
 });
 
 describe("routine validation", () => {
-  it("does not allow a tempo without a duration", () => {
-    expect(validateExercise(createExercise({ title: "Scales", tempoBpm: 100 })).durationSec).toBe(
-      "A metronome exercise needs a duration.",
-    );
+  it("allows a tempo without a duration", () => {
+    expect(validateExercise(createExercise({ title: "Scales", tempoBpm: 100 }))).toEqual({});
   });
 
   it("accepts an open-ended exercise and a zero-second break", () => {

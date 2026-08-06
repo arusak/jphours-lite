@@ -36,15 +36,12 @@ export function validateExercise(
   ) {
     errors.durationSec = "Enter a duration from 1 second to 120 minutes.";
   }
-  if (exercise.tempoBpm !== null && exercise.durationSec === null) {
-    errors.durationSec = "A metronome exercise needs a duration.";
-  }
   return errors;
 }
 
-export function validateRoutine(
-  routine: Routine,
-): FieldErrors<"exercises" | "defaultBreakDurationSec"> & {
+export function validateRoutine(routine: Routine): FieldErrors<
+  "exercises" | "defaultBreakDurationSec"
+> & {
   exercisesById: Record<string, ReturnType<typeof validateExercise>>;
 } {
   const exercisesById = Object.fromEntries(

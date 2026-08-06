@@ -59,6 +59,9 @@ export class SessionRunner {
   skipStep(): void {
     this.dispatch({ type: "SKIP_STEP", now: this.clock.now() });
   }
+  rewindBreak(): void {
+    this.dispatch({ type: "REWIND_BREAK", now: this.clock.now() });
+  }
   stop(): void {
     this.dispatch({ type: "STOP" });
   }

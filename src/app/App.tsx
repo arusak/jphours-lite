@@ -7,11 +7,29 @@ import { LocalStorageRoutineRepository } from "../services/persistence/routine-r
 export function App() {
   const repository = useMemo(() => new LocalStorageRoutineRepository(), []);
   const [activeRoutine, setActiveRoutine] = useState<Routine | null>(null);
-  return activeRoutine ? (
-    <SessionPlayer routine={activeRoutine} onExit={() => setActiveRoutine(null)} />
-  ) : (
-    <main className="app-shell">
-      <RoutineEditor repository={repository} onStartSession={setActiveRoutine} />
-    </main>
+  const saveSessionTempo = (sourceExerciseId: string, tempoBpm: number) => {
+    if (!activeRoutine) return;
+    const persisted = repository.load();
+    const updated = {
+      ...persisted,
+      exercises: persisted.exercises.map((exercise) =>
+        exercise.id === sourceExerciseId ? { ...exercise, tempoBpm } : exercise,
+      ),
+      updatedAt: new Date().toISOString(),
+    };
+    repository.save(updated);
+  };
+  return (
+    <div className="app-shell">
+      {activeRoutine ? (
+        <SessionPlayer
+          routine={activeRoutine}
+          onExit={() => setActiveRoutine(null)}
+          onSaveTempo={saveSessionTempo}
+        />
+      ) : (
+        <RoutineEditor repository={repository} onStartSession={setActiveRoutine} />
+      )}
+    </div>
   );
 }
