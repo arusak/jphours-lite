@@ -268,7 +268,11 @@ function defaultContextFactory(): AudioContext | undefined {
 }
 
 function isValidBpm(bpm: number): boolean {
-  return Number.isFinite(bpm) && bpm >= 20 && bpm <= 300;
+  return (
+    Number.isFinite(bpm) &&
+    bpm >= practiceConfig.tempo.min &&
+    bpm <= practiceConfig.tempo.max
+  );
 }
 
 function clampVolume(volume: number): number {
