@@ -68,6 +68,22 @@ export function MetronomeIcon(props: IconProps) {
   )
 }
 
+export function ChevronRightIcon(props: IconProps) {
+  return (
+    <svg
+      {...iconProps}
+      {...props}
+      fill="none"
+      stroke="currentColor"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth="2"
+    >
+      <path d="m9 18 6-6-6-6" />
+    </svg>
+  )
+}
+
 export function BreakIcon(props: IconProps) {
   return (
     <svg

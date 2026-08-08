@@ -1,4 +1,5 @@
 export * from './BottomSheet/BottomSheet'
 export * from './Icons/Icons'
+export * from './MetronomeSoundSheet/MetronomeSoundSheet'
 export * from './ProgressSegments/ProgressSegments'
 export * from './TimerRing/TimerRing'

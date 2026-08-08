@@ -1,12 +1,10 @@
-import { BottomSheet } from '../../../components'
-import { practiceConfig, type MetronomeSound } from '../../../config/practice-config'
+import { practiceConfig, type MetronomeSound } from '../../config/practice-config'
+import { BottomSheet } from '../BottomSheet/BottomSheet'
 import styles from './MetronomeSoundSheet.module.css'
 
 interface MetronomeSoundSheetProps {
   sound: MetronomeSound
-  savedSound: MetronomeSound
   onChange(sound: MetronomeSound): void
-  onSave(): void
   onClose(): void
 }
 
@@ -14,13 +12,7 @@ function soundLabel(sound: MetronomeSound) {
   return sound[0]!.toUpperCase() + sound.slice(1)
 }
 
-export function MetronomeSoundSheet({
-  sound,
-  savedSound,
-  onChange,
-  onSave,
-  onClose,
-}: MetronomeSoundSheetProps) {
+export function MetronomeSoundSheet({ sound, onChange, onClose }: MetronomeSoundSheetProps) {
   return (
     <BottomSheet title="Metronome sound" onClose={onClose}>
       <div className={styles.soundList} role="radiogroup" aria-label="Metronome sound">
@@ -39,11 +31,6 @@ export function MetronomeSoundSheet({
           </button>
         ))}
       </div>
-      {sound !== savedSound && (
-        <button className={styles.saveButton} onClick={onSave}>
-          Save sound
-        </button>
-      )}
     </BottomSheet>
   )
 }

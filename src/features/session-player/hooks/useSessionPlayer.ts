@@ -26,7 +26,6 @@ export function useSessionPlayer({
   const [tempoOverrides, setTempoOverrides] = useState<Record<string, number>>({})
   const [savedTempos, setSavedTempos] = useState<Record<string, number>>({})
   const [soundOverride, setSoundOverride] = useState<MetronomeSound>(routine.metronomeSound)
-  const [savedSound, setSavedSound] = useState<MetronomeSound>(routine.metronomeSound)
   const [beat, setBeat] = useState(0)
   const [audioAvailable, setAudioAvailable] = useState(true)
   const tempoOverridesRef = useRef<Record<string, number>>({})
@@ -102,10 +101,7 @@ export function useSessionPlayer({
     soundOverrideRef.current = sound
     setSoundOverride(sound)
     if (playing) audio.updateMetronomeSound(sound)
-  }
-  const saveSound = () => {
-    onSaveMetronomeSound?.(soundOverride)
-    setSavedSound(soundOverride)
+    onSaveMetronomeSound?.(sound)
   }
   return {
     state,
@@ -113,13 +109,11 @@ export function useSessionPlayer({
     tempoOverrides,
     savedTempos,
     soundOverride,
-    savedSound,
     beat,
     audioAvailable,
     changeTempo,
     saveTempo,
     changeSound,
-    saveSound,
     rewind: () => runner.current?.rewind(),
     togglePause: (paused: boolean) => (paused ? runner.current?.resume() : runner.current?.pause()),
     finishOrSkip: (paused: boolean) => {

@@ -51,7 +51,7 @@ describe('SessionPlayer', () => {
     expect(onSaveTempo).toHaveBeenCalledWith('scales', 91)
   })
 
-  it('selects and saves a live Metronome sound override from the sound sheet', async () => {
+  it('auto-commits a live Metronome sound change from the sound sheet', async () => {
     const onSaveMetronomeSound = vi.fn()
     render(
       <SessionPlayer
@@ -65,9 +65,9 @@ describe('SessionPlayer', () => {
     expect(screen.getByRole('radio', { name: 'Classic' })).toHaveAttribute('aria-checked', 'true')
     fireEvent.click(screen.getByRole('radio', { name: 'Wood' }))
     expect(audio.updateMetronomeSound).toHaveBeenCalledWith('wood')
-    expect(screen.getByRole('radio', { name: 'Wood' })).toHaveAttribute('aria-checked', 'true')
-    fireEvent.click(screen.getByRole('button', { name: 'Save sound' }))
     expect(onSaveMetronomeSound).toHaveBeenCalledWith('wood')
+    expect(screen.getByRole('radio', { name: 'Wood' })).toHaveAttribute('aria-checked', 'true')
+    expect(screen.queryByRole('button', { name: 'Save sound' })).not.toBeInTheDocument()
   })
 
   it('uses the neutral, accessible elapsed-time ring for an unpaced open-ended exercise', async () => {

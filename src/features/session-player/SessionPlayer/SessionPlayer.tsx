@@ -1,9 +1,13 @@
 import { useState } from 'react'
-import { BottomSheet, MetronomeIcon, ProgressSegments } from '../../../components'
+import {
+  BottomSheet,
+  MetronomeIcon,
+  MetronomeSoundSheet,
+  ProgressSegments,
+} from '../../../components'
 import { type MetronomeSound } from '../../../config/practice-config'
 import type { Routine } from '../../../domain/routine'
 import { EndScreen } from '../EndScreen/EndScreen'
-import { MetronomeSoundSheet } from '../MetronomeSoundSheet/MetronomeSoundSheet'
 import { NowPlayingSheet } from '../NowPlayingSheet/NowPlayingSheet'
 import { SessionControls } from '../SessionControls/SessionControls'
 import { SessionTimer } from '../SessionTimer/SessionTimer'
@@ -162,9 +166,7 @@ export function SessionPlayer({
       {soundPickerOpen && (
         <MetronomeSoundSheet
           sound={player.soundOverride}
-          savedSound={player.savedSound}
           onChange={(sound) => player.changeSound(sound, true)}
-          onSave={player.saveSound}
           onClose={() => setSoundPickerOpen(false)}
         />
       )}

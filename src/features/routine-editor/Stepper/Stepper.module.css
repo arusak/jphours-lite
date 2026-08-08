@@ -2,19 +2,64 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
-  font-size: 13px;
+  gap: 16px;
+  min-height: 76px;
+  padding: 12px 14px 12px 16px;
 }
 
-.settingStepper button {
-  width: 30px;
-  height: 30px;
-  border-radius: 8px;
+.settingCopy {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+}
+
+.settingCopy strong {
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.settingCopy small {
+  color: var(--color-muted-foreground);
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.stepperControls {
+  display: grid;
+  flex: 0 0 auto;
+  grid-template-columns: 34px 44px 34px;
+  align-items: center;
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: oklch(0.19 0.016 52 / 55%);
+}
+
+.stepperControls button {
+  display: grid;
+  width: 34px;
+  height: 36px;
+  padding: 0;
+  place-items: center;
+  color: var(--color-muted-foreground);
   background: var(--color-secondary);
+  font-size: 18px;
 }
 
-.settingStepper output {
-  min-width: 38px;
+.stepperControls button:hover:not(:disabled) {
+  color: var(--color-foreground);
+  background: oklch(0.32 0.025 55);
+}
+
+.stepperControls button:disabled {
+  opacity: 0.35;
+}
+
+.stepperControls output {
   text-align: center;
+  color: var(--color-foreground);
+  font-size: 13px;
+  font-weight: 650;
   font-variant-numeric: tabular-nums;
 }

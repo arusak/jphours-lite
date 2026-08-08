@@ -1,25 +1,84 @@
 .routineSettings {
-  display: grid;
-  gap: 8px;
-  margin: 20px 0;
-  padding: 12px;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-xl);
-  background: oklch(0.215 0.018 52 / 45%);
+  margin: 28px 0 24px;
 }
 
-.routineSettings label {
+.settingsHeader {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  padding: 0 4px;
+}
+
+.settingsHeader h2 {
+  font-size: 15px;
+  letter-spacing: -0.01em;
+}
+
+.settingsHeader p {
+  margin-top: 2px;
+  color: var(--color-muted-foreground);
+  font-size: 12px;
+}
+
+.settingsCard {
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  background: oklch(0.225 0.019 52 / 76%);
+  box-shadow: 0 16px 36px rgb(0 0 0 / 10%);
+}
+
+.settingsCard > * + * {
+  border-top: 1px solid var(--color-border);
+}
+
+.soundSetting {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
-  font-size: 13px;
+  gap: 16px;
+  width: 100%;
+  min-height: 76px;
+  padding: 12px 14px 12px 16px;
+  color: var(--color-foreground);
+  background: transparent;
+  text-align: left;
 }
 
-.routineSettings select {
-  min-height: 32px;
-  color: inherit;
-  background: var(--color-secondary);
-  border: 1px solid var(--color-border);
-  border-radius: 8px;
+.soundSetting:hover {
+  background: oklch(0.29 0.022 52 / 48%);
+}
+
+.settingCopy {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+}
+
+.settingCopy strong {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.settingCopy small {
+  color: var(--color-muted-foreground);
+  font-family: var(--font-body);
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.soundValue {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--color-primary);
+  font-size: 13px;
+  font-weight: 650;
+}
+
+.soundValue svg {
+  width: 16px;
+  height: 16px;
+  color: var(--color-muted-foreground);
 }

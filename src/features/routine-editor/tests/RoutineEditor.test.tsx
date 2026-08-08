@@ -61,4 +61,18 @@ describe('RoutineEditor', () => {
     expect(focus).not.toHaveBeenCalled()
     focus.mockRestore()
   })
+
+  it('edits Metronome sound in the shared sheet without a save action', () => {
+    render(<RoutineEditor repository={repository(createRoutine())} />)
+
+    fireEvent.click(screen.getByRole('button', { name: /metronome sound/i }))
+    expect(screen.getByRole('dialog', { name: 'Metronome sound' })).toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('radio', { name: 'Wood' }))
+
+    expect(screen.getByRole('radio', { name: 'Wood' })).toHaveAttribute('aria-checked', 'true')
+    expect(screen.queryByRole('button', { name: 'Save sound' })).not.toBeInTheDocument()
+    fireEvent.keyDown(document, { key: 'Escape' })
+    expect(screen.getByRole('button', { name: /metronome sound/i })).toHaveTextContent('Wood')
+  })
 })
