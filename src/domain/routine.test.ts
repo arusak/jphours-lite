@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { createExercise, deriveExerciseMode } from "./routine";
+import { createBreak, createExercise, createRoutine, deriveExerciseMode } from "./routine";
 import { isRoutineValid, validateExercise } from "./validation";
-import { createRoutine } from "./routine";
 
 describe("exercise mode", () => {
   it("derives each supported combination", () => {
@@ -19,16 +18,19 @@ describe("routine validation", () => {
     expect(validateExercise(createExercise({ title: "Scales", tempoBpm: 100 }))).toEqual({});
   });
 
-  it("accepts an open-ended exercise and a zero-second break", () => {
+  it("accepts an open-ended exercise and a zero-second Quick Rest", () => {
     expect(
       isRoutineValid(
         createRoutine({
           entries: [createExercise({ title: "Explore" })],
-          exercises: [createExercise({ title: "Explore" })],
           quickRestDurationSec: 0,
-          defaultBreakDurationSec: 0,
         }),
       ),
     ).toBe(true);
+  });
+
+  it("accepts a Break-only Routine and rejects fractional-minute durations", () => {
+    expect(isRoutineValid(createRoutine({ entries: [createBreak({ durationSec: 120 })] }))).toBe(true);
+    expect(validateExercise(createExercise({ durationSec: 90 })).durationSec).toBeDefined();
   });
 });

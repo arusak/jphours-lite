@@ -160,7 +160,10 @@ export function SessionPlayer({
 
   const changeTempo = (delta: number) => {
     if (!isExercise || currentTempo === null) return;
-    const value = Math.min(300, Math.max(20, currentTempo + delta));
+    const value = Math.min(
+      practiceConfig.tempo.max,
+      Math.max(practiceConfig.tempo.min, currentTempo + delta),
+    );
     tempoOverridesRef.current[step.sourceExerciseId] = value;
     setTempoOverrides((values) => ({ ...values, [step.sourceExerciseId]: value }));
     audio.updateMetronomeTempo(value);

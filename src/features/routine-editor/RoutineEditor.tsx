@@ -36,7 +36,7 @@ export function RoutineEditor({ repository, onStartSession }: RoutineEditorProps
   const updateSetting = (key: "quickRestDurationSec" | "warningLeadTimeSec", delta: number) => update((current) => {
     const policy = key === "quickRestDurationSec" ? practiceConfig.quickRestDuration : practiceConfig.warningLeadTime;
     const value = Math.min(policy.max, Math.max(policy.min, current[key] + delta));
-    return { ...current, [key]: value, ...(key === "quickRestDurationSec" ? { defaultBreakDurationSec: value } : {}) };
+    return { ...current, [key]: value };
   });
   const save = () => {
     if (!sheet) return;
@@ -80,7 +80,7 @@ function EditorSheet({ sheet, submitted, onChange, onSave, onCancel }: { sheet: 
         <>
           {entry!.kind === "exercise" && <label>Exercise name<input value={entry!.title} aria-invalid={Boolean(errors.title)} onChange={(event) => mutate({ title: event.target.value })} /></label>}
           {entry!.kind === "exercise" && <label className="editor-stepper">Tempo (BPM)<span><button aria-label="Decrease tempo" onClick={() => mutate({ tempoBpm: Math.max(practiceConfig.tempo.min, (entry!.tempoBpm ?? practiceConfig.tempo.default) - 1) })}>−</button><input type="number" value={entry!.tempoBpm ?? ""} onChange={(event) => mutate({ tempoBpm: event.target.value === "" ? null : Number(event.target.value) })} /><button aria-label="Increase tempo" onClick={() => mutate({ tempoBpm: Math.min(practiceConfig.tempo.max, (entry!.tempoBpm ?? practiceConfig.tempo.default) + 1) })}>+</button></span></label>}
-          <label className="editor-stepper">Duration (minutes)<span><button aria-label="Decrease duration" onClick={() => durationChange(-minute)}>−</button><input type="number" value={entry!.durationSec === null ? "" : entry!.durationSec / minute} onChange={(event) => mutate({ durationSec: event.target.value === "" ? null : Number(event.target.value) * minute })} /><button aria-label="Increase duration" onClick={() => durationChange(minute)}>+</button></span></label>
+          <label className="editor-stepper">Duration (minutes)<span><button aria-label="Decrease duration" onClick={() => durationChange(-minute)}>−</button><input type="number" step="1" value={entry!.durationSec === null ? "" : entry!.durationSec / minute} onChange={(event) => mutate({ durationSec: event.target.value === "" ? null : Number(event.target.value) * minute })} /><button aria-label="Increase duration" onClick={() => durationChange(minute)}>+</button></span></label>
           {errors.title && <p role="alert">{errors.title}</p>}{errors.durationSec && <p role="alert">{errors.durationSec}</p>}
         </>
       )}

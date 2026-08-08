@@ -25,11 +25,7 @@ export interface Routine {
   id: string;
   name: string;
   entries: RoutineEntry[];
-  /** @deprecated Transitional compatibility for the pre-v2 editor. */
-  exercises: Omit<Exercise, "kind">[];
   quickRestDurationSec: number;
-  /** @deprecated Transitional compatibility; mapped to Quick Rest duration. */
-  defaultBreakDurationSec: number;
   warningLeadTimeSec: number;
   metronomeSound: MetronomeSound;
   autoAdvance: true;
@@ -62,9 +58,7 @@ export function createRoutine(overrides: Partial<Routine> = {}): Routine {
     id: createId(),
     name: "",
     entries: [defaultExercise],
-    exercises: [defaultExercise],
     quickRestDurationSec: practiceConfig.quickRestDuration.default,
-    defaultBreakDurationSec: practiceConfig.quickRestDuration.default,
     warningLeadTimeSec: practiceConfig.warningLeadTime.default,
     metronomeSound: practiceConfig.metronome.defaultSound,
     autoAdvance: true,

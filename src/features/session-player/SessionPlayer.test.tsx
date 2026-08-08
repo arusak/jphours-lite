@@ -29,8 +29,7 @@ vi.mock("../../services/platform/visibilityLifecycle", () => ({
   observeVisibility: vi.fn(() => vi.fn()),
 }));
 
-const routineWith = (...entries: ReturnType<typeof createExercise>[]) =>
-  createRoutine({ entries, exercises: entries });
+const routineWith = (...entries: ReturnType<typeof createExercise>[]) => createRoutine({ entries });
 
 describe("SessionPlayer", () => {
   beforeEach(() => vi.clearAllMocks());
@@ -121,7 +120,7 @@ describe("SessionPlayer", () => {
     const breakEntry = createBreak({ id: "break", durationSec: 60 });
     render(
       <SessionPlayer
-        routine={createRoutine({ entries: [breakEntry], exercises: [] })}
+        routine={createRoutine({ entries: [breakEntry] })}
         onExit={vi.fn()}
       />,
     );

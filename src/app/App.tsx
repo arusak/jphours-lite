@@ -16,9 +16,6 @@ export function App() {
       entries: persisted.entries.map((entry) =>
         entry.kind === "exercise" && entry.id === sourceExerciseId ? { ...entry, tempoBpm } : entry,
       ),
-      exercises: persisted.exercises.map((exercise) =>
-        exercise.id === sourceExerciseId ? { ...exercise, tempoBpm } : exercise,
-      ),
       updatedAt: new Date().toISOString(),
     };
     repository.save(updated);
