@@ -98,7 +98,6 @@
 ## Flagged ambiguities
 
 - The original prototype plan rejects an Exercise with Tempo but no Duration, while the implemented prototype and canonical model support it as a **Paced open-ended exercise**. Update any remaining supported-combinations tables and validation text during implementation.
-- The numeric YAML value for the default Tempo assigned to an automatically restored Exercise was not selected during planning. Choose it explicitly before implementing configuration defaults.
 - Older documents may use “break” for an automatically inserted rest. In the canonical language, an explicit saved Routine entry is a **Break** and the automatic transition is a **Quick Rest**.
 - Use **Exercise** and **Break** for saved Routine entries, **Exercise step** and **Break step** for their captured Session execution, and **Quick Rest** only for the non-Step transition.
 - Use **Finish step** for manually ending an Exercise step or Break step, **Skip Quick Rest** for ending a Quick Rest, and **Stop session** only for ending the entire Session.
