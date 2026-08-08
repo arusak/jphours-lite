@@ -1,7 +1,10 @@
 import type { Routine } from "../../domain/routine";
-import { isTimedStep, type SessionStep } from "../../domain/session";
+import { isTimedStep, type QuickRestTransition, type SessionStep } from "../../domain/session";
 import {
+  activeSegmentId,
+  activeSegmentKey,
   currentStep,
+  currentQuickRest,
   initialSessionState,
   sessionReducer,
   type SessionCommand,
@@ -23,6 +26,8 @@ export interface SessionRunnerHooks {
   onStepStart?(step: SessionStep, state: SessionState): void;
   onStepStop?(step: SessionStep, reason: SessionCommand["type"] | "DISPOSE"): void;
   onWarning?(step: SessionStep): void;
+  onQuickRestStart?(rest: QuickRestTransition, state: SessionState): void;
+  onQuickRestStop?(rest: QuickRestTransition, reason: SessionCommand["type"] | "DISPOSE"): void;
   onSessionComplete?(): void;
 }
 
@@ -60,7 +65,10 @@ export class SessionRunner {
     this.dispatch({ type: "SKIP_STEP", now: this.clock.now() });
   }
   rewindBreak(): void {
-    this.dispatch({ type: "REWIND_BREAK", now: this.clock.now() });
+    this.rewind();
+  }
+  rewind(): void {
+    this.dispatch({ type: "REWIND", now: this.clock.now() });
   }
   stop(): void {
     this.dispatch({ type: "STOP" });
@@ -77,17 +85,25 @@ export class SessionRunner {
     const previousStep = currentStep(previous);
     this.state = sessionReducer(previous, command);
     const nextStep = currentStep(this.state);
+    const previousSegmentId = activeSegmentId(previous);
+    const nextSegmentId = activeSegmentId(this.state);
+    const previousSegmentKey = activeSegmentKey(previous);
+    const nextSegmentKey = activeSegmentKey(this.state);
 
     // START creates a new immutable snapshot, even when it happens to reuse an
     // exercise id, so its old callbacks/audio must never survive.
     if (
-      previousStep &&
-      (previousStep.id !== nextStep?.id ||
+      previousSegmentId &&
+      (previousSegmentKey !== nextSegmentKey ||
         this.state.status !== "running" ||
         command.type === "START")
     ) {
       this.cancelTimers();
-      this.hooks.onStepStop?.(previousStep, command.type);
+      if (previous.phase === "step" && previousStep) this.hooks.onStepStop?.(previousStep, command.type);
+      if (previous.phase === "quick-rest") {
+        const rest = currentQuickRest(previous);
+        if (rest) this.hooks.onQuickRestStop?.(rest, command.type);
+      }
     }
 
     if (
@@ -99,13 +115,17 @@ export class SessionRunner {
     }
 
     if (
-      nextStep &&
+      nextSegmentId &&
       this.state.status === "running" &&
-      (previousStep?.id !== nextStep.id ||
+      (previousSegmentKey !== nextSegmentKey ||
         previous.status !== "running" ||
         command.type === "START")
     ) {
-      this.hooks.onStepStart?.(nextStep, this.state);
+      if (this.state.phase === "step" && nextStep) this.hooks.onStepStart?.(nextStep, this.state);
+      if (this.state.phase === "quick-rest") {
+        const rest = currentQuickRest(this.state);
+        if (rest) this.hooks.onQuickRestStart?.(rest, this.state);
+      }
       this.scheduleCurrentStep();
     }
 
@@ -117,19 +137,22 @@ export class SessionRunner {
 
   dispose(): void {
     const step = currentStep(this.state);
+    const rest = currentQuickRest(this.state);
     this.cancelTimers();
-    if (step) this.hooks.onStepStop?.(step, "DISPOSE");
+    if (this.state.phase === "step" && step) this.hooks.onStepStop?.(step, "DISPOSE");
+    if (this.state.phase === "quick-rest" && rest) this.hooks.onQuickRestStop?.(rest, "DISPOSE");
     this.state = initialSessionState;
   }
 
   private scheduleCurrentStep(): void {
     const step = currentStep(this.state);
     const endsAt = this.state.currentStepEndsAt;
-    if (!step || !isTimedStep(step) || endsAt === null) return;
+    const segmentId = activeSegmentId(this.state);
+    if (!segmentId || endsAt === null || (this.state.phase === "step" && (!step || !isTimedStep(step)))) return;
 
     const remainingMs = Math.max(0, endsAt - this.clock.now());
     if (
-      step.kind === "exercise" &&
+      this.state.phase === "step" && step?.kind === "exercise" &&
       step.durationSec! * 1000 > warningLeadMs &&
       this.state.warningPlayedForStepId !== step.id
     ) {
@@ -141,7 +164,7 @@ export class SessionRunner {
       }
     }
     this.completionTimer = this.scheduler.setTimeout(() => {
-      this.dispatch({ type: "STEP_COMPLETED", stepId: step.id, now: this.clock.now() });
+      this.dispatch({ type: "STEP_COMPLETED", stepId: segmentId, now: this.clock.now() });
     }, remainingMs);
   }
 
