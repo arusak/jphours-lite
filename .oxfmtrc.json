@@ -1,0 +1,19 @@
+{
+  "$schema": "./node_modules/oxfmt/configuration_schema.json",
+  "overrides": [
+    {
+      "files": ["**/*.{ts,tsx}"],
+      "options": {
+        "singleQuote": true,
+        "semi": false,
+        "tabWidth": 2
+      }
+    },
+    {
+      "files": ["**/*.css"],
+      "options": {
+        "tabWidth": 2
+      }
+    }
+  ]
+}

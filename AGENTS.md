@@ -2,7 +2,7 @@
 
 ## Navigation
 
-Start with [the repository inventory](docs/files.json). It maps standalone files and cohesive directories to their responsibilities so agents can locate the appropriate module before editing.
+Consult [the repository inventory](docs/files.json) when you need help locating relevant code or configuration. It maps standalone files and cohesive directories to their responsibilities.
 
 ## Working conventions
 
