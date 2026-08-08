@@ -4,11 +4,17 @@ import { createBreak, createExercise, createRoutine, type Routine } from "../../
 import type { RoutineRepository } from "../../services/persistence/routine-repository";
 import { RoutineEditor, routineTotal } from "./RoutineEditor";
 
-function repository(initial: Routine): RoutineRepository { return { load: () => initial, save: vi.fn() }; }
+function repository(initial: Routine): RoutineRepository {
+  return { load: () => initial, save: vi.fn() };
+}
 
 describe("RoutineEditor", () => {
   it("adds a Break and restores a default Exercise after deletion", () => {
-    render(<RoutineEditor repository={repository(createRoutine({ entries: [createExercise({ title: "Scales" })] }))} />);
+    render(
+      <RoutineEditor
+        repository={repository(createRoutine({ entries: [createExercise({ title: "Scales" })] }))}
+      />,
+    );
     fireEvent.click(screen.getByRole("button", { name: /add break/i }));
     fireEvent.click(screen.getByRole("button", { name: /^save$/i }));
     expect(screen.getByText("Break")).toBeInTheDocument();
@@ -19,7 +25,9 @@ describe("RoutineEditor", () => {
 
   it("edits exercise duration in whole minutes while retaining seconds", () => {
     const saved = vi.fn();
-    const initial = createRoutine({ entries: [createExercise({ title: "Scales", durationSec: 300 })] });
+    const initial = createRoutine({
+      entries: [createExercise({ title: "Scales", durationSec: 300 })],
+    });
     render(<RoutineEditor repository={{ load: () => initial, save: saved }} />);
     fireEvent.click(screen.getByRole("button", { name: "Edit Scales" }));
     fireEvent.change(screen.getAllByRole("spinbutton")[1], { target: { value: "6" } });
@@ -28,15 +36,29 @@ describe("RoutineEditor", () => {
   });
 
   it("calculates eligible Quick Rests and marks open-ended totals approximate", () => {
-    expect(routineTotal(createRoutine({ quickRestDurationSec: 30, entries: [createExercise({ durationSec: null }), createExercise({ durationSec: 60 }), createBreak({ durationSec: 120 })] }))).toEqual({ minutes: 9, approximate: true });
+    expect(
+      routineTotal(
+        createRoutine({
+          quickRestDurationSec: 30,
+          entries: [
+            createExercise({ durationSec: null }),
+            createExercise({ durationSec: 60 }),
+            createBreak({ durationSec: 120 }),
+          ],
+        }),
+      ),
+    ).toEqual({ minutes: 9, approximate: true });
   });
 
   it("keeps the sheet field focused while typing", () => {
     const focus = vi.spyOn(HTMLElement.prototype, "focus");
     render(<RoutineEditor repository={repository(createRoutine())} />);
     fireEvent.click(screen.getByRole("button", { name: /add exercise/i }));
-    const name = screen.getByLabelText(/exercise name/i); focus.mockClear();
+    const name = screen.getByLabelText(/exercise name/i);
+    focus.mockClear();
     fireEvent.change(name, { target: { value: "Scales" } });
-    expect(name).toHaveFocus(); expect(focus).not.toHaveBeenCalled(); focus.mockRestore();
+    expect(name).toHaveFocus();
+    expect(focus).not.toHaveBeenCalled();
+    focus.mockRestore();
   });
 });

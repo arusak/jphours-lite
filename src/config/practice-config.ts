@@ -18,7 +18,8 @@ export interface PracticeConfig {
 }
 
 function numberPolicy(value: unknown, name: string): NumberPolicy {
-  if (typeof value !== "object" || value === null) throw new Error(`${name} configuration is missing.`);
+  if (typeof value !== "object" || value === null)
+    throw new Error(`${name} configuration is missing.`);
   const candidate = value as Record<string, unknown>;
   const keys = ["default", "min", "max", "increment"] as const;
   if (keys.some((key) => !Number.isFinite(candidate[key]))) {
@@ -32,7 +33,8 @@ function numberPolicy(value: unknown, name: string): NumberPolicy {
 }
 
 function parseConfig(value: unknown): PracticeConfig {
-  if (typeof value !== "object" || value === null) throw new Error("Practice configuration is invalid.");
+  if (typeof value !== "object" || value === null)
+    throw new Error("Practice configuration is invalid.");
   const config = value as Record<string, unknown>;
   const metronome = config.metronome as Record<string, unknown> | undefined;
   const sounds = metronome?.sounds as Record<string, unknown> | undefined;
@@ -47,20 +49,38 @@ function parseConfig(value: unknown): PracticeConfig {
         !["sine", "triangle", "square", "sawtooth"].includes(String(sound.waveform)) ||
         !Number.isFinite(sound.frequency) ||
         !Number.isFinite(sound.decay)
-      ) throw new Error(`Metronome sound ${name} is invalid.`);
-      return [name, { waveform: sound.waveform as OscillatorType, frequency: Number(sound.frequency), decay: Number(sound.decay) }];
+      )
+        throw new Error(`Metronome sound ${name} is invalid.`);
+      return [
+        name,
+        {
+          waveform: sound.waveform as OscillatorType,
+          frequency: Number(sound.frequency),
+          decay: Number(sound.decay),
+        },
+      ];
     }),
   ) as PracticeConfig["metronome"]["sounds"];
   const audio = config.audio as Record<string, unknown> | undefined;
   const interaction = config.interaction as Record<string, unknown> | undefined;
-  if (!audio || !interaction || !["beatPeak", "warningPeak", "completionPeak"].every((key) => Number.isFinite(audio[key])) || !Number.isFinite(interaction.slideToStopThreshold)) {
+  if (
+    !audio ||
+    !interaction ||
+    !["beatPeak", "warningPeak", "completionPeak"].every((key) => Number.isFinite(audio[key])) ||
+    !Number.isFinite(interaction.slideToStopThreshold)
+  ) {
     throw new Error("Audio or interaction configuration is invalid.");
   }
-  if (Object.values(audio).some((level) => Number(level) < 0 || Number(level) > 1) || Number(interaction.slideToStopThreshold) <= 0 || Number(interaction.slideToStopThreshold) > 1) {
+  if (
+    Object.values(audio).some((level) => Number(level) < 0 || Number(level) > 1) ||
+    Number(interaction.slideToStopThreshold) <= 0 ||
+    Number(interaction.slideToStopThreshold) > 1
+  ) {
     throw new Error("Audio or interaction configuration is out of bounds.");
   }
   const defaultSound = metronome.defaultSound;
-  if (!soundNames.includes(defaultSound as MetronomeSound)) throw new Error("Default metronome sound is invalid.");
+  if (!soundNames.includes(defaultSound as MetronomeSound))
+    throw new Error("Default metronome sound is invalid.");
   return {
     tempo: numberPolicy(config.tempo, "Tempo"),
     exerciseDuration: numberPolicy(config.exerciseDuration, "Exercise duration"),
@@ -68,7 +88,11 @@ function parseConfig(value: unknown): PracticeConfig {
     quickRestDuration: numberPolicy(config.quickRestDuration, "Quick Rest duration"),
     warningLeadTime: numberPolicy(config.warningLeadTime, "Warning lead time"),
     metronome: { defaultSound: defaultSound as MetronomeSound, sounds: parsedSounds },
-    audio: { beatPeak: Number(audio.beatPeak), warningPeak: Number(audio.warningPeak), completionPeak: Number(audio.completionPeak) },
+    audio: {
+      beatPeak: Number(audio.beatPeak),
+      warningPeak: Number(audio.warningPeak),
+      completionPeak: Number(audio.completionPeak),
+    },
     interaction: { slideToStopThreshold: Number(interaction.slideToStopThreshold) },
   };
 }

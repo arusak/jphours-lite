@@ -89,7 +89,9 @@ describe("buildSessionSteps", () => {
 
   it("captures consecutive Breaks as separate meaningful steps", () => {
     expect(
-      buildSessionSteps(routine([breakEntry("first-break", 60), breakEntry("second-break", 120)], 0)),
+      buildSessionSteps(
+        routine([breakEntry("first-break", 60), breakEntry("second-break", 120)], 0),
+      ),
     ).toMatchObject([
       { id: "break:first-break", kind: "break", durationSec: 60 },
       { id: "break:second-break", kind: "break", durationSec: 120 },

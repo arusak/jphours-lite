@@ -15,7 +15,8 @@ export function buildSessionSteps(routine: Routine): SessionStep[] {
  * exercises, so progress and Now Playing only contain meaningful entries.
  */
 export function buildSessionPlan(routine: Routine): SessionPlan {
-  if (routine.entries.length === 0) throw new Error("A routine needs at least one entry to start a session.");
+  if (routine.entries.length === 0)
+    throw new Error("A routine needs at least one entry to start a session.");
 
   const steps: SessionStep[] = [];
   const quickRests: SessionPlan["quickRests"] = [];
@@ -42,7 +43,11 @@ export function buildSessionPlan(routine: Routine): SessionPlan {
     steps.push(step);
     const next = routine.entries[index + 1];
     if (next?.kind === "exercise" && routine.quickRestDurationSec > 0) {
-      quickRests.push({ id: `quick-rest:${entry.id}`, afterStepId: step.id, durationSec: routine.quickRestDurationSec });
+      quickRests.push({
+        id: `quick-rest:${entry.id}`,
+        afterStepId: step.id,
+        durationSec: routine.quickRestDurationSec,
+      });
     }
   });
   return { steps, quickRests };

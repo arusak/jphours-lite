@@ -118,12 +118,7 @@ describe("SessionPlayer", () => {
 
   it("renders a Break as a meaningful dark-accent ring", async () => {
     const breakEntry = createBreak({ id: "break", durationSec: 60 });
-    render(
-      <SessionPlayer
-        routine={createRoutine({ entries: [breakEntry] })}
-        onExit={vi.fn()}
-      />,
-    );
+    render(<SessionPlayer routine={createRoutine({ entries: [breakEntry] })} onExit={vi.fn()} />);
     expect(await screen.findByRole("heading", { name: "Break" })).toBeInTheDocument();
     expect(screen.getByTestId("timer-ring")).toHaveAttribute("data-tone", "break");
     expect(screen.getByTestId("break-silhouette")).toBeInTheDocument();

@@ -48,7 +48,12 @@ export function createExercise(overrides: Partial<Omit<Exercise, "kind">> = {}):
 }
 
 export function createBreak(overrides: Partial<Omit<Break, "kind">> = {}): Break {
-  return { id: createId(), kind: "break", durationSec: practiceConfig.breakDuration.default, ...overrides };
+  return {
+    id: createId(),
+    kind: "break",
+    durationSec: practiceConfig.breakDuration.default,
+    ...overrides,
+  };
 }
 
 export function createRoutine(overrides: Partial<Routine> = {}): Routine {
@@ -67,7 +72,9 @@ export function createRoutine(overrides: Partial<Routine> = {}): Routine {
   };
 }
 
-export function deriveExerciseMode(exercise: Pick<Exercise, "tempoBpm" | "durationSec">): ExerciseMode {
+export function deriveExerciseMode(
+  exercise: Pick<Exercise, "tempoBpm" | "durationSec">,
+): ExerciseMode {
   if (exercise.tempoBpm !== null && exercise.durationSec !== null) return "paced-timed";
   if (exercise.tempoBpm === null && exercise.durationSec !== null) return "free-timed";
   if (exercise.tempoBpm !== null) return "paced-open-ended";
