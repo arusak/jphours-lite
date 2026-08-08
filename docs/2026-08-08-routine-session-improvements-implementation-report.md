@@ -15,10 +15,10 @@
 
 ## Verification
 
-- `pnpm test` — 35 tests passed.
+- `pnpm test` — 37 tests passed.
 - `pnpm lint` — passed.
 - `pnpm build` — passed.
-- Two-axis review against `70d292b` completed. The substantiated findings on duplicate v2 persistence, Break-only validation, whole-minute duration validation, and YAML-backed Tempo bounds were fixed in `dc45abd`.
+- Two-axis review against `70d292b` completed. The substantiated findings on duplicate v2 persistence, Break-only validation, whole-minute duration validation, YAML-backed Tempo bounds, and consecutive-Break coverage were fixed in `dc45abd`, `34ca476`, and `189f4f3`.
 - Browser-based small-phone and reduced-motion QA could not run because no browser-control surface was available in this environment. The 320px layout and `prefers-reduced-motion` behavior still require a manual browser pass.
 - Audio loudness and clipping still require real-browser or device listening.
 
