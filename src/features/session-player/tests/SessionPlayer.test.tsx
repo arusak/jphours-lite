@@ -106,9 +106,21 @@ describe("SessionPlayer", () => {
       <SessionPlayer routine={routineWith(createExercise({ title: "One" }))} onExit={onExit} />,
     );
     await screen.findByRole("heading", { name: "One" });
-    expect(screen.getByRole("button", { name: "Rewind step" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Pause session" })).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "Stop session" }));
+    const rewindButton = screen.getByRole("button", { name: "Rewind step" });
+    expect(rewindButton).toBeInTheDocument();
+    expect(rewindButton.querySelector("svg")).toHaveAttribute("viewBox", "0 0 24 24");
+    const pauseButton = screen.getByRole("button", { name: "Pause session" });
+    expect(pauseButton).toBeInTheDocument();
+    expect(pauseButton.querySelector("svg")).toHaveAttribute("fill", "currentColor");
+    fireEvent.click(pauseButton);
+    expect(
+      screen.getByRole("button", { name: "Resume session" }).querySelector("svg"),
+    ).toHaveAttribute("fill", "currentColor");
+    const forwardButton = screen.getByRole("button", { name: "Finish step" });
+    expect(forwardButton.querySelector("svg")).toHaveAttribute("viewBox", "0 0 24 24");
+    const stopButton = screen.getByRole("button", { name: "Stop session" });
+    expect(stopButton.querySelector("svg")).toHaveAttribute("fill", "currentColor");
+    fireEvent.click(stopButton);
     const slider = await screen.findByRole("slider", { name: /slide to stop/i });
     fireEvent.keyDown(slider, { key: "ArrowRight" });
     fireEvent.blur(slider);

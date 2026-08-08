@@ -1,4 +1,5 @@
 import { useRef, useState, type CSSProperties, type PointerEvent } from "react";
+import { StopIcon } from "../../../components";
 import { practiceConfig } from "../../../config/practice-config";
 import styles from "./StopSlider.module.css";
 
@@ -75,7 +76,9 @@ export function StopSlider({ onStop }: StopSliderProps) {
         }
       }}
     >
-      <span>■</span>
+      <span>
+        <StopIcon />
+      </span>
       <strong>Slide to stop</strong>
     </div>
   );

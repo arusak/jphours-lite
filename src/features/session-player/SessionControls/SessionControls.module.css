@@ -7,9 +7,38 @@
 }
 
 .playerControls > button {
+  display: grid;
+  place-items: center;
   min-height: 52px;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-2xl);
+  color: var(--color-secondary-foreground);
   background: var(--color-secondary);
   font-weight: 600;
+}
+
+.playerControls > .primaryButton {
+  color: var(--color-primary-foreground);
+  border-color: transparent;
+  background: var(--color-primary);
+  box-shadow: 0 10px 24px oklch(0.81 0.145 74 / 25%);
+}
+
+.playerControls > .rewindButton {
+  color: var(--color-primary);
+}
+
+.playerControls > .stopButton {
+  color: var(--color-destructive);
+}
+
+.playerControls > .forwardButton {
+  color: var(--color-accent);
+}
+
+.playerControls svg {
+  width: 24px;
+  height: 24px;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }

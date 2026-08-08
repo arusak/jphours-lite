@@ -11,6 +11,7 @@
     "src/vite-env.d.ts": "Vite TypeScript ambient declarations.",
     "src/app/": "Top-level application state, screen switching, and shell layout.",
     "src/components/BottomSheet/": "Reusable accessible bottom-sheet dialog component and styles.",
+    "src/components/Icons/": "Reusable current-color SVG UI icons.",
     "src/components/ProgressSegments/": "Segmented session-progress indicator component and styles.",
     "src/components/TimerRing/": "Circular timer display component and styles.",
     "src/components/index.ts": "Public barrel exports for shared components.",

@@ -1,4 +1,5 @@
 import { createBreak, createExercise } from "../../../domain/routine";
+import { PlayIcon } from "../../../components";
 import { EditorSheet } from "../EditorSheet/EditorSheet";
 import { RoutineEntryList } from "../RoutineEntryList/RoutineEntryList";
 import { RoutineSettings } from "../RoutineSettings/RoutineSettings";
@@ -72,7 +73,8 @@ export function RoutineEditor({ repository, onStartSession }: RoutineEditorProps
             onStartSession?.(editor.routine);
           }}
         >
-          ▶ Start session
+          <PlayIcon className={styles.buttonIcon} />
+          Start session
         </button>
       </footer>
       {editor.sheet && (
