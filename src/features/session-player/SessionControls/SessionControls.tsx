@@ -1,4 +1,5 @@
-import styles from "./SessionPlayer.module.css";
+import sharedStyles from "../SessionPlayer.module.css";
+import styles from "./SessionControls.module.css";
 
 interface SessionControlsProps {
   paused: boolean;
@@ -22,7 +23,7 @@ export function SessionControls({
         ↺
       </button>
       <button
-        className={styles.primary}
+        className={sharedStyles.primary}
         aria-label={paused ? "Resume session" : "Pause session"}
         title={paused ? "Resume session" : "Pause session"}
         onClick={onPauseResume}

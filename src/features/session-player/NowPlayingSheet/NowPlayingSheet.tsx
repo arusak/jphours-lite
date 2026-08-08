@@ -1,7 +1,7 @@
-import { BottomSheet } from "../../components";
-import type { SessionStep } from "../../domain/session";
-import { stepMetadata } from "./stepMetadata";
-import styles from "./SessionPlayer.module.css";
+import { BottomSheet } from "../../../components";
+import type { SessionStep } from "../../../domain/session";
+import { stepMetadata } from "../stepMetadata";
+import styles from "./NowPlayingSheet.module.css";
 
 interface NowPlayingSheetProps {
   steps: SessionStep[];

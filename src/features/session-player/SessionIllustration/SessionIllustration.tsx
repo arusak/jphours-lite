@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import styles from "./SessionPlayer.module.css";
+import styles from "./SessionIllustration.module.css";
 
 type SessionIllustrationKind = "break" | "quick-rest" | "exercise";
 

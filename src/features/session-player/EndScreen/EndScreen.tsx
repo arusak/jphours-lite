@@ -1,4 +1,5 @@
-import styles from "./SessionPlayer.module.css";
+import sharedStyles from "../SessionPlayer.module.css";
+import styles from "./EndScreen.module.css";
 
 interface EndScreenProps {
   title: string;
@@ -7,10 +8,10 @@ interface EndScreenProps {
 }
 export function EndScreen({ title, copy, onExit }: EndScreenProps) {
   return (
-    <main className={`${styles.sessionPlayer} ${styles.completion}`}>
+    <main className={`${sharedStyles.sessionPlayer} ${styles.completion}`}>
       <h1>{title}</h1>
       <p>{copy}</p>
-      <button className={styles.primary} onClick={onExit}>
+      <button className={sharedStyles.primary} onClick={onExit}>
         Return to routine
       </button>
     </main>

@@ -1,8 +1,8 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-import { StopSlider } from "./StopSlider";
-import { formatTime } from "./formatTime";
-import { stepMetadata } from "./stepMetadata";
+import { StopSlider } from "../StopSlider/StopSlider";
+import { formatTime } from "../formatTime";
+import { stepMetadata } from "../stepMetadata";
 
 describe("session player parts", () => {
   it("formats meaningful step metadata without a duration for open-ended exercises", () => {

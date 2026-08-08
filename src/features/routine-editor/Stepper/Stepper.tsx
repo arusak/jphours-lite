@@ -1,4 +1,4 @@
-import styles from "./RoutineEditor.module.css";
+import styles from "./Stepper.module.css";
 
 interface StepperProps {
   label: string;

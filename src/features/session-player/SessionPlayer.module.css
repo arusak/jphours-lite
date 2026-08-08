@@ -13,6 +13,7 @@
   display: flex;
   justify-content: center;
 }
+
 .eyebrow {
   color: var(--color-muted-foreground);
   font-size: 12px;
@@ -20,6 +21,7 @@
   letter-spacing: 0.22em;
   text-transform: uppercase;
 }
+
 .nowPlayingTrigger {
   display: grid;
   gap: 3px;
@@ -29,13 +31,16 @@
   color: var(--color-foreground);
   background: transparent;
 }
+
 .nowPlayingTrigger > span:last-child {
   font-size: 14px;
   font-weight: 600;
 }
+
 .sessionHeading {
   margin-top: 32px;
 }
+
 .sessionHeading h1 {
   margin-top: 8px;
   font-size: 48px;
@@ -43,70 +48,13 @@
   letter-spacing: -0.04em;
   text-wrap: balance;
 }
+
 .nextStep {
   margin-top: 12px;
   color: var(--color-muted-foreground);
   font-size: 14px;
 }
-.ringTime {
-  color: var(--color-muted-foreground);
-  font: 600 28px/1 var(--font-display);
-  font-variant-numeric: tabular-nums;
-}
-.sessionIllustration {
-  width: 62px;
-  height: 62px;
-  margin-bottom: 2px;
-  fill: none;
-  stroke: var(--color-muted-foreground);
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  stroke-width: 3.5;
-}
-.illustrationBreak {
-  stroke: oklch(0.75 0.13 58);
-}
-.illustrationQuickRest {
-  stroke: oklch(0.72 0.12 184);
-}
-.ringTempoControl {
-  display: grid;
-  grid-template-columns: 36px auto 36px;
-  align-items: center;
-  gap: 8px;
-}
-.ringTempoControl > button {
-  width: 36px;
-  height: 36px;
-  padding: 0;
-  border: 1px solid var(--color-border);
-  border-radius: 50%;
-  background: oklch(0.215 0.018 52 / 70%);
-  font-size: 20px;
-}
-.ringTempoControl > strong {
-  display: grid;
-  color: var(--color-primary);
-  font: 700 48px/0.8 var(--font-display);
-  font-variant-numeric: tabular-nums;
-}
-.ringTempoControl small {
-  margin-top: 10px;
-  color: var(--color-muted-foreground);
-  font: 600 10px/1 var(--font-body);
-  letter-spacing: 0.12em;
-}
-.ringTempoControl > .ringSave {
-  grid-column: 2;
-  justify-self: center;
-  width: auto;
-  height: auto;
-  margin-top: 4px;
-  padding: 4px 8px;
-  border-radius: 999px;
-  color: var(--color-primary);
-  font-size: 11px;
-}
+
 .metronomeSoundControl {
   display: flex;
   align-items: center;
@@ -114,6 +62,7 @@
   gap: 8px;
   margin-top: 12px;
 }
+
 .metronomeSoundControl label {
   display: flex;
   align-items: center;
@@ -121,6 +70,7 @@
   color: var(--color-muted-foreground);
   font-size: 11px;
 }
+
 .metronomeSoundControl select,
 .metronomeSoundControl button {
   min-height: 30px;
@@ -131,22 +81,26 @@
   background: var(--color-secondary);
   font-size: 11px;
 }
+
 .beatIndicator {
   display: flex;
   justify-content: center;
   gap: 12px;
   margin-top: 28px;
 }
+
 .beatIndicator span {
   width: 10px;
   height: 10px;
   border-radius: 50%;
   background: oklch(0.95 0.012 80 / 15%);
 }
+
 .beatIndicator span.active {
   background: var(--color-primary);
   animation: beat-pulse 280ms ease-out;
 }
+
 .sessionBanner {
   margin-top: 16px;
   padding: 10px 12px;
@@ -156,108 +110,12 @@
   background: oklch(0.63 0.16 42 / 15%);
   font-size: 12px;
 }
-.playerControls {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 10px;
-  margin-top: auto;
-  padding-top: 28px;
-}
-.playerControls > button {
-  min-height: 52px;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-2xl);
-  background: var(--color-secondary);
-  font-weight: 600;
-}
+
 .primary {
   color: var(--color-primary-foreground);
   border-color: transparent;
   background: var(--color-primary);
   box-shadow: 0 10px 24px oklch(0.81 0.145 74 / 25%);
-}
-.nowPlayingList {
-  display: grid;
-  gap: 8px;
-  margin: 12px 0 0;
-  padding: 0;
-  list-style: none;
-  text-align: left;
-}
-.nowPlayingList li {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 12px;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-xl);
-  color: var(--color-muted-foreground);
-  background: oklch(0.215 0.018 52 / 40%);
-  font-size: 13px;
-}
-.nowPlayingList li[data-current="true"],
-.nowPlayingList li[data-up-next="true"] {
-  border-color: oklch(0.81 0.145 74 / 35%);
-  color: var(--color-foreground);
-}
-.nowPlayingList li span {
-  color: var(--color-primary);
-  font-size: 11px;
-  white-space: nowrap;
-}
-.stopSlider {
-  position: relative;
-  height: 56px;
-  touch-action: none;
-  user-select: none;
-  border: 1px solid oklch(0.58 0.19 27 / 30%);
-  border-radius: var(--radius-2xl);
-  color: var(--color-destructive);
-  background: oklch(0.58 0.19 27 / 12%);
-}
-.stopSlider > span {
-  position: absolute;
-  top: 3px;
-  left: max(3px, calc((100% - 54px) * var(--slider-value, 0)));
-  display: grid;
-  width: 48px;
-  height: 48px;
-  place-items: center;
-  border-radius: 50%;
-  color: oklch(0.98 0.01 80);
-  background: var(--color-destructive);
-  box-shadow: 0 4px 12px rgb(0 0 0 / 25%);
-  font-size: 12px;
-  transition: left 180ms ease-out;
-}
-.stopSlider > strong {
-  position: absolute;
-  inset: 0;
-  display: grid;
-  place-items: center;
-  font-size: 14px;
-  pointer-events: none;
-}
-.stopSlider[data-dragging="true"] > strong {
-  opacity: 0.25;
-}
-.completion {
-  align-items: stretch;
-  justify-content: center;
-  gap: 16px;
-}
-.completion h1 {
-  font-size: 48px;
-  line-height: 1.05;
-}
-.completion p {
-  color: var(--color-muted-foreground);
-  font-size: 14px;
-}
-.completion button {
-  margin-top: 16px;
-  border-radius: var(--radius-2xl);
 }
 
 @keyframes beat-pulse {
@@ -266,6 +124,7 @@
     opacity: 0.35;
     transform: scale(0.72);
   }
+
   50% {
     opacity: 1;
     transform: scale(1);
@@ -276,6 +135,7 @@
   .sessionPlayer {
     padding-inline: 16px;
   }
+
   .sessionHeading h1 {
     font-size: 40px;
   }

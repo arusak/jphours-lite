@@ -1,15 +1,15 @@
 import { useState } from "react";
-import { BottomSheet, ProgressSegments } from "../../components";
-import { practiceConfig, type MetronomeSound } from "../../config/practice-config";
-import type { Routine } from "../../domain/routine";
-import { EndScreen } from "./EndScreen";
-import { NowPlayingSheet } from "./NowPlayingSheet";
-import { SessionControls } from "./SessionControls";
-import { SessionTimer } from "./SessionTimer";
-import { StopSlider } from "./StopSlider";
-import { stepMetadata } from "./stepMetadata";
-import { useSessionPlayer } from "./useSessionPlayer";
-import styles from "./SessionPlayer.module.css";
+import { BottomSheet, ProgressSegments } from "../../../components";
+import { practiceConfig, type MetronomeSound } from "../../../config/practice-config";
+import type { Routine } from "../../../domain/routine";
+import { EndScreen } from "../EndScreen/EndScreen";
+import { NowPlayingSheet } from "../NowPlayingSheet/NowPlayingSheet";
+import { SessionControls } from "../SessionControls/SessionControls";
+import { SessionTimer } from "../SessionTimer/SessionTimer";
+import { StopSlider } from "../StopSlider/StopSlider";
+import { stepMetadata } from "../stepMetadata";
+import { useSessionPlayer } from "../hooks/useSessionPlayer";
+import styles from "../SessionPlayer.module.css";
 
 export interface SessionPlayerProps {
   routine: Routine;

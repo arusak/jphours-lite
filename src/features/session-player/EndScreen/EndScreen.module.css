@@ -1,0 +1,20 @@
+.completion {
+  align-items: stretch;
+  justify-content: center;
+  gap: 16px;
+}
+
+.completion h1 {
+  font-size: 48px;
+  line-height: 1.05;
+}
+
+.completion p {
+  color: var(--color-muted-foreground);
+  font-size: 14px;
+}
+
+.completion button {
+  margin-top: 16px;
+  border-radius: var(--radius-2xl);
+}

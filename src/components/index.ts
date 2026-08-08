@@ -1,3 +1,3 @@
-export * from "./BottomSheet";
-export * from "./ProgressSegments";
-export * from "./TimerRing";
+export * from "./BottomSheet/BottomSheet";
+export * from "./ProgressSegments/ProgressSegments";
+export * from "./TimerRing/TimerRing";

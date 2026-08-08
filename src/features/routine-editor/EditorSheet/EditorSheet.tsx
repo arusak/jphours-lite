@@ -1,9 +1,10 @@
-import { BottomSheet } from "../../components";
-import { practiceConfig } from "../../config/practice-config";
-import type { Exercise, RoutineEntry } from "../../domain/routine";
-import { validateEntry } from "../../domain/validation";
-import type { EditorSheet as Sheet } from "./types";
-import styles from "./RoutineEditor.module.css";
+import { BottomSheet } from "../../../components";
+import { practiceConfig } from "../../../config/practice-config";
+import type { Exercise, RoutineEntry } from "../../../domain/routine";
+import { validateEntry } from "../../../domain/validation";
+import type { EditorSheet as Sheet } from "../types";
+import sharedStyles from "../RoutineEditor.module.css";
+import styles from "./EditorSheet.module.css";
 
 interface EditorSheetProps {
   sheet: Sheet;
@@ -139,7 +140,7 @@ export function EditorSheet({ sheet, submitted, onChange, onSave, onCancel }: Ed
         </>
       )}
       <div className={styles.sheetActions}>
-        <button className={styles.primaryAction} onClick={onSave}>
+        <button className={sharedStyles.primaryAction} onClick={onSave}>
           Save
         </button>
         <button className={styles.secondaryAction} onClick={onCancel}>

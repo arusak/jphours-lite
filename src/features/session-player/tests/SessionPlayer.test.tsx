@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { createBreak, createExercise, createRoutine } from "../../domain/routine";
-import { SessionPlayer } from "./SessionPlayer";
+import { createBreak, createExercise, createRoutine } from "../../../domain/routine";
+import { SessionPlayer } from "../SessionPlayer/SessionPlayer";
 
 const audio = {
   unlock: vi.fn().mockResolvedValue(true),
@@ -12,20 +12,20 @@ const audio = {
   playCue: vi.fn(),
   dispose: vi.fn(),
 };
-vi.mock("../../services/audio", () => ({
+vi.mock("../../../services/audio", () => ({
   AudioController: class {
     constructor() {
       return audio;
     }
   },
 }));
-vi.mock("../../services/platform/wakeLock", () => ({
+vi.mock("../../../services/platform/wakeLock", () => ({
   WakeLockController: class {
     acquire = vi.fn();
     release = vi.fn();
   },
 }));
-vi.mock("../../services/platform/visibilityLifecycle", () => ({
+vi.mock("../../../services/platform/visibilityLifecycle", () => ({
   observeVisibility: vi.fn(() => vi.fn()),
 }));
 

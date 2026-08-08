@@ -1,6 +1,6 @@
-import type { Routine } from "../../domain/routine";
-import { RoutineEntryCard } from "./RoutineEntryCard";
-import styles from "./RoutineEditor.module.css";
+import type { Routine } from "../../../domain/routine";
+import { RoutineEntryCard } from "../RoutineEntryCard/RoutineEntryCard";
+import styles from "./RoutineEntryList.module.css";
 
 interface RoutineEntryListProps {
   routine: Routine;

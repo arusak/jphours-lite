@@ -1,0 +1,25 @@
+.routineSettings {
+  display: grid;
+  gap: 8px;
+  margin: 20px 0;
+  padding: 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  background: oklch(0.215 0.018 52 / 45%);
+}
+
+.routineSettings label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.routineSettings select {
+  min-height: 32px;
+  color: inherit;
+  background: var(--color-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+}

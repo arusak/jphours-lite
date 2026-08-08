@@ -1,13 +1,13 @@
-import { createBreak, createExercise } from "../../domain/routine";
-import { EditorSheet } from "./EditorSheet";
-import { RoutineEntryList } from "./RoutineEntryList";
-import { RoutineSettings } from "./RoutineSettings";
-import { useRoutineEditor } from "./useRoutineEditor";
-import type { RoutineEditorProps } from "./types";
-import styles from "./RoutineEditor.module.css";
+import { createBreak, createExercise } from "../../../domain/routine";
+import { EditorSheet } from "../EditorSheet/EditorSheet";
+import { RoutineEntryList } from "../RoutineEntryList/RoutineEntryList";
+import { RoutineSettings } from "../RoutineSettings/RoutineSettings";
+import { useRoutineEditor } from "../hooks/useRoutineEditor";
+import type { RoutineEditorProps } from "../types";
+import styles from "../RoutineEditor.module.css";
 
-export type { RoutineEditorProps } from "./types";
-export { routineTotal } from "./routineTotal";
+export type { RoutineEditorProps } from "../types";
+export { routineTotal } from "../routineTotal";
 
 export function RoutineEditor({ repository, onStartSession }: RoutineEditorProps) {
   const editor = useRoutineEditor(repository);

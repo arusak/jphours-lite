@@ -1,5 +1,5 @@
-import type { RoutineEntry } from "../../domain/routine";
-import styles from "./RoutineEditor.module.css";
+import type { RoutineEntry } from "../../../domain/routine";
+import styles from "./RoutineEntryCard.module.css";
 
 interface RoutineEntryCardProps {
   entry: RoutineEntry;

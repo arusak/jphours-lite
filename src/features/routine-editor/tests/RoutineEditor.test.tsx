@@ -1,8 +1,8 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-import { createBreak, createExercise, createRoutine, type Routine } from "../../domain/routine";
-import type { RoutineRepository } from "../../services/persistence/routine-repository";
-import { RoutineEditor, routineTotal } from "./RoutineEditor";
+import { createBreak, createExercise, createRoutine, type Routine } from "../../../domain/routine";
+import type { RoutineRepository } from "../../../services/persistence/routine-repository";
+import { RoutineEditor, routineTotal } from "../RoutineEditor/RoutineEditor";
 
 function repository(initial: Routine): RoutineRepository {
   return { load: () => initial, save: vi.fn() };

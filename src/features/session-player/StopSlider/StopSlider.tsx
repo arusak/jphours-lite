@@ -1,6 +1,6 @@
 import { useRef, useState, type CSSProperties, type PointerEvent } from "react";
-import { practiceConfig } from "../../config/practice-config";
-import styles from "./SessionPlayer.module.css";
+import { practiceConfig } from "../../../config/practice-config";
+import styles from "./StopSlider.module.css";
 
 interface StopSliderProps {
   onStop(): void;

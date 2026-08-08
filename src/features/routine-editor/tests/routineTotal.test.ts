@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { createExercise, createRoutine } from "../../domain/routine";
-import { routineTotal } from "./routineTotal";
+import { createExercise, createRoutine } from "../../../domain/routine";
+import { routineTotal } from "../routineTotal";
 
 describe("routineTotal", () => {
   it("does not add a Quick Rest after the final Exercise", () => {

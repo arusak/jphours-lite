@@ -1,0 +1,33 @@
+.nowPlayingList {
+  display: grid;
+  gap: 8px;
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+  text-align: left;
+}
+
+.nowPlayingList li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  color: var(--color-muted-foreground);
+  background: oklch(0.215 0.018 52 / 40%);
+  font-size: 13px;
+}
+
+.nowPlayingList li[data-current="true"],
+.nowPlayingList li[data-up-next="true"] {
+  border-color: oklch(0.81 0.145 74 / 35%);
+  color: var(--color-foreground);
+}
+
+.nowPlayingList li span {
+  color: var(--color-primary);
+  font-size: 11px;
+  white-space: nowrap;
+}

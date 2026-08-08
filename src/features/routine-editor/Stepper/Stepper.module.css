@@ -1,0 +1,20 @@
+.settingStepper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.settingStepper button {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  background: var(--color-secondary);
+}
+
+.settingStepper output {
+  min-width: 38px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}

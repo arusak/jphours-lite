@@ -1,8 +1,8 @@
 import { useMemo, useState } from "react";
 import type { MetronomeSound } from "../config/practice-config";
 import type { Routine } from "../domain/routine";
-import { RoutineEditor } from "../features/routine-editor/RoutineEditor";
-import { SessionPlayer } from "../features/session-player/SessionPlayer";
+import { RoutineEditor } from "../features/routine-editor/RoutineEditor/RoutineEditor";
+import { SessionPlayer } from "../features/session-player/SessionPlayer/SessionPlayer";
 import { LocalStorageRoutineRepository } from "../services/persistence/routine-repository";
 import styles from "./App.module.css";
 

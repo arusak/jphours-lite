@@ -1,12 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { practiceConfig, type MetronomeSound } from "../../config/practice-config";
-import type { Routine } from "../../domain/routine";
-import type { SessionStep } from "../../domain/session";
-import { AudioController } from "../../services/audio";
-import { WakeLockController } from "../../services/platform/wakeLock";
-import { observeVisibility } from "../../services/platform/visibilityLifecycle";
-import { SessionRunner } from "../../services/session/SessionRunner";
-import { initialSessionState, type SessionState } from "../../services/session/sessionReducer";
+import { practiceConfig, type MetronomeSound } from "../../../config/practice-config";
+import type { Routine } from "../../../domain/routine";
+import type { SessionStep } from "../../../domain/session";
+import { AudioController } from "../../../services/audio";
+import { WakeLockController } from "../../../services/platform/wakeLock";
+import { observeVisibility } from "../../../services/platform/visibilityLifecycle";
+import { SessionRunner } from "../../../services/session/SessionRunner";
+import { initialSessionState, type SessionState } from "../../../services/session/sessionReducer";
 
 function cueForCompleted(step: SessionStep): "exercise-complete" | "break-complete" {
   return step.kind === "break" ? "break-complete" : "exercise-complete";

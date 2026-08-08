@@ -1,0 +1,48 @@
+.ringTime {
+  color: var(--color-muted-foreground);
+  font: 600 28px/1 var(--font-display);
+  font-variant-numeric: tabular-nums;
+}
+
+.ringTempoControl {
+  display: grid;
+  grid-template-columns: 36px auto 36px;
+  align-items: center;
+  gap: 8px;
+}
+
+.ringTempoControl > button {
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 1px solid var(--color-border);
+  border-radius: 50%;
+  background: oklch(0.215 0.018 52 / 70%);
+  font-size: 20px;
+}
+
+.ringTempoControl > strong {
+  display: grid;
+  color: var(--color-primary);
+  font: 700 48px/0.8 var(--font-display);
+  font-variant-numeric: tabular-nums;
+}
+
+.ringTempoControl small {
+  margin-top: 10px;
+  color: var(--color-muted-foreground);
+  font: 600 10px/1 var(--font-body);
+  letter-spacing: 0.12em;
+}
+
+.ringTempoControl > .ringSave {
+  grid-column: 2;
+  justify-self: center;
+  width: auto;
+  height: auto;
+  margin-top: 4px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  color: var(--color-primary);
+  font-size: 11px;
+}

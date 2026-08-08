@@ -2,11 +2,11 @@
 
 ## Navigation
 
-Start with [the code-file inventory](docs/files.json). It maps every source, test, configuration, and supporting script to its responsibility so agents can locate the appropriate module before editing.
+Start with [the repository inventory](docs/files.json). It maps standalone files and cohesive directories to their responsibilities so agents can locate the appropriate module before editing.
 
 ## Working conventions
 
 - Preserve the domain vocabulary in `docs/UBIQUITOUS_LANGUAGE.md`.
 - Keep React hooks and components in their dedicated feature files.
 - Add or update focused Vitest coverage for behaviour changes.
-- update the inventory after files being added or removed
+- Update the inventory after files or directories are added or removed. Use directory entries for components, subcomponents, and other cohesive modules; only add a file entry when it is useful as a standalone navigation target.

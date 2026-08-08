@@ -1,7 +1,7 @@
-import { TimerRing } from "../../components";
-import { SessionIllustration } from "./SessionIllustration";
-import { formatTime } from "./formatTime";
-import styles from "./SessionPlayer.module.css";
+import { TimerRing } from "../../../components";
+import { SessionIllustration } from "../SessionIllustration/SessionIllustration";
+import { formatTime } from "../formatTime";
+import styles from "./SessionTimer.module.css";
 
 interface SessionTimerProps {
   tempo: number | null;

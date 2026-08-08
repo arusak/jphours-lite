@@ -1,7 +1,7 @@
-import { practiceConfig } from "../../config/practice-config";
-import type { Routine } from "../../domain/routine";
-import { Stepper } from "./Stepper";
-import styles from "./RoutineEditor.module.css";
+import { practiceConfig } from "../../../config/practice-config";
+import type { Routine } from "../../../domain/routine";
+import { Stepper } from "../Stepper/Stepper";
+import styles from "./RoutineSettings.module.css";
 
 interface RoutineSettingsProps {
   routine: Routine;
