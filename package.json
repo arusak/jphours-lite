@@ -20,6 +20,7 @@
     "vite-plugin-pwa": "latest"
   },
   "devDependencies": {
+    "@rollup/plugin-yaml": "^5.0.0",
     "@testing-library/jest-dom": "latest",
     "@testing-library/react": "latest",
     "@types/react": "latest",
@@ -28,7 +29,8 @@
     "oxfmt": "latest",
     "oxlint": "latest",
     "typescript": "latest",
-    "vitest": "latest"
+    "vitest": "latest",
+    "yaml": "^2.9.0"
   },
   "packageManager": "pnpm@11.20.0",
   "devEngines": {
