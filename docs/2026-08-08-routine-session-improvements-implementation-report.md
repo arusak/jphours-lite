@@ -10,13 +10,18 @@
 - Redesigned the Routine editor around ordered Exercise and Break entries, compact settings, calculated totals, minute-based editing, and automatic default Exercise restoration after deleting the final entry.
 - Redesigned Session playback with a compact Now Playing list, Quick Rest-aware progress and controls, presentation-specific rings, and a stop confirmation sheet.
 - Added YAML-backed Classic, Wood, and Digital metronome synthesis presets; live sound overrides; independent persistence of Tempo and Metronome sound; configurable warnings for timed Exercises and Breaks.
+- Added native SVG coffee, stretching, and neutral Exercise illustrations for Break, Quick Rest, and unpaced Exercise rings. Brightened the background, strengthened its noise texture, and hardened reduced-motion overrides.
+- Removed duplicate v2 `exercises` and legacy Quick Rest persistence fields. Routine validity now accepts any non-empty entry list, including Break-only Routines; duration validation enforces YAML-defined whole-minute increments.
 
 ## Verification
 
-- `pnpm exec vitest run src/services/audio/__tests__/AudioController.test.ts src/services/session/session.test.ts src/features/session-player/SessionPlayer.test.tsx` — 24 tests passed.
+- `pnpm test` — 35 tests passed.
 - `pnpm lint` — passed.
 - `pnpm build` — passed.
+- Two-axis review against `70d292b` completed. The substantiated findings on duplicate v2 persistence, Break-only validation, whole-minute duration validation, and YAML-backed Tempo bounds were fixed in `dc45abd`.
+- Browser-based small-phone and reduced-motion QA could not run because no browser-control surface was available in this environment. The 320px layout and `prefers-reduced-motion` behavior still require a manual browser pass.
+- Audio loudness and clipping still require real-browser or device listening.
 
 ## Remaining planned work
 
-Phase 9 and final follow-up work remain: native SVG silhouettes and visual polish, full-suite verification, browser-based small-phone and reduced-motion QA, and the required two-axis code review. Audio loudness and clipping still require real-browser or device listening.
+No implementation work remains. Manual browser/device verification is still required for the smallest phone layout, reduced-motion behavior, and audio loudness/clipping.
