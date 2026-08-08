@@ -2,6 +2,7 @@ import { TimerRing } from "../../../components";
 import { SessionIllustration } from "../SessionIllustration/SessionIllustration";
 import { formatTime } from "../formatTime";
 import styles from "./SessionTimer.module.css";
+import cn from "clsx";
 
 interface SessionTimerProps {
   tempo: number | null;
@@ -28,9 +29,14 @@ export function SessionTimer({
   onSaveTempo,
 }: SessionTimerProps) {
   const time = formatTime(displaySeconds ?? elapsedSeconds);
-  const timerDescription = displaySeconds === null ? "Elapsed time" : "Remaining time";
+  const timerDescription =
+    displaySeconds === null ? "Elapsed time" : "Remaining time";
   return (
-    <TimerRing accessibleName={`${timerDescription}: ${time}`} progress={progress} tone={tone}>
+    <TimerRing
+      accessibleName={`${timerDescription}: ${time}`}
+      progress={progress}
+      tone={tone}
+    >
       {tempo !== null ? (
         <div className={styles.ringTempoControl}>
           <button aria-label="Decrease tempo" onClick={() => onChangeTempo(-1)}>
@@ -43,15 +49,22 @@ export function SessionTimer({
           <button aria-label="Increase tempo" onClick={() => onChangeTempo(1)}>
             +
           </button>
-          {tempo !== savedTempo && (
-            <button className={styles.ringSave} aria-label="Save tempo" onClick={onSaveTempo}>
-              Save
-            </button>
-          )}
+          <button
+            className={cn(
+              styles.ringSave,
+              tempo === savedTempo && styles.hidden,
+            )}
+            aria-label="Save tempo"
+            onClick={onSaveTempo}
+          >
+            Save
+          </button>
         </div>
       ) : (
         <>
-          <SessionIllustration kind={isBreak ? "break" : isQuickRest ? "quick-rest" : "exercise"} />
+          <SessionIllustration
+            kind={isBreak ? "break" : isQuickRest ? "quick-rest" : "exercise"}
+          />
           <span className={styles.ringTime}>{time}</span>
         </>
       )}
