@@ -80,7 +80,7 @@ describe("SessionPlayer", () => {
     const ring = await screen.findByTestId("timer-ring");
     expect(ring).toHaveAttribute("data-open-ended", "true");
     expect(ring).toHaveAccessibleName(/elapsed time/i);
-    expect(screen.getByText("◌")).toBeInTheDocument();
+    expect(screen.getByTestId("exercise-silhouette")).toBeInTheDocument();
   });
 
   it("opens a read-only Now Playing list of meaningful steps and marks the next exercise during Quick Rest", async () => {
@@ -95,6 +95,7 @@ describe("SessionPlayer", () => {
     fireEvent.keyDown(document, { key: "Escape" });
     fireEvent.click(screen.getByRole("button", { name: "Finish step" }));
     expect(await screen.findByRole("heading", { name: "Quick Rest" })).toBeInTheDocument();
+    expect(screen.getByTestId("quick-rest-silhouette")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Skip Quick Rest" })).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: /now playing/i }));
     expect(await screen.findByText("Up next")).toBeInTheDocument();
@@ -126,6 +127,6 @@ describe("SessionPlayer", () => {
     );
     expect(await screen.findByRole("heading", { name: "Break" })).toBeInTheDocument();
     expect(screen.getByTestId("timer-ring")).toHaveClass("timer-ring--break");
-    expect(screen.getByText("☕")).toBeInTheDocument();
+    expect(screen.getByTestId("break-silhouette")).toBeInTheDocument();
   });
 });

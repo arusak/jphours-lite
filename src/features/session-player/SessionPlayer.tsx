@@ -8,6 +8,7 @@ import { WakeLockController } from "../../services/platform/wakeLock";
 import { observeVisibility } from "../../services/platform/visibilityLifecycle";
 import { SessionRunner } from "../../services/session/SessionRunner";
 import { initialSessionState, type SessionState } from "../../services/session/sessionReducer";
+import { SessionIllustration } from "./SessionIllustration";
 
 export interface SessionPlayerProps {
   routine: Routine;
@@ -227,9 +228,9 @@ export function SessionPlayer({
             </div>
           ) : (
             <>
-              <span aria-hidden="true" className="ring-silhouette">
-                {isBreak ? "☕" : isQuickRest ? "↝" : "◌"}
-              </span>
+              <SessionIllustration
+                kind={isBreak ? "break" : isQuickRest ? "quick-rest" : "exercise"}
+              />
               <span className="ring-time">{formatTime(displaySeconds ?? elapsedSec)}</span>
             </>
           )
