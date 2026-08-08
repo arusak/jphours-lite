@@ -1,6 +1,6 @@
 {
   "name": "rhythm-practice-trainer",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -18,10 +18,10 @@
     "react-dom": "latest",
     "vite": "latest",
     "vite-plugin-pwa": "latest",
-    "vite-plugin-readable-css-modules": "0.6.1"
+    "vite-plugin-readable-css-modules": "latest"
   },
   "devDependencies": {
-    "@rollup/plugin-yaml": "^5.0.0",
+    "@rollup/plugin-yaml": "latest",
     "@testing-library/jest-dom": "latest",
     "@testing-library/react": "latest",
     "@types/react": "latest",
@@ -31,7 +31,7 @@
     "oxlint": "latest",
     "typescript": "latest",
     "vitest": "latest",
-    "yaml": "^2.9.0"
+    "yaml": "latest"
   },
   "devEngines": {
     "runtime": {

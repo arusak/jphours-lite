@@ -2,9 +2,11 @@ import { defineConfig } from "vitest/config";
 import react from "@vitejs/plugin-react";
 import yaml from "@rollup/plugin-yaml";
 import { VitePWA } from "vite-plugin-pwa";
+import { readableCssModules } from "vite-plugin-readable-css-modules";
 
 export default defineConfig({
   base: "/jphours-proto/",
+  resolve: { tsconfigPaths: true },
   plugins: [
     react(),
     yaml(),
@@ -49,6 +51,7 @@ export default defineConfig({
       },
       workbox: { navigateFallback: "/jphours-proto/index.html" },
     }),
+    readableCssModules(),
   ],
   test: {
     environment: "jsdom",
