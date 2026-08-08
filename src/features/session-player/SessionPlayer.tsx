@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
-import { ProgressSegments, TimerRing } from "../../components";
+import { BottomSheet, ProgressSegments, TimerRing } from "../../components";
 import type { Routine } from "../../domain/routine";
 import type { SessionStep } from "../../domain/session";
 import { AudioController } from "../../services/audio";
@@ -25,6 +25,8 @@ export function SessionPlayer({ routine, onExit, onSaveTempo }: SessionPlayerPro
   const [savedTempos, setSavedTempos] = useState<Record<string, number>>({});
   const [beat, setBeat] = useState(0);
   const [audioAvailable, setAudioAvailable] = useState(true);
+  const [nowPlayingOpen, setNowPlayingOpen] = useState(false);
+  const [stopOpen, setStopOpen] = useState(false);
   const tempoOverridesRef = useRef<Record<string, number>>({});
   const audio = useMemo(() => new AudioController(), []);
   const wakeLock = useMemo(() => new WakeLockController(), []);
@@ -33,18 +35,22 @@ export function SessionPlayer({ routine, onExit, onSaveTempo }: SessionPlayerPro
   useEffect(() => {
     runner.current = new SessionRunner(undefined, undefined, {
       onStateChange: setState,
-      onStepStart: (step) => {
-        if (step.kind === "exercise" && step.tempoBpm !== null) {
-          const bpm = tempoOverridesRef.current[step.sourceExerciseId] ?? step.tempoBpm;
+      onStepStart: (nextStep) => {
+        if (nextStep.kind === "exercise" && nextStep.tempoBpm !== null) {
+          const bpm = tempoOverridesRef.current[nextStep.sourceExerciseId] ?? nextStep.tempoBpm;
           audio.startMetronome({
             bpm,
             onBeatScheduled: ({ beat: nextBeat }) => setBeat(nextBeat % 4),
           });
         }
       },
-      onStepStop: (step, reason) => {
+      onStepStop: (stoppedStep, reason) => {
         audio.stopMetronome();
-        if (reason === "STEP_COMPLETED") audio.playCue(cueForCompleted(step));
+        if (reason === "STEP_COMPLETED") audio.playCue(cueForCompleted(stoppedStep));
+      },
+      onQuickRestStart: () => audio.stopMetronome(),
+      onQuickRestStop: (_rest, reason) => {
+        if (reason === "STEP_COMPLETED") audio.playCue("break-complete");
       },
       onWarning: () => audio.playCue("warning"),
       onSessionComplete: () => audio.playCue("session-complete"),
@@ -81,8 +87,12 @@ export function SessionPlayer({ routine, onExit, onSaveTempo }: SessionPlayerPro
 
   const step =
     state.currentStepIndex === null ? null : (state.steps[state.currentStepIndex] ?? null);
-  const next =
-    state.currentStepIndex === null ? null : (state.steps[state.currentStepIndex + 1] ?? null);
+  const index = state.currentStepIndex ?? 0;
+  const quickRest =
+    state.phase === "quick-rest"
+      ? (state.quickRests.find((rest) => rest.afterStepId === step?.id) ?? null)
+      : null;
+  const nextStep = state.steps[index + 1] ?? null;
   const remainingSec =
     state.currentStepEndsAt === null
       ? null
@@ -98,7 +108,7 @@ export function SessionPlayer({ routine, onExit, onSaveTempo }: SessionPlayerPro
     return (
       <EndScreen
         title="Routine complete"
-        copy="Nice work — every exercise is finished."
+        copy="Nice work — every step is finished."
         onExit={onExit}
       />
     );
@@ -117,8 +127,9 @@ export function SessionPlayer({ routine, onExit, onSaveTempo }: SessionPlayerPro
     paused && state.pausedRemainingSec !== null
       ? Math.ceil(state.pausedRemainingSec)
       : remainingSec;
-  const index = state.currentStepIndex ?? 0;
-  const isExercise = step.kind === "exercise";
+  const isQuickRest = state.phase === "quick-rest";
+  const isExercise = !isQuickRest && step.kind === "exercise";
+  const isBreak = !isQuickRest && step.kind === "break";
   const currentTempo =
     isExercise && step.tempoBpm !== null
       ? (tempoOverrides[step.sourceExerciseId] ?? step.tempoBpm)
@@ -127,11 +138,13 @@ export function SessionPlayer({ routine, onExit, onSaveTempo }: SessionPlayerPro
     isExercise && step.tempoBpm !== null
       ? (savedTempos[step.sourceExerciseId] ?? step.tempoBpm)
       : null;
-  const duration = step.durationSec;
+  const duration = isQuickRest ? (quickRest?.durationSec ?? null) : step.durationSec;
   const progress =
     duration === null || displaySeconds === null
       ? null
       : Math.min(1, Math.max(0, (duration - displaySeconds) / duration));
+  const title = isQuickRest ? "Quick Rest" : isBreak ? "Break" : step.title;
+  const ringTone = isQuickRest ? "quick-rest" : isBreak ? "break" : "exercise";
 
   const changeTempo = (delta: number) => {
     if (!isExercise || currentTempo === null) return;
@@ -145,72 +158,66 @@ export function SessionPlayer({ routine, onExit, onSaveTempo }: SessionPlayerPro
     onSaveTempo?.(step.sourceExerciseId, currentTempo);
     setSavedTempos((values) => ({ ...values, [step.sourceExerciseId]: currentTempo }));
   };
+  const finishOrSkip = () => {
+    if (paused) runner.current?.resume();
+    runner.current?.skipStep();
+  };
 
   return (
-    <main
-      className={`session-player ${isExercise ? "exercise-session" : "break-session"}`}
-      aria-live="polite"
-    >
+    <main className={`session-player ${ringTone}-session`} aria-live="polite">
       <header className="session-header">
-        <button aria-label="Back" onClick={onExit}>
-          ←
+        <button
+          className="now-playing-trigger"
+          onClick={() => setNowPlayingOpen(true)}
+          aria-haspopup="dialog"
+        >
+          <span className="eyebrow">NOW PLAYING</span>
+          <span>{routine.name}</span>
         </button>
-        <div>
-          <p className="eyebrow">NOW PLAYING</p>
-          <p>{routine.name}</p>
-        </div>
-        <span aria-hidden="true" />
       </header>
       <ProgressSegments
         count={state.steps.length}
         current={index}
-        tone={isExercise ? "exercise" : "break"}
-        label={`Step ${index + 1} of ${state.steps.length}`}
+        tone={ringTone}
+        label="Session progress"
       />
-      {isExercise ? (
-        <>
-          <section className="session-heading">
-            <p className="section-label">
-              Exercise{" "}
-              {state.steps.slice(0, index + 1).filter((item) => item.kind === "exercise").length} of{" "}
-              {routine.exercises.length}
-            </p>
-            <h1>{step.title}</h1>
-          </section>
-          {currentTempo !== null && (
-            <div className="tempo-control">
+      <section className="session-heading">
+        <h1>{title}</h1>
+        {nextStep && <p className="next-step">Up next: {stepMetadata(nextStep)}</p>}
+      </section>
+      <TimerRing
+        value={
+          currentTempo !== null ? (
+            <div className="ring-tempo-control">
               <button aria-label="Decrease tempo" onClick={() => changeTempo(-1)}>
                 −
               </button>
-              <div>
-                <strong>{currentTempo}</strong>
-                <div>
-                  <span>BPM</span>
-                  {currentTempo !== savedTempo && (
-                    <button aria-label="Save tempo" onClick={saveTempo}>
-                      Save
-                    </button>
-                  )}
-                </div>
-              </div>
+              <strong>
+                {currentTempo}
+                <small>BPM</small>
+              </strong>
               <button aria-label="Increase tempo" onClick={() => changeTempo(1)}>
                 +
               </button>
+              {currentTempo !== savedTempo && (
+                <button className="ring-save" aria-label="Save tempo" onClick={saveTempo}>
+                  Save
+                </button>
+              )}
             </div>
-          )}
-        </>
-      ) : (
-        <section className="break-heading">
-          <span aria-hidden="true">☕</span>
-          <h1>Break</h1>
-          <p>Shake it out. Reset your hands.</p>
-        </section>
-      )}
-      <TimerRing
-        value={formatTime(displaySeconds ?? elapsedSec)}
-        label={displaySeconds === null ? "ELAPSED" : "REMAINING"}
+          ) : (
+            <>
+              <span aria-hidden="true" className="ring-silhouette">
+                {isBreak ? "☕" : isQuickRest ? "↝" : "◌"}
+              </span>
+              <span className="ring-time">{formatTime(displaySeconds ?? elapsedSec)}</span>
+            </>
+          )
+        }
+        label={displaySeconds === null ? "Elapsed time" : "Remaining time"}
+        accessibleValue={formatTime(displaySeconds ?? elapsedSec)}
         progress={progress}
-        tone={step.kind === "break" ? "break" : "exercise"}
+        tone={ringTone}
       />
       {isExercise && currentTempo !== null && (
         <div className="beat-indicator" aria-label="Metronome beat">
@@ -218,14 +225,6 @@ export function SessionPlayer({ routine, onExit, onSaveTempo }: SessionPlayerPro
             <span key={dot} className={dot === beat && !paused ? "active" : ""} />
           ))}
         </div>
-      )}
-      {next && (
-        <p className="next">
-          Next:{" "}
-          {next.kind === "break"
-            ? "Break"
-            : `${next.title}${next.tempoBpm ? ` · ${next.tempoBpm} BPM` : ""}`}
-        </p>
       )}
       {!audioAvailable && (
         <p role="status" className="session-banner">
@@ -237,48 +236,91 @@ export function SessionPlayer({ routine, onExit, onSaveTempo }: SessionPlayerPro
           Session paused while the app was in the background.
         </p>
       )}
-      <div className="player-controls">
-        {!isExercise && (
-          <button onClick={() => runner.current?.rewindBreak()}>Rewind exercise</button>
-        )}
-        {paused ? (
-          <button className="primary" onClick={() => runner.current?.resume()}>
-            Resume
-          </button>
-        ) : isExercise ? (
-          <button className="primary" onClick={() => runner.current?.pause()}>
-            Pause
-          </button>
-        ) : (
-          <button className="primary" onClick={() => runner.current?.skipStep()}>
-            Skip break
-          </button>
-        )}
-        {isExercise && (
-          <button
-            onClick={() => {
-              if (paused) runner.current?.resume();
-              runner.current?.skipStep();
-            }}
-          >
-            Finish / Skip
-          </button>
-        )}
-        {!isExercise && paused && (
-          <button
-            onClick={() => {
-              runner.current?.resume();
-              runner.current?.skipStep();
-            }}
-          >
-            Skip break
-          </button>
-        )}
-        {!isExercise && !paused && <button onClick={() => runner.current?.pause()}>Pause</button>}
-        <StopSlider onStop={() => runner.current?.stop()} />
+      <div className="player-controls" aria-label="Session controls">
+        <button
+          aria-label="Rewind step"
+          title="Rewind step"
+          onClick={() => runner.current?.rewind()}
+        >
+          ↺
+        </button>
+        <button
+          className="primary"
+          aria-label={paused ? "Resume session" : "Pause session"}
+          title={paused ? "Resume session" : "Pause session"}
+          onClick={() => (paused ? runner.current?.resume() : runner.current?.pause())}
+        >
+          {paused ? "▶" : "Ⅱ"}
+        </button>
+        <button aria-label="Stop session" title="Stop session" onClick={() => setStopOpen(true)}>
+          ■
+        </button>
+        <button
+          aria-label={isQuickRest ? "Skip Quick Rest" : "Finish step"}
+          title={isQuickRest ? "Skip Quick Rest" : "Finish step"}
+          onClick={finishOrSkip}
+        >
+          {isQuickRest ? "↠" : "✓"}
+        </button>
       </div>
+      {nowPlayingOpen && (
+        <NowPlayingSheet
+          steps={state.steps}
+          currentIndex={index}
+          quickRest={isQuickRest}
+          onClose={() => setNowPlayingOpen(false)}
+        />
+      )}
+      {stopOpen && (
+        <BottomSheet title="Stop session" onClose={() => setStopOpen(false)}>
+          <StopSlider
+            onStop={() => {
+              setStopOpen(false);
+              runner.current?.stop();
+            }}
+          />
+        </BottomSheet>
+      )}
     </main>
   );
+}
+
+function NowPlayingSheet({
+  steps,
+  currentIndex,
+  quickRest,
+  onClose,
+}: {
+  steps: SessionStep[];
+  currentIndex: number;
+  quickRest: boolean;
+  onClose(): void;
+}) {
+  return (
+    <BottomSheet title="Now Playing" onClose={onClose}>
+      <ol className="now-playing-list">
+        {steps.map((item, itemIndex) => (
+          <li
+            key={item.id}
+            data-current={(itemIndex === currentIndex && !quickRest) || undefined}
+            data-up-next={(itemIndex === currentIndex + 1 && quickRest) || undefined}
+          >
+            <strong>{stepMetadata(item)}</strong>
+            {itemIndex === currentIndex && !quickRest && <span>Current</span>}
+            {itemIndex === currentIndex + 1 && quickRest && <span>Up next</span>}
+          </li>
+        ))}
+      </ol>
+    </BottomSheet>
+  );
+}
+
+function stepMetadata(step: SessionStep): string {
+  if (step.kind === "break") return `Break · ${formatTime(step.durationSec)}`;
+  const metadata = [step.title];
+  if (step.tempoBpm !== null) metadata.push(`${step.tempoBpm} BPM`);
+  if (step.durationSec !== null) metadata.push(formatTime(step.durationSec));
+  return metadata.join(" · ");
 }
 
 function StopSlider({ onStop }: { onStop(): void }) {
@@ -294,9 +336,11 @@ function StopSlider({ onStop }: { onStop(): void }) {
   };
   const pointerValue = (event: React.PointerEvent<HTMLDivElement>) => {
     const bounds = event.currentTarget.getBoundingClientRect();
-    const travel = Math.max(1, bounds.width - 56);
     return Math.round(
-      Math.min(100, Math.max(0, ((event.clientX - bounds.left - 4) / travel) * 100)),
+      Math.min(
+        100,
+        Math.max(0, ((event.clientX - bounds.left - 4) / Math.max(1, bounds.width - 56)) * 100),
+      ),
     );
   };
   return (
@@ -311,9 +355,6 @@ function StopSlider({ onStop }: { onStop(): void }) {
       aria-valuenow={value}
       data-dragging={dragging}
       onPointerDown={(event) => {
-        const bounds = event.currentTarget.getBoundingClientRect();
-        const thumbLeft = bounds.left + 4 + (Math.max(1, bounds.width - 56) * value) / 100;
-        if (event.clientX < thumbLeft || event.clientX > thumbLeft + 48) return;
         fired.current = false;
         setDragging(true);
         event.currentTarget.setPointerCapture?.(event.pointerId);
@@ -368,7 +409,6 @@ function EndScreen({ title, copy, onExit }: { title: string; copy: string; onExi
     </main>
   );
 }
-
 function formatTime(seconds: number): string {
   const minutes = Math.floor(seconds / 60);
   return `${minutes}:${String(seconds % 60).padStart(2, "0")}`;

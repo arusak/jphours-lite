@@ -1,7 +1,7 @@
 interface ProgressSegmentsProps {
   count: number;
   current: number;
-  tone?: "exercise" | "break";
+  tone?: "exercise" | "break" | "quick-rest";
   label?: string;
 }
 
@@ -13,7 +13,7 @@ export function ProgressSegments({
 }: ProgressSegmentsProps) {
   return (
     <div
-      className={`progress-segments${count > 12 ? " progress-segments--dense" : ""}${tone === "break" ? " progress-segments--break" : ""}`}
+      className={`progress-segments${count > 12 ? " progress-segments--dense" : ""}${tone === "break" ? " progress-segments--break" : ""}${tone === "quick-rest" ? " progress-segments--quick-rest" : ""}`}
       role="progressbar"
       aria-label={label}
       aria-valuemin={0}
