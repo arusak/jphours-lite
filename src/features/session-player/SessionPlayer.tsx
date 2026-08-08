@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { BottomSheet, ProgressSegments, TimerRing } from "../../components";
+import { practiceConfig, type MetronomeSound } from "../../config/practice-config";
 import type { Routine } from "../../domain/routine";
 import type { SessionStep } from "../../domain/session";
 import { AudioController } from "../../services/audio";
@@ -12,22 +13,31 @@ export interface SessionPlayerProps {
   routine: Routine;
   onExit(): void;
   onSaveTempo?(sourceExerciseId: string, tempoBpm: number): void;
+  onSaveMetronomeSound?(sound: MetronomeSound): void;
 }
 
 function cueForCompleted(step: SessionStep): "exercise-complete" | "break-complete" {
   return step.kind === "break" ? "break-complete" : "exercise-complete";
 }
 
-export function SessionPlayer({ routine, onExit, onSaveTempo }: SessionPlayerProps) {
+export function SessionPlayer({
+  routine,
+  onExit,
+  onSaveTempo,
+  onSaveMetronomeSound,
+}: SessionPlayerProps) {
   const [state, setState] = useState<SessionState>(initialSessionState);
   const [now, setNow] = useState(() => performance.now());
   const [tempoOverrides, setTempoOverrides] = useState<Record<string, number>>({});
   const [savedTempos, setSavedTempos] = useState<Record<string, number>>({});
+  const [soundOverride, setSoundOverride] = useState<MetronomeSound>(routine.metronomeSound);
+  const [savedSound, setSavedSound] = useState<MetronomeSound>(routine.metronomeSound);
   const [beat, setBeat] = useState(0);
   const [audioAvailable, setAudioAvailable] = useState(true);
   const [nowPlayingOpen, setNowPlayingOpen] = useState(false);
   const [stopOpen, setStopOpen] = useState(false);
   const tempoOverridesRef = useRef<Record<string, number>>({});
+  const soundOverrideRef = useRef<MetronomeSound>(routine.metronomeSound);
   const audio = useMemo(() => new AudioController(), []);
   const wakeLock = useMemo(() => new WakeLockController(), []);
   const runner = useRef<SessionRunner | null>(null);
@@ -40,6 +50,7 @@ export function SessionPlayer({ routine, onExit, onSaveTempo }: SessionPlayerPro
           const bpm = tempoOverridesRef.current[nextStep.sourceExerciseId] ?? nextStep.tempoBpm;
           audio.startMetronome({
             bpm,
+            sound: soundOverrideRef.current,
             onBeatScheduled: ({ beat: nextBeat }) => setBeat(nextBeat % 4),
           });
         }
@@ -158,6 +169,15 @@ export function SessionPlayer({ routine, onExit, onSaveTempo }: SessionPlayerPro
     onSaveTempo?.(step.sourceExerciseId, currentTempo);
     setSavedTempos((values) => ({ ...values, [step.sourceExerciseId]: currentTempo }));
   };
+  const changeSound = (sound: MetronomeSound) => {
+    soundOverrideRef.current = sound;
+    setSoundOverride(sound);
+    if (isExercise && currentTempo !== null) audio.updateMetronomeSound(sound);
+  };
+  const saveSound = () => {
+    onSaveMetronomeSound?.(soundOverride);
+    setSavedSound(soundOverride);
+  };
   const finishOrSkip = () => {
     if (paused) runner.current?.resume();
     runner.current?.skipStep();
@@ -219,6 +239,24 @@ export function SessionPlayer({ routine, onExit, onSaveTempo }: SessionPlayerPro
         progress={progress}
         tone={ringTone}
       />
+      {isExercise && currentTempo !== null && (
+        <div className="metronome-sound-control">
+          <label>
+            <span>Metronome sound</span>
+            <select
+              value={soundOverride}
+              onChange={(event) => changeSound(event.target.value as MetronomeSound)}
+            >
+              {Object.keys(practiceConfig.metronome.sounds).map((sound) => (
+                <option key={sound} value={sound}>
+                  {sound[0]!.toUpperCase() + sound.slice(1)}
+                </option>
+              ))}
+            </select>
+          </label>
+          {soundOverride !== savedSound && <button onClick={saveSound}>Save sound</button>}
+        </div>
+      )}
       {isExercise && currentTempo !== null && (
         <div className="beat-indicator" aria-label="Metronome beat">
           {[0, 1, 2, 3].map((dot) => (
@@ -327,9 +365,10 @@ function StopSlider({ onStop }: { onStop(): void }) {
   const [value, setValue] = useState(0);
   const [dragging, setDragging] = useState(false);
   const fired = useRef(false);
+  const threshold = practiceConfig.interaction.slideToStopThreshold * 100;
   const commit = (next: number) => {
     setValue(next);
-    if (next >= 90 && !fired.current) {
+    if (next >= threshold && !fired.current) {
       fired.current = true;
       onStop();
     }
@@ -368,7 +407,7 @@ function StopSlider({ onStop }: { onStop(): void }) {
         const next = pointerValue(event);
         setDragging(false);
         commit(next);
-        if (next < 90) setValue(0);
+        if (next < threshold) setValue(0);
       }}
       onPointerCancel={() => {
         setDragging(false);
@@ -386,7 +425,7 @@ function StopSlider({ onStop }: { onStop(): void }) {
           setValue(Math.max(0, value - 10));
       }}
       onBlur={() => {
-        if (value < 90) {
+        if (value < threshold) {
           fired.current = false;
           setValue(0);
         }

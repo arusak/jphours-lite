@@ -706,6 +706,30 @@ button,
   color: var(--color-primary);
   font-size: 11px;
 }
+.metronome-sound-control {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 12px;
+}
+.metronome-sound-control label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--color-muted-foreground);
+  font-size: 11px;
+}
+.metronome-sound-control select,
+.metronome-sound-control button {
+  min-height: 30px;
+  padding: 4px 8px;
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  color: var(--color-foreground);
+  background: var(--color-secondary);
+  font-size: 11px;
+}
 .beat-indicator {
   display: flex;
   justify-content: center;

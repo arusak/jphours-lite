@@ -24,7 +24,11 @@ const exercise = (id: string, tempoBpm: number | null, durationSec: number | nul
   tempoBpm,
   durationSec,
 });
-const breakEntry = (id: string, durationSec: number) => ({ id, kind: "break" as const, durationSec });
+const breakEntry = (id: string, durationSec: number) => ({
+  id,
+  kind: "break" as const,
+  durationSec,
+});
 
 class FakeTime implements Clock, TimeoutScheduler {
   value = 0;
@@ -64,7 +68,11 @@ describe("buildSessionSteps", () => {
       ]),
     );
     expect(plan.steps.map((step) => (step.kind === "exercise" ? step.mode : step.kind))).toEqual([
-      "paced-timed", "break", "free-timed", "paced-open-ended", "open-ended",
+      "paced-timed",
+      "break",
+      "free-timed",
+      "paced-open-ended",
+      "open-ended",
     ]);
     expect(plan.quickRests).toEqual([
       expect.objectContaining({ afterStepId: "exercise:free", durationSec: 10 }),
@@ -87,7 +95,9 @@ describe("SessionRunner", () => {
     const time = new FakeTime();
     const warning = vi.fn();
     const runner = new SessionRunner(time, time, { onWarning: warning });
-    runner.start(routine([exercise("one", null, 25), breakEntry("planned", 10), exercise("two", null, null)]));
+    runner.start(
+      routine([exercise("one", null, 25), breakEntry("planned", 10), exercise("two", null, null)]),
+    );
     expect(runner.getState().currentStepIndex).toBe(0);
     time.advance(5_000);
     expect(warning).toHaveBeenCalledTimes(1);
@@ -95,6 +105,27 @@ describe("SessionRunner", () => {
     expect(runner.getState().currentStepIndex).toBe(1);
     runner.dispatch({ type: "STEP_COMPLETED", stepId: "exercise:one", now: time.now() });
     expect(runner.getState().currentStepIndex).toBe(1);
+  });
+
+  it("applies the Routine warning lead to Breaks, suppression, and paced Beat alignment", () => {
+    const time = new FakeTime();
+    const warning = vi.fn();
+    const runner = new SessionRunner(time, time, { onWarning: warning });
+    runner.start({ ...routine([breakEntry("break", 30)], 0), warningLeadTimeSec: 20 });
+    time.advance(9_999);
+    expect(warning).not.toHaveBeenCalled();
+    time.advance(1);
+    expect(warning).toHaveBeenCalledWith(expect.objectContaining({ kind: "break" }));
+
+    runner.start({ ...routine([exercise("short", null, 20)], 0), warningLeadTimeSec: 20 });
+    time.advance(20_000);
+    expect(warning).toHaveBeenCalledTimes(1);
+
+    runner.start({ ...routine([exercise("paced", 100, 31)], 0), warningLeadTimeSec: 20 });
+    time.advance(10_799);
+    expect(warning).toHaveBeenCalledTimes(1);
+    time.advance(1);
+    expect(warning).toHaveBeenCalledTimes(2);
   });
 
   it("does not auto-complete open-ended work and pauses/resumes a timed step", () => {
@@ -133,17 +164,16 @@ describe("SessionRunner", () => {
     const time = new FakeTime();
     const stopped = vi.fn();
     const runner = new SessionRunner(time, time, { onStepStop: stopped });
-    runner.start(routine([exercise("one", 120, 10), breakEntry("rest", 5), exercise("two", null, 10)], 0));
+    runner.start(
+      routine([exercise("one", 120, 10), breakEntry("rest", 5), exercise("two", null, 10)], 0),
+    );
     time.advance(10_000);
     expect(runner.getState().currentStepIndex).toBe(1);
 
     time.advance(2_000);
     runner.rewind();
     expect(runner.getState()).toMatchObject({ currentStepIndex: 1, currentStepEndsAt: 17_000 });
-    expect(stopped).toHaveBeenLastCalledWith(
-      expect.objectContaining({ kind: "break" }),
-      "REWIND",
-    );
+    expect(stopped).toHaveBeenLastCalledWith(expect.objectContaining({ kind: "break" }), "REWIND");
 
     time.advance(3_000);
     runner.pause();
@@ -158,7 +188,9 @@ describe("SessionRunner", () => {
   it("cancels the stale Break timer when rewinding", () => {
     const time = new FakeTime();
     const runner = new SessionRunner(time, time);
-    runner.start(routine([exercise("one", null, 1), breakEntry("rest", 10), exercise("two", null, 10)], 0));
+    runner.start(
+      routine([exercise("one", null, 1), breakEntry("rest", 10), exercise("two", null, 10)], 0),
+    );
     time.advance(1_000);
     runner.rewindBreak();
     time.advance(1_000);
@@ -173,10 +205,21 @@ describe("SessionRunner", () => {
     const runner = new SessionRunner(time, time, { onQuickRestStart: started });
     runner.start(routine([exercise("one", null, 2), exercise("two", null, 10)], 5));
     time.advance(2_000);
-    expect(runner.getState()).toMatchObject({ phase: "quick-rest", currentStepIndex: 0, currentStepEndsAt: 7_000 });
-    expect(started).toHaveBeenCalledWith(expect.objectContaining({ id: "quick-rest:one" }), expect.anything());
+    expect(runner.getState()).toMatchObject({
+      phase: "quick-rest",
+      currentStepIndex: 0,
+      currentStepEndsAt: 7_000,
+    });
+    expect(started).toHaveBeenCalledWith(
+      expect.objectContaining({ id: "quick-rest:one" }),
+      expect.anything(),
+    );
     runner.rewind();
-    expect(runner.getState()).toMatchObject({ phase: "step", currentStepIndex: 0, currentStepEndsAt: 4_000 });
+    expect(runner.getState()).toMatchObject({
+      phase: "step",
+      currentStepIndex: 0,
+      currentStepEndsAt: 4_000,
+    });
     time.advance(2_000);
     expect(runner.getState().phase).toBe("quick-rest");
     runner.skipStep();

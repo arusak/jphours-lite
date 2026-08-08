@@ -135,6 +135,29 @@ describe("AudioController", () => {
     expect(onBeatScheduled).toHaveBeenLastCalledWith({ beat: 2, time: 1.25 });
   });
 
+  it("switches presets immediately, cancelling old clicks and using YAML synthesis parameters", () => {
+    const context = makeContext();
+    const clearIntervalFn = vi.fn();
+    const controller = new AudioController({
+      contextFactory: () => context,
+      setIntervalFn: vi.fn(() => 1) as unknown as typeof setInterval,
+      clearIntervalFn: clearIntervalFn as unknown as typeof clearInterval,
+    });
+    controller.startMetronome({ bpm: 120, sound: "classic" });
+    const classic = context.oscillators[0]!;
+    expect(classic.frequency.value).toBe(1100);
+    expect(classic.type).toBe("sine");
+    const beatEnvelope = context.gains.at(-1)!;
+    expect(beatEnvelope.gain.exponentialRampToValueAtTime.mock.calls[0]?.[0]).toBe(0.35);
+
+    context.now = 0.2;
+    expect(controller.updateMetronomeSound("wood")).toBe(true);
+    expect(clearIntervalFn).toHaveBeenCalled();
+    expect(classic.stop).toHaveBeenCalled();
+    expect(context.oscillators.at(-1)!.frequency.value).toBe(720);
+    expect(context.oscillators.at(-1)!.type).toBe("triangle");
+  });
+
   it("rejects an invalid live tempo without disturbing the active metronome", () => {
     const context = makeContext();
     const clearIntervalFn = vi.fn();

@@ -2,6 +2,7 @@ export type AudioCue = "warning" | "exercise-complete" | "break-complete" | "ses
 
 export interface MetronomeOptions {
   bpm: number;
+  sound?: MetronomeSound;
   onBeatScheduled?: (beat: ScheduledBeat) => void;
 }
 
@@ -17,3 +18,4 @@ export interface AudioControllerOptions {
   schedulerPollMs?: number;
   scheduleAheadSec?: number;
 }
+import type { MetronomeSound } from "../../config/practice-config";

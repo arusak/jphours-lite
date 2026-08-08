@@ -7,6 +7,7 @@ const audio = {
   unlock: vi.fn().mockResolvedValue(true),
   startMetronome: vi.fn(),
   updateMetronomeTempo: vi.fn(),
+  updateMetronomeSound: vi.fn(),
   stopMetronome: vi.fn(),
   playCue: vi.fn(),
   dispose: vi.fn(),
@@ -49,6 +50,22 @@ describe("SessionPlayer", () => {
     expect(audio.updateMetronomeTempo).toHaveBeenCalledWith(91);
     fireEvent.click(screen.getByRole("button", { name: "Save tempo" }));
     expect(onSaveTempo).toHaveBeenCalledWith("scales", 91);
+  });
+
+  it("applies a live Metronome sound override and saves it separately from Tempo", async () => {
+    const onSaveMetronomeSound = vi.fn();
+    render(
+      <SessionPlayer
+        routine={routineWith(createExercise({ id: "scales", title: "Scales", tempoBpm: 90 }))}
+        onExit={vi.fn()}
+        onSaveMetronomeSound={onSaveMetronomeSound}
+      />,
+    );
+    const select = await screen.findByLabelText("Metronome sound");
+    fireEvent.change(select, { target: { value: "wood" } });
+    expect(audio.updateMetronomeSound).toHaveBeenCalledWith("wood");
+    fireEvent.click(screen.getByRole("button", { name: "Save sound" }));
+    expect(onSaveMetronomeSound).toHaveBeenCalledWith("wood");
   });
 
   it("uses the neutral, accessible elapsed-time ring for an unpaced open-ended exercise", async () => {

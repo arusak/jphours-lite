@@ -31,8 +31,6 @@ export interface SessionRunnerHooks {
   onSessionComplete?(): void;
 }
 
-const warningLeadMs = 20_000;
-
 /**
  * Owns timer callbacks and feeds only step-id-tagged events into the reducer.
  * Its dependencies make timer/audio behaviour deterministic in tests.
@@ -41,6 +39,7 @@ export class SessionRunner {
   private state: SessionState = initialSessionState;
   private warningTimer: unknown | null = null;
   private completionTimer: unknown | null = null;
+  private warningLeadTimeSec = 0;
 
   constructor(
     private readonly clock: Clock = { now: () => performance.now() },
@@ -53,6 +52,7 @@ export class SessionRunner {
   }
 
   start(routine: Routine): void {
+    this.warningLeadTimeSec = routine.warningLeadTimeSec;
     this.dispatch({ type: "START", routine, now: this.clock.now() });
   }
   pause(): void {
@@ -99,7 +99,8 @@ export class SessionRunner {
         command.type === "START")
     ) {
       this.cancelTimers();
-      if (previous.phase === "step" && previousStep) this.hooks.onStepStop?.(previousStep, command.type);
+      if (previous.phase === "step" && previousStep)
+        this.hooks.onStepStop?.(previousStep, command.type);
       if (previous.phase === "quick-rest") {
         const rest = currentQuickRest(previous);
         if (rest) this.hooks.onQuickRestStop?.(rest, command.type);
@@ -148,16 +149,17 @@ export class SessionRunner {
     const step = currentStep(this.state);
     const endsAt = this.state.currentStepEndsAt;
     const segmentId = activeSegmentId(this.state);
-    if (!segmentId || endsAt === null || (this.state.phase === "step" && (!step || !isTimedStep(step)))) return;
+    if (
+      !segmentId ||
+      endsAt === null ||
+      (this.state.phase === "step" && (!step || !isTimedStep(step)))
+    )
+      return;
 
     const remainingMs = Math.max(0, endsAt - this.clock.now());
-    if (
-      this.state.phase === "step" && step?.kind === "exercise" &&
-      step.durationSec! * 1000 > warningLeadMs &&
-      this.state.warningPlayedForStepId !== step.id
-    ) {
-      const warningDelayMs = remainingMs - warningLeadMs;
-      if (warningDelayMs > 0) {
+    if (this.canScheduleWarning(step)) {
+      const warningDelayMs = this.warningDelayMs(step!, endsAt);
+      if (warningDelayMs >= 0) {
         this.warningTimer = this.scheduler.setTimeout(() => {
           this.dispatch({ type: "STEP_WARNING", stepId: step.id });
         }, warningDelayMs);
@@ -166,6 +168,29 @@ export class SessionRunner {
     this.completionTimer = this.scheduler.setTimeout(() => {
       this.dispatch({ type: "STEP_COMPLETED", stepId: segmentId, now: this.clock.now() });
     }, remainingMs);
+  }
+
+  private canScheduleWarning(step: SessionStep | null): step is SessionStep {
+    return (
+      this.state.phase === "step" &&
+      step !== null &&
+      isTimedStep(step) &&
+      this.warningLeadTimeSec > 0 &&
+      step.durationSec! > this.warningLeadTimeSec &&
+      this.state.warningPlayedForStepId !== step.id
+    );
+  }
+
+  private warningDelayMs(step: SessionStep, endsAt: number): number {
+    if (step.kind !== "exercise" || step.tempoBpm === null) {
+      return Math.max(0, endsAt - this.clock.now() - this.warningLeadTimeSec * 1000);
+    }
+    const startedAt = this.state.currentStepStartedAt ?? this.clock.now();
+    const warningOffsetSec = step.durationSec! - this.warningLeadTimeSec;
+    const beatIntervalMs = 60_000 / step.tempoBpm;
+    const nearestBeatAt =
+      startedAt + Math.round((warningOffsetSec * 1000) / beatIntervalMs) * beatIntervalMs;
+    return Math.max(0, nearestBeatAt - this.clock.now());
   }
 
   private cancelTimers(): void {

@@ -1,3 +1,4 @@
+import { practiceConfig, type MetronomeSound } from "../../config/practice-config";
 import type { AudioControllerOptions, AudioCue, MetronomeOptions } from "./types";
 
 const DEFAULT_POLL_MS = 25;
@@ -55,7 +56,7 @@ export class AudioController {
     if (!isValidBpm(options.bpm) || !this.getContext()) return false;
 
     this.stopMetronome();
-    this.metronome = options;
+    this.metronome = { ...options, sound: options.sound ?? practiceConfig.metronome.defaultSound };
     this.beat = 0;
     this.nextBeatTime = this.context!.currentTime + START_DELAY_SEC;
     this.scheduleBeats();
@@ -73,6 +74,14 @@ export class AudioController {
     this.nextBeatTime = this.context!.currentTime + START_DELAY_SEC;
     this.scheduleBeats();
     this.scheduler = this.setIntervalFn(() => this.scheduleBeats(), this.schedulerPollMs);
+    return true;
+  }
+
+  /** Applies a session-only sound preset and drops clicks queued with the old sound. */
+  public updateMetronomeSound(sound: MetronomeSound): boolean {
+    if (!this.metronome || !practiceConfig.metronome.sounds[sound] || !this.getContext())
+      return false;
+    this.restartMetronome({ ...this.metronome, sound });
     return true;
   }
 
@@ -118,8 +127,10 @@ export class AudioController {
     if (!context || !gain) return false;
 
     const start = context.currentTime + 0.01;
+    const peak =
+      cue === "warning" ? practiceConfig.audio.warningPeak : practiceConfig.audio.completionPeak;
     cuePatterns[cue].forEach((frequency, index) => {
-      this.scheduleTone(frequency, start + index * 0.16, 0.1, gain, 0.18);
+      this.scheduleTone(frequency, start + index * 0.16, 0.1, gain, peak);
     });
     return true;
   }
@@ -149,7 +160,19 @@ export class AudioController {
 
   private scheduleClick(time: number): void {
     const gain = this.getMetronomeGain();
-    if (gain) this.scheduleTone(1100, time, 0.035, gain, 0.22);
+    const sound =
+      practiceConfig.metronome.sounds[
+        this.metronome?.sound ?? practiceConfig.metronome.defaultSound
+      ];
+    if (gain)
+      this.scheduleTone(
+        sound.frequency,
+        time,
+        sound.decay,
+        gain,
+        practiceConfig.audio.beatPeak,
+        sound.waveform,
+      );
   }
 
   private scheduleTone(
@@ -158,13 +181,14 @@ export class AudioController {
     duration: number,
     destination: GainNode,
     peak: number,
+    waveform: OscillatorType = "sine",
   ): void {
     const context = this.context;
     if (!context) return;
     const oscillator = context.createOscillator();
     const envelope = context.createGain();
     oscillator.frequency.value = frequency;
-    oscillator.type = "sine";
+    oscillator.type = waveform;
     envelope.gain.setValueAtTime(0.0001, time);
     envelope.gain.exponentialRampToValueAtTime(peak, time + 0.002);
     envelope.gain.exponentialRampToValueAtTime(0.0001, time + duration);
@@ -211,6 +235,15 @@ export class AudioController {
   private clearScheduler(): void {
     if (this.scheduler !== undefined) this.clearIntervalFn(this.scheduler);
     this.scheduler = undefined;
+  }
+
+  private restartMetronome(options: MetronomeOptions): void {
+    this.clearScheduler();
+    this.cancelActiveSources();
+    this.metronome = options;
+    this.nextBeatTime = this.context!.currentTime + START_DELAY_SEC;
+    this.scheduleBeats();
+    this.scheduler = this.setIntervalFn(() => this.scheduleBeats(), this.schedulerPollMs);
   }
 
   private cancelActiveSources(): void {
