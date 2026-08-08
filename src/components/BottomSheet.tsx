@@ -9,6 +9,9 @@ interface BottomSheetProps {
 export function BottomSheet({ title, children, onClose }: BottomSheetProps) {
   const titleId = `sheet-${title.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`;
   const sheet = useRef<HTMLDivElement>(null);
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
+
   useEffect(() => {
     const opener = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     document.body.classList.add("sheet-open");
@@ -17,7 +20,7 @@ export function BottomSheet({ title, children, onClose }: BottomSheetProps) {
     );
     first?.focus();
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") onClose();
+      if (event.key === "Escape") onCloseRef.current();
       if (event.key !== "Tab" || !sheet.current) return;
       const items = [
         ...sheet.current.querySelectorAll<HTMLElement>(
@@ -41,12 +44,12 @@ export function BottomSheet({ title, children, onClose }: BottomSheetProps) {
       document.removeEventListener("keydown", onKeyDown);
       opener?.focus();
     };
-  }, [onClose]);
+  }, []);
   return (
     <div
       className="sheet-backdrop"
       onMouseDown={(event) => {
-        if (event.target === event.currentTarget) onClose();
+        if (event.target === event.currentTarget) onCloseRef.current();
       }}
     >
       <div
