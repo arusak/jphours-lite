@@ -101,8 +101,9 @@ describe("SessionPlayer", () => {
   });
 
   it("presents the four media controls and only stops after slide confirmation", async () => {
+    const onExit = vi.fn();
     render(
-      <SessionPlayer routine={routineWith(createExercise({ title: "One" }))} onExit={vi.fn()} />,
+      <SessionPlayer routine={routineWith(createExercise({ title: "One" }))} onExit={onExit} />,
     );
     await screen.findByRole("heading", { name: "One" });
     expect(screen.getByRole("button", { name: "Rewind step" })).toBeInTheDocument();
@@ -113,7 +114,8 @@ describe("SessionPlayer", () => {
     fireEvent.blur(slider);
     expect(screen.queryByText("Session stopped")).not.toBeInTheDocument();
     fireEvent.keyDown(slider, { key: "End" });
-    expect(await screen.findByText("Session stopped")).toBeInTheDocument();
+    expect(onExit).toHaveBeenCalledOnce();
+    expect(screen.queryByText("Session stopped")).not.toBeInTheDocument();
   });
 
   it("renders a Break as a meaningful dark-accent ring", async () => {

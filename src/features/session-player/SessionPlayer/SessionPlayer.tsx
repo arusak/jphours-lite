@@ -54,14 +54,6 @@ export function SessionPlayer({
         onExit={onExit}
       />
     );
-  if (state.status === "stopped")
-    return (
-      <EndScreen
-        title="Session stopped"
-        copy="Your progress for this session has ended."
-        onExit={onExit}
-      />
-    );
   if (!step) return null;
   const paused = state.status === "paused" || state.status === "interrupted";
   const displaySeconds =
@@ -181,6 +173,7 @@ export function SessionPlayer({
             onStop={() => {
               setStopOpen(false);
               player.stop();
+              onExit();
             }}
           />
         </BottomSheet>

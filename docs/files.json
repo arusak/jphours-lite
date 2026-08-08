@@ -24,7 +24,7 @@
     "src/features/routine-editor/RoutineSettings/": "Quick Rest, warning, and Metronome sound settings UI.",
     "src/features/routine-editor/Stepper/": "Reusable increment/decrement setting control.",
     "src/features/session-player/": "Session player feature, including lifecycle, controls, timer views, styles, and tests.",
-    "src/features/session-player/EndScreen/": "Completed and stopped session end-state screen.",
+    "src/features/session-player/EndScreen/": "Completed session end-state screen.",
     "src/features/session-player/NowPlayingSheet/": "Read-only session-step list shown in the Now Playing sheet.",
     "src/features/session-player/SessionControls/": "Playback, rewind, stop, and finish/skip controls.",
     "src/features/session-player/SessionIllustration/": "Illustrations for exercise, break, and Quick Rest timer states.",
