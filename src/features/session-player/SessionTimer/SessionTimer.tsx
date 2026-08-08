@@ -28,40 +28,33 @@ export function SessionTimer({
   onSaveTempo,
 }: SessionTimerProps) {
   const time = formatTime(displaySeconds ?? elapsedSeconds);
+  const timerDescription = displaySeconds === null ? "Elapsed time" : "Remaining time";
   return (
-    <TimerRing
-      value={
-        tempo !== null ? (
-          <div className={styles.ringTempoControl}>
-            <button aria-label="Decrease tempo" onClick={() => onChangeTempo(-1)}>
-              −
+    <TimerRing accessibleName={`${timerDescription}: ${time}`} progress={progress} tone={tone}>
+      {tempo !== null ? (
+        <div className={styles.ringTempoControl}>
+          <button aria-label="Decrease tempo" onClick={() => onChangeTempo(-1)}>
+            −
+          </button>
+          <strong>
+            {tempo}
+            <small>BPM</small>
+          </strong>
+          <button aria-label="Increase tempo" onClick={() => onChangeTempo(1)}>
+            +
+          </button>
+          {tempo !== savedTempo && (
+            <button className={styles.ringSave} aria-label="Save tempo" onClick={onSaveTempo}>
+              Save
             </button>
-            <strong>
-              {tempo}
-              <small>BPM</small>
-            </strong>
-            <button aria-label="Increase tempo" onClick={() => onChangeTempo(1)}>
-              +
-            </button>
-            {tempo !== savedTempo && (
-              <button className={styles.ringSave} aria-label="Save tempo" onClick={onSaveTempo}>
-                Save
-              </button>
-            )}
-          </div>
-        ) : (
-          <>
-            <SessionIllustration
-              kind={isBreak ? "break" : isQuickRest ? "quick-rest" : "exercise"}
-            />
-            <span className={styles.ringTime}>{time}</span>
-          </>
-        )
-      }
-      label={displaySeconds === null ? "Elapsed time" : "Remaining time"}
-      accessibleValue={time}
-      progress={progress}
-      tone={tone}
-    />
+          )}
+        </div>
+      ) : (
+        <>
+          <SessionIllustration kind={isBreak ? "break" : isQuickRest ? "quick-rest" : "exercise"} />
+          <span className={styles.ringTime}>{time}</span>
+        </>
+      )}
+    </TimerRing>
   );
 }

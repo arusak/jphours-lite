@@ -1,6 +1,7 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { StopSlider } from "../StopSlider/StopSlider";
+import { TimerRing } from "../../../components";
 import { formatTime } from "../formatTime";
 import { stepMetadata } from "../stepMetadata";
 
@@ -28,5 +29,18 @@ describe("session player parts", () => {
     expect(onStop).not.toHaveBeenCalled();
     fireEvent.keyDown(slider, { key: "End" });
     expect(onStop).toHaveBeenCalledOnce();
+  });
+
+  it("renders supplied timer-ring content as children", () => {
+    render(
+      <TimerRing accessibleName="Remaining time: 0:30">
+        <strong>0:30</strong>
+        <span>Remaining time</span>
+      </TimerRing>,
+    );
+
+    expect(screen.getByTestId("timer-ring")).toHaveAccessibleName("Remaining time: 0:30");
+    expect(screen.getByText("0:30", { selector: "strong" })).toBeInTheDocument();
+    expect(screen.getByText("Remaining time", { selector: "span" })).toBeInTheDocument();
   });
 });

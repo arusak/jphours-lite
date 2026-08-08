@@ -40,6 +40,7 @@
     "tsconfig.app.json": "TypeScript configuration for browser application code.",
     "tsconfig.node.json": "TypeScript configuration for Vite and Node-side configuration.",
     "vite.config.ts": "Vite, React, PWA, and test-runner configuration.",
-    "docs/": "Project plans, implementation reports, ubiquitous language, and this inventory."
+    "docs/": "Project plans, implementation reports, ubiquitous language, and this inventory.",
+    "docs/2026-08-08-timer-ring-children-implementation-report.md": "Implementation report for the TimerRing children API refactor."
   }
 }

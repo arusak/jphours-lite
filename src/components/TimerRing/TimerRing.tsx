@@ -2,29 +2,27 @@ import { useId, type ReactNode } from "react";
 import styles from "./TimerRing.module.css";
 
 interface TimerRingProps {
+  children: ReactNode;
   progress?: number | null;
   tone?: "exercise" | "break" | "quick-rest";
-  value: ReactNode;
-  label: string;
-  accessibleValue?: string;
+  accessibleName?: string;
 }
 
 const RADIUS = 128;
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
 
 export function TimerRing({
+  children,
   progress = null,
   tone = "exercise",
-  value,
-  label,
-  accessibleValue = String(value),
+  accessibleName,
 }: TimerRingProps) {
   const gradientId = useId();
   const fraction = Math.min(1, Math.max(0, progress ?? 0));
   return (
     <div
       className={`${styles.timerRing} ${tone === "break" ? styles.break : tone === "quick-rest" ? styles.quickRest : ""}`}
-      aria-label={`${label}: ${accessibleValue}`}
+      aria-label={accessibleName}
       data-testid="timer-ring"
       data-open-ended={progress === null}
       data-tone={tone}
@@ -72,10 +70,7 @@ export function TimerRing({
           />
         )}
       </svg>
-      <div className={styles.content}>
-        <span className={styles.value}>{value}</span>
-        <span className={styles.label}>{label}</span>
-      </div>
+      <div className={styles.content}>{children}</div>
     </div>
   );
 }

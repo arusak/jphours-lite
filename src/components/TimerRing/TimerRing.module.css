@@ -67,29 +67,8 @@
   gap: 12px;
 }
 
-.value {
-  font: 600 72px/1 var(--font-display);
-  letter-spacing: -0.04em;
-  font-variant-numeric: tabular-nums;
-}
-
-.label {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  color: var(--color-muted-foreground);
-  font-size: 12px;
-  letter-spacing: 0.22em;
-}
-
 @media (max-width: 359px) {
   .timerRing {
     width: min(268px, calc(100vw - 32px));
-  }
-
-  .value {
-    font-size: 60px;
   }
 }
