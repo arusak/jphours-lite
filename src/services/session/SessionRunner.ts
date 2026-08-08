@@ -1,5 +1,5 @@
-import type { Routine } from "../../domain/routine";
-import { isTimedStep, type QuickRestTransition, type SessionStep } from "../../domain/session";
+import type { Routine } from '../../domain/routine'
+import { isTimedStep, type QuickRestTransition, type SessionStep } from '../../domain/session'
 import {
   activeSegmentId,
   activeSegmentKey,
@@ -9,26 +9,26 @@ import {
   sessionReducer,
   type SessionCommand,
   type SessionState,
-} from "./sessionReducer";
+} from './sessionReducer'
 
 export interface Clock {
-  now(): number;
+  now(): number
 }
 
 export interface TimeoutScheduler {
-  setTimeout(callback: () => void, delayMs: number): unknown;
-  clearTimeout(handle: unknown): void;
+  setTimeout(callback: () => void, delayMs: number): unknown
+  clearTimeout(handle: unknown): void
 }
 
 /** Adapter boundary for audio and UI integration. All methods are optional. */
 export interface SessionRunnerHooks {
-  onStateChange?(state: SessionState): void;
-  onStepStart?(step: SessionStep, state: SessionState): void;
-  onStepStop?(step: SessionStep, reason: SessionCommand["type"] | "DISPOSE"): void;
-  onWarning?(step: SessionStep): void;
-  onQuickRestStart?(rest: QuickRestTransition, state: SessionState): void;
-  onQuickRestStop?(rest: QuickRestTransition, reason: SessionCommand["type"] | "DISPOSE"): void;
-  onSessionComplete?(): void;
+  onStateChange?(state: SessionState): void
+  onStepStart?(step: SessionStep, state: SessionState): void
+  onStepStop?(step: SessionStep, reason: SessionCommand['type'] | 'DISPOSE'): void
+  onWarning?(step: SessionStep): void
+  onQuickRestStart?(rest: QuickRestTransition, state: SessionState): void
+  onQuickRestStop?(rest: QuickRestTransition, reason: SessionCommand['type'] | 'DISPOSE'): void
+  onSessionComplete?(): void
 }
 
 /**
@@ -36,10 +36,10 @@ export interface SessionRunnerHooks {
  * Its dependencies make timer/audio behaviour deterministic in tests.
  */
 export class SessionRunner {
-  private state: SessionState = initialSessionState;
-  private warningTimer: unknown | null = null;
-  private completionTimer: unknown | null = null;
-  private warningLeadTimeSec = 0;
+  private state: SessionState = initialSessionState
+  private warningTimer: unknown | null = null
+  private completionTimer: unknown | null = null
+  private warningLeadTimeSec = 0
 
   constructor(
     private readonly clock: Clock = { now: () => performance.now() },
@@ -48,155 +48,155 @@ export class SessionRunner {
   ) {}
 
   getState(): SessionState {
-    return this.state;
+    return this.state
   }
 
   start(routine: Routine): void {
-    this.warningLeadTimeSec = routine.warningLeadTimeSec;
-    this.dispatch({ type: "START", routine, now: this.clock.now() });
+    this.warningLeadTimeSec = routine.warningLeadTimeSec
+    this.dispatch({ type: 'START', routine, now: this.clock.now() })
   }
   pause(): void {
-    this.dispatch({ type: "PAUSE", now: this.clock.now() });
+    this.dispatch({ type: 'PAUSE', now: this.clock.now() })
   }
   resume(): void {
-    this.dispatch({ type: "RESUME", now: this.clock.now() });
+    this.dispatch({ type: 'RESUME', now: this.clock.now() })
   }
   skipStep(): void {
-    this.dispatch({ type: "SKIP_STEP", now: this.clock.now() });
+    this.dispatch({ type: 'SKIP_STEP', now: this.clock.now() })
   }
   rewindBreak(): void {
-    this.rewind();
+    this.rewind()
   }
   rewind(): void {
-    this.dispatch({ type: "REWIND", now: this.clock.now() });
+    this.dispatch({ type: 'REWIND', now: this.clock.now() })
   }
   stop(): void {
-    this.dispatch({ type: "STOP" });
+    this.dispatch({ type: 'STOP' })
   }
   appHidden(): void {
-    this.dispatch({ type: "APP_HIDDEN", now: this.clock.now() });
+    this.dispatch({ type: 'APP_HIDDEN', now: this.clock.now() })
   }
   appVisible(): void {
-    this.dispatch({ type: "APP_VISIBLE" });
+    this.dispatch({ type: 'APP_VISIBLE' })
   }
 
   dispatch(command: SessionCommand): void {
-    const previous = this.state;
-    const previousStep = currentStep(previous);
-    this.state = sessionReducer(previous, command);
-    const nextStep = currentStep(this.state);
-    const previousSegmentId = activeSegmentId(previous);
-    const nextSegmentId = activeSegmentId(this.state);
-    const previousSegmentKey = activeSegmentKey(previous);
-    const nextSegmentKey = activeSegmentKey(this.state);
+    const previous = this.state
+    const previousStep = currentStep(previous)
+    this.state = sessionReducer(previous, command)
+    const nextStep = currentStep(this.state)
+    const previousSegmentId = activeSegmentId(previous)
+    const nextSegmentId = activeSegmentId(this.state)
+    const previousSegmentKey = activeSegmentKey(previous)
+    const nextSegmentKey = activeSegmentKey(this.state)
 
     // START creates a new immutable snapshot, even when it happens to reuse an
     // exercise id, so its old callbacks/audio must never survive.
     if (
       previousSegmentId &&
       (previousSegmentKey !== nextSegmentKey ||
-        this.state.status !== "running" ||
-        command.type === "START")
+        this.state.status !== 'running' ||
+        command.type === 'START')
     ) {
-      this.cancelTimers();
-      if (previous.phase === "step" && previousStep)
-        this.hooks.onStepStop?.(previousStep, command.type);
-      if (previous.phase === "quick-rest") {
-        const rest = currentQuickRest(previous);
-        if (rest) this.hooks.onQuickRestStop?.(rest, command.type);
+      this.cancelTimers()
+      if (previous.phase === 'step' && previousStep)
+        this.hooks.onStepStop?.(previousStep, command.type)
+      if (previous.phase === 'quick-rest') {
+        const rest = currentQuickRest(previous)
+        if (rest) this.hooks.onQuickRestStop?.(rest, command.type)
       }
     }
 
     if (
-      command.type === "STEP_WARNING" &&
+      command.type === 'STEP_WARNING' &&
       previous.warningPlayedForStepId !== this.state.warningPlayedForStepId &&
       nextStep
     ) {
-      this.hooks.onWarning?.(nextStep);
+      this.hooks.onWarning?.(nextStep)
     }
 
     if (
       nextSegmentId &&
-      this.state.status === "running" &&
+      this.state.status === 'running' &&
       (previousSegmentKey !== nextSegmentKey ||
-        previous.status !== "running" ||
-        command.type === "START")
+        previous.status !== 'running' ||
+        command.type === 'START')
     ) {
-      if (this.state.phase === "step" && nextStep) this.hooks.onStepStart?.(nextStep, this.state);
-      if (this.state.phase === "quick-rest") {
-        const rest = currentQuickRest(this.state);
-        if (rest) this.hooks.onQuickRestStart?.(rest, this.state);
+      if (this.state.phase === 'step' && nextStep) this.hooks.onStepStart?.(nextStep, this.state)
+      if (this.state.phase === 'quick-rest') {
+        const rest = currentQuickRest(this.state)
+        if (rest) this.hooks.onQuickRestStart?.(rest, this.state)
       }
-      this.scheduleCurrentStep();
+      this.scheduleCurrentStep()
     }
 
-    if (previous.status !== "completed" && this.state.status === "completed") {
-      this.hooks.onSessionComplete?.();
+    if (previous.status !== 'completed' && this.state.status === 'completed') {
+      this.hooks.onSessionComplete?.()
     }
-    if (previous !== this.state) this.hooks.onStateChange?.(this.state);
+    if (previous !== this.state) this.hooks.onStateChange?.(this.state)
   }
 
   dispose(): void {
-    const step = currentStep(this.state);
-    const rest = currentQuickRest(this.state);
-    this.cancelTimers();
-    if (this.state.phase === "step" && step) this.hooks.onStepStop?.(step, "DISPOSE");
-    if (this.state.phase === "quick-rest" && rest) this.hooks.onQuickRestStop?.(rest, "DISPOSE");
-    this.state = initialSessionState;
+    const step = currentStep(this.state)
+    const rest = currentQuickRest(this.state)
+    this.cancelTimers()
+    if (this.state.phase === 'step' && step) this.hooks.onStepStop?.(step, 'DISPOSE')
+    if (this.state.phase === 'quick-rest' && rest) this.hooks.onQuickRestStop?.(rest, 'DISPOSE')
+    this.state = initialSessionState
   }
 
   private scheduleCurrentStep(): void {
-    const step = currentStep(this.state);
-    const endsAt = this.state.currentStepEndsAt;
-    const segmentId = activeSegmentId(this.state);
+    const step = currentStep(this.state)
+    const endsAt = this.state.currentStepEndsAt
+    const segmentId = activeSegmentId(this.state)
     if (
       !segmentId ||
       endsAt === null ||
-      (this.state.phase === "step" && (!step || !isTimedStep(step)))
+      (this.state.phase === 'step' && (!step || !isTimedStep(step)))
     )
-      return;
+      return
 
-    const remainingMs = Math.max(0, endsAt - this.clock.now());
+    const remainingMs = Math.max(0, endsAt - this.clock.now())
     if (this.canScheduleWarning(step)) {
-      const warningDelayMs = this.warningDelayMs(step!, endsAt);
+      const warningDelayMs = this.warningDelayMs(step!, endsAt)
       if (warningDelayMs >= 0) {
         this.warningTimer = this.scheduler.setTimeout(() => {
-          this.dispatch({ type: "STEP_WARNING", stepId: step.id });
-        }, warningDelayMs);
+          this.dispatch({ type: 'STEP_WARNING', stepId: step.id })
+        }, warningDelayMs)
       }
     }
     this.completionTimer = this.scheduler.setTimeout(() => {
-      this.dispatch({ type: "STEP_COMPLETED", stepId: segmentId, now: this.clock.now() });
-    }, remainingMs);
+      this.dispatch({ type: 'STEP_COMPLETED', stepId: segmentId, now: this.clock.now() })
+    }, remainingMs)
   }
 
   private canScheduleWarning(step: SessionStep | null): step is SessionStep {
     return (
-      this.state.phase === "step" &&
+      this.state.phase === 'step' &&
       step !== null &&
       isTimedStep(step) &&
       this.warningLeadTimeSec > 0 &&
       step.durationSec! > this.warningLeadTimeSec &&
       this.state.warningPlayedForStepId !== step.id
-    );
+    )
   }
 
   private warningDelayMs(step: SessionStep, endsAt: number): number {
-    if (step.kind !== "exercise" || step.tempoBpm === null) {
-      return Math.max(0, endsAt - this.clock.now() - this.warningLeadTimeSec * 1000);
+    if (step.kind !== 'exercise' || step.tempoBpm === null) {
+      return Math.max(0, endsAt - this.clock.now() - this.warningLeadTimeSec * 1000)
     }
-    const startedAt = this.state.currentStepStartedAt ?? this.clock.now();
-    const warningOffsetSec = step.durationSec! - this.warningLeadTimeSec;
-    const beatIntervalMs = 60_000 / step.tempoBpm;
+    const startedAt = this.state.currentStepStartedAt ?? this.clock.now()
+    const warningOffsetSec = step.durationSec! - this.warningLeadTimeSec
+    const beatIntervalMs = 60_000 / step.tempoBpm
     const nearestBeatAt =
-      startedAt + Math.round((warningOffsetSec * 1000) / beatIntervalMs) * beatIntervalMs;
-    return Math.max(0, nearestBeatAt - this.clock.now());
+      startedAt + Math.round((warningOffsetSec * 1000) / beatIntervalMs) * beatIntervalMs
+    return Math.max(0, nearestBeatAt - this.clock.now())
   }
 
   private cancelTimers(): void {
-    if (this.warningTimer !== null) this.scheduler.clearTimeout(this.warningTimer);
-    if (this.completionTimer !== null) this.scheduler.clearTimeout(this.completionTimer);
-    this.warningTimer = null;
-    this.completionTimer = null;
+    if (this.warningTimer !== null) this.scheduler.clearTimeout(this.warningTimer)
+    if (this.completionTimer !== null) this.scheduler.clearTimeout(this.completionTimer)
+    this.warningTimer = null
+    this.completionTimer = null
   }
 }

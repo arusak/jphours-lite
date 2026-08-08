@@ -1,20 +1,19 @@
-import { TimerRing } from "../../../components";
-import { SessionIllustration } from "../SessionIllustration/SessionIllustration";
-import { formatTime } from "../formatTime";
-import styles from "./SessionTimer.module.css";
-import cn from "clsx";
+import { BreakIcon, ExerciseIcon, TimerRing } from '../../../components'
+import { formatTime } from '../formatTime'
+import styles from './SessionTimer.module.css'
+import cn from 'clsx'
 
 interface SessionTimerProps {
-  tempo: number | null;
-  savedTempo: number | null;
-  isBreak: boolean;
-  isQuickRest: boolean;
-  displaySeconds: number | null;
-  elapsedSeconds: number;
-  progress: number | null;
-  tone: "exercise" | "break" | "quick-rest";
-  onChangeTempo(delta: number): void;
-  onSaveTempo(): void;
+  tempo: number | null
+  savedTempo: number | null
+  isBreak: boolean
+  isQuickRest: boolean
+  displaySeconds: number | null
+  elapsedSeconds: number
+  progress: number | null
+  tone: 'exercise' | 'break' | 'quick-rest'
+  onChangeTempo(delta: number): void
+  onSaveTempo(): void
 }
 export function SessionTimer({
   tempo,
@@ -28,15 +27,10 @@ export function SessionTimer({
   onChangeTempo,
   onSaveTempo,
 }: SessionTimerProps) {
-  const time = formatTime(displaySeconds ?? elapsedSeconds);
-  const timerDescription =
-    displaySeconds === null ? "Elapsed time" : "Remaining time";
+  const time = formatTime(displaySeconds ?? elapsedSeconds)
+  const timerDescription = displaySeconds === null ? 'Elapsed time' : 'Remaining time'
   return (
-    <TimerRing
-      accessibleName={`${timerDescription}: ${time}`}
-      progress={progress}
-      tone={tone}
-    >
+    <TimerRing accessibleName={`${timerDescription}: ${time}`} progress={progress} tone={tone}>
       {tempo !== null ? (
         <div className={styles.ringTempoControl}>
           <button aria-label="Decrease tempo" onClick={() => onChangeTempo(-1)}>
@@ -50,10 +44,7 @@ export function SessionTimer({
             +
           </button>
           <button
-            className={cn(
-              styles.ringSave,
-              tempo === savedTempo && styles.hidden,
-            )}
+            className={cn(styles.ringSave, tempo === savedTempo && styles.hidden)}
             aria-label="Save tempo"
             onClick={onSaveTempo}
           >
@@ -62,12 +53,18 @@ export function SessionTimer({
         </div>
       ) : (
         <>
-          <SessionIllustration
-            kind={isBreak ? "break" : isQuickRest ? "quick-rest" : "exercise"}
-          />
+          {!isQuickRest &&
+            (isBreak ? (
+              <BreakIcon
+                className={`${styles.sessionIcon} ${styles.breakIcon}`}
+                data-testid="break-icon"
+              />
+            ) : (
+              <ExerciseIcon className={styles.sessionIcon} data-testid="exercise-icon" />
+            ))}
           <span className={styles.ringTime}>{time}</span>
         </>
       )}
     </TimerRing>
-  );
+  )
 }

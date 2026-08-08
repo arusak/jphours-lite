@@ -1,44 +1,44 @@
 .stopSlider {
-    position: relative;
-    height: 56px;
-    touch-action: none;
-    user-select: none;
-    border: 1px solid oklch(0.58 0.19 27 / 30%);
-    border-radius: var(--radius-2xl);
-    color: var(--color-destructive);
-    background: oklch(0.58 0.19 27 / 12%);
+  position: relative;
+  height: 56px;
+  touch-action: none;
+  user-select: none;
+  border: 1px solid oklch(0.58 0.19 27 / 30%);
+  border-radius: var(--radius-2xl);
+  color: var(--color-destructive);
+  background: oklch(0.58 0.19 27 / 12%);
 }
 
 .stopSlider > span {
-    position: absolute;
-    top: 3px;
-    left: max(3px, calc((100% - 54px) * var(--slider-value, 0)));
-    display: grid;
-    width: 48px;
-    height: 48px;
-    place-items: center;
-    border-radius: 50%;
-    color: oklch(0.98 0.01 80);
-    background: var(--color-destructive);
-    box-shadow: 0 4px 12px rgb(0 0 0 / 25%);
-    font-size: 12px;
-    transition: left 180ms ease-out;
+  position: absolute;
+  top: 3px;
+  left: max(3px, calc((100% - 54px) * var(--slider-value, 0)));
+  display: grid;
+  width: 48px;
+  height: 48px;
+  place-items: center;
+  border-radius: 50%;
+  color: oklch(0.98 0.01 80);
+  background: var(--color-destructive);
+  box-shadow: 0 4px 12px rgb(0 0 0 / 25%);
+  font-size: 12px;
+  transition: left 180ms ease-out;
 }
 
 .stopSlider > span svg {
-    width: 20px;
-    height: 20px;
+  width: 20px;
+  height: 20px;
 }
 
 .stopSlider > strong {
-    position: absolute;
-    inset: 0;
-    display: grid;
-    place-items: center;
-    font-size: 14px;
-    pointer-events: none;
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-size: 14px;
+  pointer-events: none;
 }
 
 .stopSlider[data-dragging="true"] > strong {
-    opacity: 0.25;
+  opacity: 0.25;
 }

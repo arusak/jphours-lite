@@ -1,53 +1,64 @@
 .ringTime {
-    color: var(--color-muted-foreground);
-    font: 600 28px/1 var(--font-display);
-    font-variant-numeric: tabular-nums;
+  color: var(--color-foreground);
+  font: 700 42px/1 var(--font-display);
+  font-variant-numeric: tabular-nums;
+}
+
+.sessionIcon {
+  width: 62px;
+  height: 62px;
+  margin-bottom: 2px;
+  color: var(--color-muted-foreground);
+}
+
+.breakIcon {
+  color: oklch(0.75 0.13 58);
 }
 
 .ringTempoControl {
-    display: grid;
-    grid-template-columns: auto 1fr auto;
-    align-items: center;
-    justify-content: center;
-    justify-items: center;
-    gap: 4px;
-    margin: 14px 0 0;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  justify-content: center;
+  justify-items: center;
+  gap: 4px;
+  margin: 14px 0 0;
 }
 
 .ringTempoControl > button {
-    padding: 0;
-    border: none;
-    border-radius: 50%;
-    background: transparent;
-    font-size: 36px;
-    font-weight: 800;
-    padding: 4px 12px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  font-size: 36px;
+  font-weight: 800;
+  padding: 4px 12px;
 }
 
 .ringTempoControl > strong {
-    display: grid;
-    color: var(--color-primary);
-    font: 700 60px/0.8 var(--font-display);
-    font-variant-numeric: tabular-nums;
-    padding: 20px 0 0;
+  display: grid;
+  color: var(--color-primary);
+  font: 700 60px/0.8 var(--font-display);
+  font-variant-numeric: tabular-nums;
+  padding: 20px 0 0;
 }
 
 .ringTempoControl small {
-    margin-top: 10px;
-    color: var(--color-muted-foreground);
-    font: 600 10px/1 var(--font-body);
-    letter-spacing: 0.12em;
+  margin-top: 10px;
+  color: var(--color-muted-foreground);
+  font: 600 10px/1 var(--font-body);
+  letter-spacing: 0.12em;
 }
 
 .ringTempoControl > .ringSave {
-    grid-column: 2;
-    justify-self: center;
-    padding: 4px 8px;
-    border-radius: 999px;
-    color: var(--color-primary);
-    font-size: 11px;
+  grid-column: 2;
+  justify-self: center;
+  padding: 4px 8px;
+  border-radius: 999px;
+  color: var(--color-primary);
+  font-size: 11px;
 }
 
 .ringSave.hidden {
-    opacity: 0;
+  opacity: 0;
 }

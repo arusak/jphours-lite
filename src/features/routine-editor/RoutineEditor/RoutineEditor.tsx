@@ -1,33 +1,33 @@
-import { createBreak, createExercise } from "../../../domain/routine";
-import { PlayIcon } from "../../../components";
-import { EditorSheet } from "../EditorSheet/EditorSheet";
-import { RoutineEntryList } from "../RoutineEntryList/RoutineEntryList";
-import { RoutineSettings } from "../RoutineSettings/RoutineSettings";
-import { useRoutineEditor } from "../hooks/useRoutineEditor";
-import type { RoutineEditorProps } from "../types";
-import styles from "../RoutineEditor.module.css";
+import { createBreak, createExercise } from '../../../domain/routine'
+import { PlayIcon } from '../../../components'
+import { EditorSheet } from '../EditorSheet/EditorSheet'
+import { RoutineEntryList } from '../RoutineEntryList/RoutineEntryList'
+import { RoutineSettings } from '../RoutineSettings/RoutineSettings'
+import { useRoutineEditor } from '../hooks/useRoutineEditor'
+import type { RoutineEditorProps } from '../types'
+import styles from '../RoutineEditor.module.css'
 
-export type { RoutineEditorProps } from "../types";
-export { routineTotal } from "../routineTotal";
+export type { RoutineEditorProps } from '../types'
+export { routineTotal } from '../routineTotal'
 
 export function RoutineEditor({ repository, onStartSession }: RoutineEditorProps) {
-  const editor = useRoutineEditor(repository);
+  const editor = useRoutineEditor(repository)
   return (
     <section className={styles.routineEditor} aria-labelledby="routine-editor-title">
       <header className={`${styles.routineHeader} ${styles.compact}`}>
-        <h1 id="routine-editor-title">{editor.routine.name.trim() || "Practice routine"}</h1>
+        <h1 id="routine-editor-title">{editor.routine.name.trim() || 'Practice routine'}</h1>
         <button
           className={styles.routineEdit}
           aria-label="Edit routine name"
-          onClick={() => editor.setSheet({ kind: "routine", name: editor.routine.name })}
+          onClick={() => editor.setSheet({ kind: 'routine', name: editor.routine.name })}
         >
           ✎
         </button>
         <span
           className={styles.routineTotal}
-          aria-label={`${editor.total.approximate ? "approximately " : ""}${editor.total.minutes} minutes`}
+          aria-label={`${editor.total.approximate ? 'approximately ' : ''}${editor.total.minutes} minutes`}
         >
-          {editor.total.approximate ? "≈" : ""}
+          {editor.total.approximate ? '≈' : ''}
           {editor.total.minutes} min
         </span>
       </header>
@@ -41,27 +41,27 @@ export function RoutineEditor({ repository, onStartSession }: RoutineEditorProps
       <RoutineEntryList
         routine={editor.routine}
         onEdit={(index) =>
-          editor.setSheet({ kind: "entry", entry: { ...editor.routine.entries[index]! }, index })
+          editor.setSheet({ kind: 'entry', entry: { ...editor.routine.entries[index]! }, index })
         }
         onDelete={editor.remove}
       />
       <div className={styles.entryActions}>
         <button
           className={styles.addExercise}
-          onClick={() => editor.setSheet({ kind: "entry", entry: createExercise(), index: null })}
+          onClick={() => editor.setSheet({ kind: 'entry', entry: createExercise(), index: null })}
         >
           ＋ Add exercise
         </button>
         <button
           className={styles.addExercise}
-          onClick={() => editor.setSheet({ kind: "entry", entry: createBreak(), index: null })}
+          onClick={() => editor.setSheet({ kind: 'entry', entry: createBreak(), index: null })}
         >
           ＋ Add break
         </button>
       </div>
       {!editor.valid && (
         <p className={styles.editorError} role="alert">
-          {editor.validation.entries || "Complete each routine entry."}
+          {editor.validation.entries || 'Complete each routine entry.'}
         </p>
       )}
       <footer className={styles.editorFooter}>
@@ -69,8 +69,8 @@ export function RoutineEditor({ repository, onStartSession }: RoutineEditorProps
           className={styles.primaryAction}
           disabled={!editor.valid}
           onClick={() => {
-            editor.flush();
-            onStartSession?.(editor.routine);
+            editor.flush()
+            onStartSession?.(editor.routine)
           }}
         >
           <PlayIcon className={styles.buttonIcon} />
@@ -87,5 +87,5 @@ export function RoutineEditor({ repository, onStartSession }: RoutineEditorProps
         />
       )}
     </section>
-  );
+  )
 }

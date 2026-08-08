@@ -29,7 +29,7 @@
 }
 
 .quickRest .segment[data-state="current"] {
-  background: oklch(0.69 0.14 184);
+  background: linear-gradient(90deg, oklch(0.86 0.17 96), oklch(0.68 0.16 140));
 }
 
 .dense {

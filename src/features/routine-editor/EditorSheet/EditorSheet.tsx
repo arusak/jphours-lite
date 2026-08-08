@@ -1,56 +1,56 @@
-import { BottomSheet } from "../../../components";
-import { practiceConfig } from "../../../config/practice-config";
-import type { Exercise, RoutineEntry } from "../../../domain/routine";
-import { validateEntry } from "../../../domain/validation";
-import type { EditorSheet as Sheet } from "../types";
-import sharedStyles from "../RoutineEditor.module.css";
-import styles from "./EditorSheet.module.css";
+import { BottomSheet } from '../../../components'
+import { practiceConfig } from '../../../config/practice-config'
+import type { Exercise, RoutineEntry } from '../../../domain/routine'
+import { validateEntry } from '../../../domain/validation'
+import type { EditorSheet as Sheet } from '../types'
+import sharedStyles from '../RoutineEditor.module.css'
+import styles from './EditorSheet.module.css'
 
 interface EditorSheetProps {
-  sheet: Sheet;
-  submitted: boolean;
-  onChange(value: Sheet): void;
-  onSave(): void;
-  onCancel(): void;
+  sheet: Sheet
+  submitted: boolean
+  onChange(value: Sheet): void
+  onSave(): void
+  onCancel(): void
 }
-const minute = 60;
+const minute = 60
 export function EditorSheet({ sheet, submitted, onChange, onSave, onCancel }: EditorSheetProps) {
-  const entry = sheet.kind === "entry" ? sheet.entry : null;
-  const errors = entry && submitted ? validateEntry(entry) : {};
+  const entry = sheet.kind === 'entry' ? sheet.entry : null
+  const errors = entry && submitted ? validateEntry(entry) : {}
   const mutate = (value: Partial<Exercise>) =>
     entry &&
     onChange({
-      kind: "entry",
+      kind: 'entry',
       entry: { ...entry, ...value } as RoutineEntry,
-      index: sheet.kind === "entry" ? sheet.index : null,
-    });
+      index: sheet.kind === 'entry' ? sheet.index : null,
+    })
   const durationChange = (delta: number) => {
-    if (!entry) return;
+    if (!entry) return
     const policy =
-      entry.kind === "break" ? practiceConfig.breakDuration : practiceConfig.exerciseDuration;
-    const base = entry.durationSec ?? (delta > 0 ? minute : policy.default);
-    mutate({ durationSec: Math.max(policy.min, Math.min(policy.max, base + delta)) });
-  };
+      entry.kind === 'break' ? practiceConfig.breakDuration : practiceConfig.exerciseDuration
+    const base = entry.durationSec ?? (delta > 0 ? minute : policy.default)
+    mutate({ durationSec: Math.max(policy.min, Math.min(policy.max, base + delta)) })
+  }
   const title =
-    sheet.kind === "routine"
-      ? "Edit routine"
+    sheet.kind === 'routine'
+      ? 'Edit routine'
       : sheet.index === null
         ? `Add ${entry!.kind}`
-        : `Edit ${entry!.kind}`;
+        : `Edit ${entry!.kind}`
   return (
     <BottomSheet title={title} onClose={onCancel}>
-      {sheet.kind === "routine" ? (
+      {sheet.kind === 'routine' ? (
         <label>
           Routine name
           <input
             value={sheet.name}
-            onChange={(event) => onChange({ kind: "routine", name: event.target.value })}
+            onChange={(event) => onChange({ kind: 'routine', name: event.target.value })}
           />
         </label>
       ) : (
         <>
           <>
-            {entry!.kind === "exercise" && (
+            {entry!.kind === 'exercise' && (
               <label>
                 Exercise name
                 <input
@@ -62,7 +62,7 @@ export function EditorSheet({ sheet, submitted, onChange, onSave, onCancel }: Ed
             )}
           </>
           <>
-            {entry!.kind === "exercise" && (
+            {entry!.kind === 'exercise' && (
               <label className={styles.editorStepper}>
                 Tempo (BPM)
                 <span>
@@ -81,10 +81,10 @@ export function EditorSheet({ sheet, submitted, onChange, onSave, onCancel }: Ed
                   </button>
                   <input
                     type="number"
-                    value={entry!.tempoBpm ?? ""}
+                    value={entry!.tempoBpm ?? ''}
                     onChange={(event) =>
                       mutate({
-                        tempoBpm: event.target.value === "" ? null : Number(event.target.value),
+                        tempoBpm: event.target.value === '' ? null : Number(event.target.value),
                       })
                     }
                   />
@@ -114,11 +114,11 @@ export function EditorSheet({ sheet, submitted, onChange, onSave, onCancel }: Ed
               <input
                 type="number"
                 step="1"
-                value={entry!.durationSec === null ? "" : entry!.durationSec / minute}
+                value={entry!.durationSec === null ? '' : entry!.durationSec / minute}
                 onChange={(event) =>
                   mutate({
                     durationSec:
-                      event.target.value === "" ? null : Number(event.target.value) * minute,
+                      event.target.value === '' ? null : Number(event.target.value) * minute,
                   })
                 }
               />
@@ -148,5 +148,5 @@ export function EditorSheet({ sheet, submitted, onChange, onSave, onCancel }: Ed
         </button>
       </div>
     </BottomSheet>
-  );
+  )
 }

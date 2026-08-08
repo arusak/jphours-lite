@@ -23,13 +23,7 @@
 }
 
 .quickRest::before {
-  background: radial-gradient(circle, oklch(0.65 0.14 190 / 20%), transparent 68%);
-}
-
-.timerRing svg {
-  width: 100%;
-  height: 100%;
-  overflow: visible;
+  background: radial-gradient(circle, oklch(0.8 0.16 110 / 22%), transparent 68%);
 }
 
 .timerRing circle {
@@ -54,7 +48,7 @@
 }
 
 .quickRest .progress {
-  stroke: oklch(0.65 0.14 190);
+  stroke: oklch(0.72 0.16 125);
 }
 
 .content {

@@ -1,6 +1,7 @@
 {
   "description": "Repository navigation inventory for agentic code discovery.",
   "entries": {
+    ".zed/": "Project-level Zed editor settings, including oxfmt formatter integration.",
     "index.html": "Vite HTML entry document.",
     "package.json": "Project metadata, dependencies, and package scripts.",
     "pnpm-lock.yaml": "Locked dependency graph for pnpm.",
@@ -27,6 +28,7 @@
     "src/features/session-player/": "Session player feature, including lifecycle, controls, timer views, styles, and tests.",
     "src/features/session-player/EndScreen/": "Completed session end-state screen.",
     "src/features/session-player/NowPlayingSheet/": "Read-only session-step list shown in the Now Playing sheet.",
+    "src/features/session-player/MetronomeSoundSheet/": "Selectable metronome-sound bottom sheet for active exercise sessions.",
     "src/features/session-player/SessionControls/": "Playback, rewind, stop, and finish/skip controls.",
     "src/features/session-player/SessionIllustration/": "Illustrations for exercise, break, and Quick Rest timer states.",
     "src/features/session-player/SessionPlayer/": "Session-player feature composition and public props.",

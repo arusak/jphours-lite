@@ -1,18 +1,18 @@
-import type { RoutineEntry } from "../../../domain/routine";
-import styles from "./RoutineEntryCard.module.css";
+import type { RoutineEntry } from '../../../domain/routine'
+import styles from './RoutineEntryCard.module.css'
 
 interface RoutineEntryCardProps {
-  entry: RoutineEntry;
-  index: number;
-  onEdit(): void;
-  onDelete(): void;
+  entry: RoutineEntry
+  index: number
+  onEdit(): void
+  onDelete(): void
 }
 
 export function RoutineEntryCard({ entry, index, onEdit, onDelete }: RoutineEntryCardProps) {
-  const name = entry.kind === "break" ? "Break" : entry.title;
+  const name = entry.kind === 'break' ? 'Break' : entry.title
   return (
     <article
-      className={`${styles.exerciseCard} ${entry.kind === "break" ? styles.entryCardBreak : ""}`}
+      className={`${styles.exerciseCard} ${entry.kind === 'break' ? styles.entryCardBreak : ''}`}
     >
       <div className={styles.exerciseCardContent}>
         <div className={styles.exerciseTitleRow}>
@@ -20,11 +20,11 @@ export function RoutineEntryCard({ entry, index, onEdit, onDelete }: RoutineEntr
           <h3>{name}</h3>
         </div>
         <div className={styles.exerciseMeta}>
-          {entry.kind === "exercise" && entry.tempoBpm !== null && (
+          {entry.kind === 'exercise' && entry.tempoBpm !== null && (
             <span className={`${styles.badge} ${styles.badgeTempo}`}>♪ {entry.tempoBpm} BPM</span>
           )}
           <span className={styles.badge}>
-            ◷ {entry.durationSec === null ? "Open-ended" : `${entry.durationSec / 60} min`}
+            ◷ {entry.durationSec === null ? 'Open-ended' : `${entry.durationSec / 60} min`}
           </span>
         </div>
       </div>
@@ -39,5 +39,5 @@ export function RoutineEntryCard({ entry, index, onEdit, onDelete }: RoutineEntr
         ×
       </button>
     </article>
-  );
+  )
 }

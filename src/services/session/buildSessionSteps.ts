@@ -1,12 +1,12 @@
-import { deriveExerciseMode, type Routine } from "../../domain/routine";
-import type { ExerciseStep, SessionPlan, SessionStep } from "../../domain/session";
+import { deriveExerciseMode, type Routine } from '../../domain/routine'
+import type { ExerciseStep, SessionPlan, SessionStep } from '../../domain/session'
 
 /**
  * Builds the immutable execution snapshot used by a running session.  It never
  * retains references to the routine's exercise objects.
  */
 export function buildSessionSteps(routine: Routine): SessionStep[] {
-  return buildSessionPlan(routine).steps;
+  return buildSessionPlan(routine).steps
 }
 
 /**
@@ -16,39 +16,39 @@ export function buildSessionSteps(routine: Routine): SessionStep[] {
  */
 export function buildSessionPlan(routine: Routine): SessionPlan {
   if (routine.entries.length === 0)
-    throw new Error("A routine needs at least one entry to start a session.");
+    throw new Error('A routine needs at least one entry to start a session.')
 
-  const steps: SessionStep[] = [];
-  const quickRests: SessionPlan["quickRests"] = [];
+  const steps: SessionStep[] = []
+  const quickRests: SessionPlan['quickRests'] = []
   routine.entries.forEach((entry, index) => {
-    if (entry.kind === "break") {
+    if (entry.kind === 'break') {
       steps.push({
         id: `break:${entry.id}`,
-        kind: "break",
+        kind: 'break',
         sourceBreakId: entry.id,
-        title: "Break",
+        title: 'Break',
         durationSec: entry.durationSec,
-      });
-      return;
+      })
+      return
     }
     const step: ExerciseStep = {
       id: `exercise:${entry.id}`,
-      kind: "exercise",
+      kind: 'exercise',
       sourceExerciseId: entry.id,
       title: entry.title.trim(),
       mode: deriveExerciseMode(entry),
       tempoBpm: entry.tempoBpm,
       durationSec: entry.durationSec,
-    };
-    steps.push(step);
-    const next = routine.entries[index + 1];
-    if (next?.kind === "exercise" && routine.quickRestDurationSec > 0) {
+    }
+    steps.push(step)
+    const next = routine.entries[index + 1]
+    if (next?.kind === 'exercise' && routine.quickRestDurationSec > 0) {
       quickRests.push({
         id: `quick-rest:${entry.id}`,
         afterStepId: step.id,
         durationSec: routine.quickRestDurationSec,
-      });
+      })
     }
-  });
-  return { steps, quickRests };
+  })
+  return { steps, quickRests }
 }

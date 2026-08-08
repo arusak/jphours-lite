@@ -1,193 +1,193 @@
-import { describe, expect, it, vi } from "vitest";
-import { AudioController } from "../AudioController";
+import { describe, expect, it, vi } from 'vitest'
+import { AudioController } from '../AudioController'
 
 type FakeContext = AudioContext & {
-  now: number;
-  state: AudioContextState;
-  oscillators: FakeOscillator[];
-  gains: FakeGain[];
-};
+  now: number
+  state: AudioContextState
+  oscillators: FakeOscillator[]
+  gains: FakeGain[]
+}
 type FakeOscillator = OscillatorNode & {
-  start: ReturnType<typeof vi.fn>;
-  stop: ReturnType<typeof vi.fn>;
-};
+  start: ReturnType<typeof vi.fn>
+  stop: ReturnType<typeof vi.fn>
+}
 type FakeGain = GainNode & {
   gain: AudioParam & {
-    setValueAtTime: ReturnType<typeof vi.fn>;
-    exponentialRampToValueAtTime: ReturnType<typeof vi.fn>;
-  };
-};
+    setValueAtTime: ReturnType<typeof vi.fn>
+    exponentialRampToValueAtTime: ReturnType<typeof vi.fn>
+  }
+}
 
-function makeContext(state: AudioContextState = "running"): FakeContext {
-  const oscillators: FakeOscillator[] = [];
-  const gains: FakeGain[] = [];
+function makeContext(state: AudioContextState = 'running'): FakeContext {
+  const oscillators: FakeOscillator[] = []
+  const gains: FakeGain[] = []
   const context = {
     now: 0,
     state,
     destination: {},
     resume: vi.fn(async () => {
-      context.state = "running";
+      context.state = 'running'
     }),
     createGain: vi.fn(() => {
       const gain = {
         gain: { value: 0, setValueAtTime: vi.fn(), exponentialRampToValueAtTime: vi.fn() },
         connect: vi.fn(),
         disconnect: vi.fn(),
-      } as unknown as FakeGain;
-      gains.push(gain);
-      return gain;
+      } as unknown as FakeGain
+      gains.push(gain)
+      return gain
     }),
     createOscillator: vi.fn(() => {
       const oscillator = {
         frequency: { value: 0 },
-        type: "sine",
+        type: 'sine',
         connect: vi.fn(),
         disconnect: vi.fn(),
         start: vi.fn(),
         stop: vi.fn(),
         onended: null,
-      } as unknown as FakeOscillator;
-      oscillators.push(oscillator);
-      return oscillator;
+      } as unknown as FakeOscillator
+      oscillators.push(oscillator)
+      return oscillator
     }),
     get currentTime() {
-      return context.now;
+      return context.now
     },
-  } as unknown as FakeContext;
-  context.oscillators = oscillators;
-  context.gains = gains;
-  return context;
+  } as unknown as FakeContext
+  context.oscillators = oscillators
+  context.gains = gains
+  return context
 }
 
-describe("AudioController", () => {
-  it("unlocks a suspended audio context from the explicit start gesture", async () => {
-    const context = makeContext("suspended");
-    const controller = new AudioController({ contextFactory: () => context });
+describe('AudioController', () => {
+  it('unlocks a suspended audio context from the explicit start gesture', async () => {
+    const context = makeContext('suspended')
+    const controller = new AudioController({ contextFactory: () => context })
 
-    await expect(controller.unlock()).resolves.toBe(true);
-    expect(context.resume).toHaveBeenCalledOnce();
-  });
+    await expect(controller.unlock()).resolves.toBe(true)
+    expect(context.resume).toHaveBeenCalledOnce()
+  })
 
-  it("schedules metronome beats against the audio clock without duplicate scheduling", () => {
-    const context = makeContext();
-    const intervals: Array<() => void> = [];
-    const onBeatScheduled = vi.fn();
+  it('schedules metronome beats against the audio clock without duplicate scheduling', () => {
+    const context = makeContext()
+    const intervals: Array<() => void> = []
+    const onBeatScheduled = vi.fn()
     const controller = new AudioController({
       contextFactory: () => context,
       setIntervalFn: ((callback: () => void) => {
-        intervals.push(callback);
-        return 1;
+        intervals.push(callback)
+        return 1
       }) as typeof setInterval,
       clearIntervalFn: vi.fn() as unknown as typeof clearInterval,
-    });
+    })
 
-    expect(controller.startMetronome({ bpm: 120, onBeatScheduled })).toBe(true);
-    expect(onBeatScheduled).toHaveBeenCalledTimes(1);
-    expect(onBeatScheduled).toHaveBeenLastCalledWith({ beat: 0, time: 0.05 });
+    expect(controller.startMetronome({ bpm: 120, onBeatScheduled })).toBe(true)
+    expect(onBeatScheduled).toHaveBeenCalledTimes(1)
+    expect(onBeatScheduled).toHaveBeenLastCalledWith({ beat: 0, time: 0.05 })
 
-    intervals[0]!();
-    expect(onBeatScheduled).toHaveBeenCalledTimes(1);
-    context.now = 0.45;
-    intervals[0]!();
-    expect(onBeatScheduled).toHaveBeenLastCalledWith({ beat: 1, time: 0.55 });
-    expect(onBeatScheduled).toHaveBeenCalledTimes(2);
-  });
+    intervals[0]!()
+    expect(onBeatScheduled).toHaveBeenCalledTimes(1)
+    context.now = 0.45
+    intervals[0]!()
+    expect(onBeatScheduled).toHaveBeenLastCalledWith({ beat: 1, time: 0.55 })
+    expect(onBeatScheduled).toHaveBeenCalledTimes(2)
+  })
 
-  it("cancels scheduled sources and its polling timer when paused", () => {
-    const context = makeContext();
-    const clearIntervalFn = vi.fn();
+  it('cancels scheduled sources and its polling timer when paused', () => {
+    const context = makeContext()
+    const clearIntervalFn = vi.fn()
     const controller = new AudioController({
       contextFactory: () => context,
       setIntervalFn: vi.fn(() => 7) as unknown as typeof setInterval,
       clearIntervalFn: clearIntervalFn as unknown as typeof clearInterval,
-    });
-    controller.startMetronome({ bpm: 120 });
+    })
+    controller.startMetronome({ bpm: 120 })
 
-    controller.pauseMetronome();
-    expect(clearIntervalFn).toHaveBeenCalledWith(7);
-    expect(context.oscillators[0]?.stop).toHaveBeenCalled();
-  });
+    controller.pauseMetronome()
+    expect(clearIntervalFn).toHaveBeenCalledWith(7)
+    expect(context.oscillators[0]?.stop).toHaveBeenCalled()
+  })
 
-  it("changes live tempo from a clean beat boundary and retains the beat callback", () => {
-    const context = makeContext();
-    const intervals: Array<() => void> = [];
-    const clearIntervalFn = vi.fn();
-    const onBeatScheduled = vi.fn();
+  it('changes live tempo from a clean beat boundary and retains the beat callback', () => {
+    const context = makeContext()
+    const intervals: Array<() => void> = []
+    const clearIntervalFn = vi.fn()
+    const onBeatScheduled = vi.fn()
     const controller = new AudioController({
       contextFactory: () => context,
       setIntervalFn: ((callback: () => void) => {
-        intervals.push(callback);
-        return intervals.length;
+        intervals.push(callback)
+        return intervals.length
       }) as typeof setInterval,
       clearIntervalFn: clearIntervalFn as unknown as typeof clearInterval,
-    });
-    controller.startMetronome({ bpm: 120, onBeatScheduled });
-    const oldSource = context.oscillators[0]!;
+    })
+    controller.startMetronome({ bpm: 120, onBeatScheduled })
+    const oldSource = context.oscillators[0]!
 
-    context.now = 0.2;
-    expect(controller.updateMetronomeTempo(60)).toBe(true);
-    expect(clearIntervalFn).toHaveBeenCalledWith(1);
-    expect(oldSource.stop).toHaveBeenCalled();
-    expect(onBeatScheduled).toHaveBeenLastCalledWith({ beat: 1, time: 0.25 });
+    context.now = 0.2
+    expect(controller.updateMetronomeTempo(60)).toBe(true)
+    expect(clearIntervalFn).toHaveBeenCalledWith(1)
+    expect(oldSource.stop).toHaveBeenCalled()
+    expect(onBeatScheduled).toHaveBeenLastCalledWith({ beat: 1, time: 0.25 })
 
-    context.now = 1.2;
-    intervals.at(-1)!();
-    expect(onBeatScheduled).toHaveBeenLastCalledWith({ beat: 2, time: 1.25 });
-  });
+    context.now = 1.2
+    intervals.at(-1)!()
+    expect(onBeatScheduled).toHaveBeenLastCalledWith({ beat: 2, time: 1.25 })
+  })
 
-  it("switches presets immediately, cancelling old clicks and using YAML synthesis parameters", () => {
-    const context = makeContext();
-    const clearIntervalFn = vi.fn();
+  it('switches presets immediately, cancelling old clicks and using YAML synthesis parameters', () => {
+    const context = makeContext()
+    const clearIntervalFn = vi.fn()
     const controller = new AudioController({
       contextFactory: () => context,
       setIntervalFn: vi.fn(() => 1) as unknown as typeof setInterval,
       clearIntervalFn: clearIntervalFn as unknown as typeof clearInterval,
-    });
-    controller.startMetronome({ bpm: 120, sound: "classic" });
-    const classic = context.oscillators[0]!;
-    expect(classic.frequency.value).toBe(1100);
-    expect(classic.type).toBe("sine");
-    const beatEnvelope = context.gains.at(-1)!;
-    expect(beatEnvelope.gain.exponentialRampToValueAtTime.mock.calls[0]?.[0]).toBe(0.35);
+    })
+    controller.startMetronome({ bpm: 120, sound: 'classic' })
+    const classic = context.oscillators[0]!
+    expect(classic.frequency.value).toBe(1100)
+    expect(classic.type).toBe('sine')
+    const beatEnvelope = context.gains.at(-1)!
+    expect(beatEnvelope.gain.exponentialRampToValueAtTime.mock.calls[0]?.[0]).toBe(0.35)
 
-    context.now = 0.2;
-    expect(controller.updateMetronomeSound("wood")).toBe(true);
-    expect(clearIntervalFn).toHaveBeenCalled();
-    expect(classic.stop).toHaveBeenCalled();
-    expect(context.oscillators.at(-1)!.frequency.value).toBe(720);
-    expect(context.oscillators.at(-1)!.type).toBe("triangle");
-  });
+    context.now = 0.2
+    expect(controller.updateMetronomeSound('wood')).toBe(true)
+    expect(clearIntervalFn).toHaveBeenCalled()
+    expect(classic.stop).toHaveBeenCalled()
+    expect(context.oscillators.at(-1)!.frequency.value).toBe(720)
+    expect(context.oscillators.at(-1)!.type).toBe('triangle')
+  })
 
-  it("rejects an invalid live tempo without disturbing the active metronome", () => {
-    const context = makeContext();
-    const clearIntervalFn = vi.fn();
+  it('rejects an invalid live tempo without disturbing the active metronome', () => {
+    const context = makeContext()
+    const clearIntervalFn = vi.fn()
     const controller = new AudioController({
       contextFactory: () => context,
       setIntervalFn: vi.fn(() => 1) as unknown as typeof setInterval,
       clearIntervalFn: clearIntervalFn as unknown as typeof clearInterval,
-    });
-    controller.startMetronome({ bpm: 120 });
-    expect(controller.updateMetronomeTempo(19)).toBe(false);
-    expect(clearIntervalFn).not.toHaveBeenCalled();
-  });
+    })
+    controller.startMetronome({ bpm: 120 })
+    expect(controller.updateMetronomeTempo(19)).toBe(false)
+    expect(clearIntervalFn).not.toHaveBeenCalled()
+  })
 
-  it("keeps cue playback separate and gives each cue its own pitch pattern", () => {
-    const context = makeContext();
-    const controller = new AudioController({ contextFactory: () => context });
+  it('keeps cue playback separate and gives each cue its own pitch pattern', () => {
+    const context = makeContext()
+    const controller = new AudioController({ contextFactory: () => context })
 
-    expect(controller.playCue("session-complete")).toBe(true);
-    expect(context.oscillators).toHaveLength(3);
+    expect(controller.playCue('session-complete')).toBe(true)
+    expect(context.oscillators).toHaveLength(3)
     expect(context.oscillators.map((oscillator) => oscillator.frequency.value)).toEqual([
       660, 880, 1040,
-    ]);
-  });
+    ])
+  })
 
-  it("does not throw when Web Audio is unavailable or BPM is outside the supported range", () => {
-    const controller = new AudioController({ contextFactory: () => undefined });
-    expect(controller.startMetronome({ bpm: 120 })).toBe(false);
-    expect(controller.playCue("warning")).toBe(false);
+  it('does not throw when Web Audio is unavailable or BPM is outside the supported range', () => {
+    const controller = new AudioController({ contextFactory: () => undefined })
+    expect(controller.startMetronome({ bpm: 120 })).toBe(false)
+    expect(controller.playCue('warning')).toBe(false)
 
-    const supported = new AudioController({ contextFactory: () => makeContext() });
-    expect(supported.startMetronome({ bpm: 19 })).toBe(false);
-  });
-});
+    const supported = new AudioController({ contextFactory: () => makeContext() })
+    expect(supported.startMetronome({ bpm: 19 })).toBe(false)
+  })
+})

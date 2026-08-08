@@ -1,10 +1,10 @@
-import sharedStyles from "../SessionPlayer.module.css";
-import styles from "./EndScreen.module.css";
+import sharedStyles from '../SessionPlayer.module.css'
+import styles from './EndScreen.module.css'
 
 interface EndScreenProps {
-  title: string;
-  copy: string;
-  onExit(): void;
+  title: string
+  copy: string
+  onExit(): void
 }
 export function EndScreen({ title, copy, onExit }: EndScreenProps) {
   return (
@@ -15,5 +15,5 @@ export function EndScreen({ title, copy, onExit }: EndScreenProps) {
         Return to routine
       </button>
     </main>
-  );
+  )
 }

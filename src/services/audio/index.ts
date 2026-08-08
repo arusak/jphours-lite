@@ -1,2 +1,2 @@
-export { AudioController } from "./AudioController";
-export type { AudioControllerOptions, AudioCue, MetronomeOptions, ScheduledBeat } from "./types";
+export { AudioController } from './AudioController'
+export type { AudioControllerOptions, AudioCue, MetronomeOptions, ScheduledBeat } from './types'

@@ -1,10 +1,10 @@
-import styles from "./Stepper.module.css";
+import styles from './Stepper.module.css'
 
 interface StepperProps {
-  label: string;
-  value: string;
-  onDecrease(): void;
-  onIncrease(): void;
+  label: string
+  value: string
+  onDecrease(): void
+  onIncrease(): void
 }
 
 export function Stepper({ label, value, onDecrease, onIncrease }: StepperProps) {
@@ -19,5 +19,5 @@ export function Stepper({ label, value, onDecrease, onIncrease }: StepperProps) 
         +
       </button>
     </div>
-  );
+  )
 }

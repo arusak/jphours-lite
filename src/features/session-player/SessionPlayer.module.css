@@ -10,6 +10,7 @@
 }
 
 .sessionHeader {
+  position: relative;
   display: flex;
   justify-content: center;
 }
@@ -55,31 +56,28 @@
   font-size: 14px;
 }
 
-.metronomeSoundControl {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  margin-top: 12px;
-}
-
-.metronomeSoundControl label {
-  display: flex;
-  align-items: center;
-  gap: 6px;
+.metronomeSoundTrigger {
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: grid;
+  width: 36px;
+  height: 36px;
+  padding: 8px;
+  place-items: center;
+  border-radius: 50%;
   color: var(--color-muted-foreground);
-  font-size: 11px;
+  background: transparent;
 }
 
-.metronomeSoundControl select,
-.metronomeSoundControl button {
-  min-height: 30px;
-  padding: 4px 8px;
-  border: 1px solid var(--color-border);
-  border-radius: 999px;
+.metronomeSoundTrigger:hover {
   color: var(--color-foreground);
   background: var(--color-secondary);
-  font-size: 11px;
+}
+
+.metronomeSoundTrigger svg {
+  width: 20px;
+  height: 20px;
 }
 
 .beatIndicator {

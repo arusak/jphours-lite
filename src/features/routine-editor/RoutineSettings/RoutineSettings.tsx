@@ -1,12 +1,12 @@
-import { practiceConfig } from "../../../config/practice-config";
-import type { Routine } from "../../../domain/routine";
-import { Stepper } from "../Stepper/Stepper";
-import styles from "./RoutineSettings.module.css";
+import { practiceConfig } from '../../../config/practice-config'
+import type { Routine } from '../../../domain/routine'
+import { Stepper } from '../Stepper/Stepper'
+import styles from './RoutineSettings.module.css'
 
 interface RoutineSettingsProps {
-  routine: Routine;
-  onUpdateSetting(key: "quickRestDurationSec" | "warningLeadTimeSec", delta: number): void;
-  onSoundChange(sound: Routine["metronomeSound"]): void;
+  routine: Routine
+  onUpdateSetting(key: 'quickRestDurationSec' | 'warningLeadTimeSec', delta: number): void
+  onSoundChange(sound: Routine['metronomeSound']): void
 }
 
 export function RoutineSettings({ routine, onUpdateSetting, onSoundChange }: RoutineSettingsProps) {
@@ -16,27 +16,27 @@ export function RoutineSettings({ routine, onUpdateSetting, onSoundChange }: Rou
         label="Quick Rest"
         value={`${routine.quickRestDurationSec}s`}
         onDecrease={() =>
-          onUpdateSetting("quickRestDurationSec", -practiceConfig.quickRestDuration.increment)
+          onUpdateSetting('quickRestDurationSec', -practiceConfig.quickRestDuration.increment)
         }
         onIncrease={() =>
-          onUpdateSetting("quickRestDurationSec", practiceConfig.quickRestDuration.increment)
+          onUpdateSetting('quickRestDurationSec', practiceConfig.quickRestDuration.increment)
         }
       />
       <Stepper
         label="Warning"
-        value={routine.warningLeadTimeSec === 0 ? "Off" : `${routine.warningLeadTimeSec}s`}
+        value={routine.warningLeadTimeSec === 0 ? 'Off' : `${routine.warningLeadTimeSec}s`}
         onDecrease={() =>
-          onUpdateSetting("warningLeadTimeSec", -practiceConfig.warningLeadTime.increment)
+          onUpdateSetting('warningLeadTimeSec', -practiceConfig.warningLeadTime.increment)
         }
         onIncrease={() =>
-          onUpdateSetting("warningLeadTimeSec", practiceConfig.warningLeadTime.increment)
+          onUpdateSetting('warningLeadTimeSec', practiceConfig.warningLeadTime.increment)
         }
       />
       <label>
         Metronome sound
         <select
           value={routine.metronomeSound}
-          onChange={(event) => onSoundChange(event.target.value as Routine["metronomeSound"])}
+          onChange={(event) => onSoundChange(event.target.value as Routine['metronomeSound'])}
         >
           {Object.keys(practiceConfig.metronome.sounds).map((sound) => (
             <option key={sound} value={sound}>
@@ -46,5 +46,5 @@ export function RoutineSettings({ routine, onUpdateSetting, onSoundChange }: Rou
         </select>
       </label>
     </section>
-  );
+  )
 }

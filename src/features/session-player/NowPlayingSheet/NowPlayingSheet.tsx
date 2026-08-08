@@ -1,13 +1,13 @@
-import { BottomSheet } from "../../../components";
-import type { SessionStep } from "../../../domain/session";
-import { stepMetadata } from "../stepMetadata";
-import styles from "./NowPlayingSheet.module.css";
+import { BottomSheet } from '../../../components'
+import type { SessionStep } from '../../../domain/session'
+import { stepMetadata } from '../stepMetadata'
+import styles from './NowPlayingSheet.module.css'
 
 interface NowPlayingSheetProps {
-  steps: SessionStep[];
-  currentIndex: number;
-  quickRest: boolean;
-  onClose(): void;
+  steps: SessionStep[]
+  currentIndex: number
+  quickRest: boolean
+  onClose(): void
 }
 export function NowPlayingSheet({ steps, currentIndex, quickRest, onClose }: NowPlayingSheetProps) {
   return (
@@ -26,5 +26,5 @@ export function NowPlayingSheet({ steps, currentIndex, quickRest, onClose }: Now
         ))}
       </ol>
     </BottomSheet>
-  );
+  )
 }
