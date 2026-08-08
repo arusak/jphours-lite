@@ -1,67 +1,83 @@
-export const ROUTINE_SCHEMA_VERSION = 1 as const;
+import { practiceConfig, type MetronomeSound } from "../config/practice-config";
+
+export const ROUTINE_SCHEMA_VERSION = 2 as const;
 
 export type ExerciseMode = "paced-timed" | "free-timed" | "paced-open-ended" | "open-ended";
 
 export interface Exercise {
   id: string;
+  kind: "exercise";
   title: string;
-  /** A null tempo means this exercise is not paced by the metronome. */
   tempoBpm: number | null;
-  /** A null duration makes this exercise open-ended. */
   durationSec: number | null;
 }
+
+export interface Break {
+  id: string;
+  kind: "break";
+  durationSec: number;
+}
+
+export type RoutineEntry = Exercise | Break;
 
 export interface Routine {
   schemaVersion: typeof ROUTINE_SCHEMA_VERSION;
   id: string;
   name: string;
-  exercises: Exercise[];
+  entries: RoutineEntry[];
+  /** @deprecated Transitional compatibility for the pre-v2 editor. */
+  exercises: Omit<Exercise, "kind">[];
+  quickRestDurationSec: number;
+  /** @deprecated Transitional compatibility; mapped to Quick Rest duration. */
   defaultBreakDurationSec: number;
   warningLeadTimeSec: number;
+  metronomeSound: MetronomeSound;
   autoAdvance: true;
   updatedAt: string;
 }
-
-export const DEFAULT_BREAK_DURATION_SEC = 30;
-export const DEFAULT_WARNING_LEAD_TIME_SEC = 20;
 
 const createId = (): string =>
   globalThis.crypto?.randomUUID?.() ??
   `routine-${Date.now()}-${Math.random().toString(36).slice(2)}`;
 
-export function createExercise(overrides: Partial<Exercise> = {}): Exercise {
+export function createExercise(overrides: Partial<Omit<Exercise, "kind">> = {}): Exercise {
   return {
     id: createId(),
-    title: "",
-    tempoBpm: null,
-    durationSec: null,
+    kind: "exercise",
+    title: "Exercise",
+    tempoBpm: practiceConfig.tempo.default,
+    durationSec: practiceConfig.exerciseDuration.default,
     ...overrides,
   };
 }
 
+export function createBreak(overrides: Partial<Omit<Break, "kind">> = {}): Break {
+  return { id: createId(), kind: "break", durationSec: practiceConfig.breakDuration.default, ...overrides };
+}
+
 export function createRoutine(overrides: Partial<Routine> = {}): Routine {
+  const defaultExercise = createExercise();
   return {
     schemaVersion: ROUTINE_SCHEMA_VERSION,
     id: createId(),
     name: "",
-    exercises: [],
-    defaultBreakDurationSec: DEFAULT_BREAK_DURATION_SEC,
-    warningLeadTimeSec: DEFAULT_WARNING_LEAD_TIME_SEC,
+    entries: [defaultExercise],
+    exercises: [defaultExercise],
+    quickRestDurationSec: practiceConfig.quickRestDuration.default,
+    defaultBreakDurationSec: practiceConfig.quickRestDuration.default,
+    warningLeadTimeSec: practiceConfig.warningLeadTime.default,
+    metronomeSound: practiceConfig.metronome.defaultSound,
     autoAdvance: true,
     updatedAt: new Date().toISOString(),
     ...overrides,
   };
 }
 
-/** The single mode derivation used by validation, editing, and session snapshots. */
-export function deriveExerciseMode(
-  exercise: Pick<Exercise, "tempoBpm" | "durationSec">,
-): ExerciseMode {
+export function deriveExerciseMode(exercise: Pick<Exercise, "tempoBpm" | "durationSec">): ExerciseMode {
   if (exercise.tempoBpm !== null && exercise.durationSec !== null) return "paced-timed";
   if (exercise.tempoBpm === null && exercise.durationSec !== null) return "free-timed";
   if (exercise.tempoBpm !== null) return "paced-open-ended";
   return "open-ended";
 }
 
-/** @deprecated Use deriveExerciseMode. */
 export const exerciseMode = deriveExerciseMode;

@@ -55,7 +55,7 @@ describe("SessionPlayer", () => {
   it("shows elapsed time and a static ring for an open-ended exercise", async () => {
     render(
       <SessionPlayer
-        routine={createRoutine({ exercises: [createExercise({ title: "Improv" })] })}
+        routine={createRoutine({ exercises: [createExercise({ title: "Improv", tempoBpm: null, durationSec: null })] })}
         onExit={vi.fn()}
       />,
     );

@@ -12,15 +12,33 @@ describe("RoutineEditor", () => {
   it("validates and saves a new paced open-ended exercise in a sheet", () => {
     render(<RoutineEditor repository={repository(createRoutine({ name: "Daily" }))} />);
     fireEvent.click(screen.getByRole("button", { name: /add exercise/i }));
+    fireEvent.change(screen.getByLabelText(/exercise name/i), { target: { value: "" } });
     fireEvent.click(screen.getByRole("button", { name: /^save$/i }));
     expect(screen.getByText("Enter an exercise name.")).toBeInTheDocument();
 
     fireEvent.change(screen.getByLabelText(/exercise name/i), { target: { value: "Scales" } });
     fireEvent.change(screen.getByLabelText(/tempo/i), { target: { value: "90" } });
+    fireEvent.change(screen.getByLabelText(/duration/i), { target: { value: "" } });
     fireEvent.click(screen.getByRole("button", { name: /^save$/i }));
 
     expect(screen.getByText("Scales")).toBeInTheDocument();
     expect(screen.getByText("Paced open-ended")).toBeInTheDocument();
+  });
+
+  it("keeps the sheet field focused while typing", () => {
+    const focus = vi.spyOn(HTMLElement.prototype, "focus");
+    render(<RoutineEditor repository={repository(createRoutine({ name: "Daily" }))} />);
+    fireEvent.click(screen.getByRole("button", { name: /add exercise/i }));
+
+    const name = screen.getByLabelText(/exercise name/i);
+    expect(name).toHaveFocus();
+    focus.mockClear();
+
+    fireEvent.change(name, { target: { value: "Scales" } });
+
+    expect(name).toHaveFocus();
+    expect(focus).not.toHaveBeenCalled();
+    focus.mockRestore();
   });
 
   it("offers undo after deletion and restores the same exercise", () => {

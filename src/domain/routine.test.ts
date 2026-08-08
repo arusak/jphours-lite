@@ -8,9 +8,9 @@ describe("exercise mode", () => {
     expect(deriveExerciseMode(createExercise({ tempoBpm: 80, durationSec: 60 }))).toBe(
       "paced-timed",
     );
-    expect(deriveExerciseMode(createExercise({ durationSec: 60 }))).toBe("free-timed");
-    expect(deriveExerciseMode(createExercise())).toBe("open-ended");
-    expect(deriveExerciseMode(createExercise({ tempoBpm: 80 }))).toBe("paced-open-ended");
+    expect(deriveExerciseMode(createExercise({ tempoBpm: null, durationSec: 60 }))).toBe("free-timed");
+    expect(deriveExerciseMode(createExercise({ tempoBpm: null, durationSec: null }))).toBe("open-ended");
+    expect(deriveExerciseMode(createExercise({ durationSec: null }))).toBe("paced-open-ended");
   });
 });
 
@@ -23,8 +23,10 @@ describe("routine validation", () => {
     expect(
       isRoutineValid(
         createRoutine({
-          defaultBreakDurationSec: 0,
+          entries: [createExercise({ title: "Explore" })],
           exercises: [createExercise({ title: "Explore" })],
+          quickRestDurationSec: 0,
+          defaultBreakDurationSec: 0,
         }),
       ),
     ).toBe(true);

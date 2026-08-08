@@ -4,10 +4,13 @@ import { buildSessionSteps } from "./buildSessionSteps";
 import { SessionRunner, type Clock, type TimeoutScheduler } from "./SessionRunner";
 
 const routine = (exercises: Routine["exercises"], defaultBreakDurationSec = 10): Routine => ({
-  schemaVersion: 1,
+  schemaVersion: 2,
   id: "routine-1",
   name: "Warmup",
   exercises,
+  entries: exercises.map((entry) => ({ ...entry, kind: "exercise" as const })),
+  quickRestDurationSec: defaultBreakDurationSec,
+  metronomeSound: "classic",
   defaultBreakDurationSec,
   warningLeadTimeSec: 20,
   autoAdvance: true,

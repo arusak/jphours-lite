@@ -28,7 +28,7 @@ type SheetState =
   | { kind: "routine"; value: string }
   | { kind: "exercise"; value: Exercise; index: number | null }
   | null;
-type Deleted = { exercise: Exercise; index: number };
+type Deleted = { exercise: Omit<Exercise, "kind">; index: number };
 
 export function RoutineEditor({ repository, onStartSession }: RoutineEditorProps) {
   const [routine, setRoutine] = useState<Routine>(() => repository.load());
@@ -233,7 +233,7 @@ export function RoutineEditor({ repository, onStartSession }: RoutineEditorProps
             <button
               className="card-action"
               aria-label={`Edit ${exercise.title}`}
-              onClick={() => setSheet({ kind: "exercise", value: { ...exercise }, index })}
+              onClick={() => setSheet({ kind: "exercise", value: { ...exercise, kind: "exercise" }, index })}
             >
               ✎
             </button>
