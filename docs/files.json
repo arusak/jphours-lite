@@ -9,9 +9,13 @@
     "src/styles.css": "Global application styles.",
     "src/vite-env.d.ts": "Vite TypeScript ambient declarations.",
     "src/app/App.tsx": "Top-level application state and editor/player screen switching.",
+    "src/app/App.module.css": "Scoped application-shell layout and background effects.",
     "src/components/BottomSheet.tsx": "Reusable accessible bottom-sheet dialog component.",
+    "src/components/BottomSheet.module.css": "Scoped bottom-sheet dialog presentation and entrance animation.",
     "src/components/ProgressSegments.tsx": "Segmented session-progress indicator.",
+    "src/components/ProgressSegments.module.css": "Scoped session-progress indicator presentation.",
     "src/components/TimerRing.tsx": "Circular timer display used by the session player.",
+    "src/components/TimerRing.module.css": "Scoped circular timer presentation and responsive sizing.",
     "src/components/index.ts": "Public barrel exports for shared components.",
     "src/config/practice-config.ts": "Typed practice settings derived from the YAML configuration.",
     "src/config/practice-config.test.ts": "Tests for practice-configuration constraints and values.",
@@ -22,6 +26,7 @@
     "src/domain/validation.ts": "Routine and entry validation rules.",
     "src/features/routine-editor/types.ts": "Routine editor public props and editor-sheet state types.",
     "src/features/routine-editor/RoutineEditor.tsx": "Routine editor feature composition and public exports.",
+    "src/features/routine-editor/RoutineEditor.module.css": "Scoped routine editor forms, cards, controls, and responsive layout styles.",
     "src/features/routine-editor/useRoutineEditor.ts": "Routine editor state, persistence, validation, and mutation hook.",
     "src/features/routine-editor/RoutineSettings.tsx": "Quick Rest, warning, and Metronome sound settings UI.",
     "src/features/routine-editor/Stepper.tsx": "Reusable increment/decrement setting control.",
@@ -32,6 +37,7 @@
     "src/features/routine-editor/RoutineEditor.test.tsx": "Integration tests for routine editing interactions.",
     "src/features/routine-editor/routineTotal.test.ts": "Unit tests for routine duration totals.",
     "src/features/session-player/SessionPlayer.tsx": "Session-player feature composition and public props.",
+    "src/features/session-player/SessionPlayer.module.css": "Scoped session-player layout, controls, and state presentations.",
     "src/features/session-player/useSessionPlayer.ts": "Session Runner lifecycle, audio, wake-lock, and live override hook.",
     "src/features/session-player/SessionTimer.tsx": "Timer Ring content, tempo controls, and session illustration selection.",
     "src/features/session-player/SessionControls.tsx": "Playback, rewind, stop, and finish/skip controls.",
@@ -60,6 +66,7 @@
     "tsconfig.json": "Base TypeScript project configuration.",
     "tsconfig.app.json": "TypeScript configuration for browser application code.",
     "tsconfig.node.json": "TypeScript configuration for Vite and Node-side configuration.",
-    "vite.config.ts": "Vite, React, PWA, and test runner configuration."
+    "vite.config.ts": "Vite, React, PWA, and test runner configuration.",
+    "docs/css-modules-refactor-report.md": "Summary and verification record for the CSS Modules refactor."
   }
 }

@@ -1,4 +1,5 @@
 import { useId, type ReactNode } from "react";
+import styles from "./TimerRing.module.css";
 
 interface TimerRingProps {
   progress?: number | null;
@@ -22,12 +23,12 @@ export function TimerRing({
   const fraction = Math.min(1, Math.max(0, progress ?? 0));
   return (
     <div
-      className={`timer-ring timer-ring--${tone}`}
+      className={`${styles.timerRing} ${tone === "break" ? styles.break : tone === "quick-rest" ? styles.quickRest : ""}`}
       aria-label={`${label}: ${accessibleValue}`}
       data-testid="timer-ring"
       data-open-ended={progress === null}
+      data-tone={tone}
     >
-      <div className="timer-ring__glow" />
       <svg viewBox="0 0 268 268" aria-hidden="true">
         <defs>
           <linearGradient id={gradientId} x1="0" y1="0" x2="1" y2="1">
@@ -50,7 +51,7 @@ export function TimerRing({
           </linearGradient>
         </defs>
         <circle
-          className="timer-ring__track"
+          className={styles.track}
           cx="134"
           cy="134"
           r={RADIUS}
@@ -59,7 +60,7 @@ export function TimerRing({
         />
         {progress !== null && (
           <circle
-            className="timer-ring__progress"
+            className={styles.progress}
             cx="134"
             cy="134"
             r={RADIUS}
@@ -71,9 +72,9 @@ export function TimerRing({
           />
         )}
       </svg>
-      <div className="timer-ring__content">
-        <span className="timer-ring__value">{value}</span>
-        <span className="timer-ring__label">{label}</span>
+      <div className={styles.content}>
+        <span className={styles.value}>{value}</span>
+        <span className={styles.label}>{label}</span>
       </div>
     </div>
   );

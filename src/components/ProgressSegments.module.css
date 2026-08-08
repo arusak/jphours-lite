@@ -1,0 +1,37 @@
+.progressSegments {
+  display: flex;
+  gap: 6px;
+  width: 100%;
+  margin-top: 24px;
+}
+
+.segment {
+  flex: 1;
+  height: 6px;
+  border-radius: 999px;
+  background: oklch(0.95 0.012 80 / 10%);
+}
+
+.segment[data-state="complete"] {
+  background: oklch(0.81 0.145 74 / 45%);
+}
+
+.segment[data-state="current"] {
+  background: var(--color-primary);
+}
+
+.break .segment[data-state="complete"] {
+  background: oklch(0.63 0.16 42 / 45%);
+}
+
+.break .segment[data-state="current"] {
+  background: var(--color-accent);
+}
+
+.quickRest .segment[data-state="current"] {
+  background: oklch(0.69 0.14 184);
+}
+
+.dense {
+  gap: 3px;
+}

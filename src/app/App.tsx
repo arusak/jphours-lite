@@ -4,6 +4,7 @@ import type { Routine } from "../domain/routine";
 import { RoutineEditor } from "../features/routine-editor/RoutineEditor";
 import { SessionPlayer } from "../features/session-player/SessionPlayer";
 import { LocalStorageRoutineRepository } from "../services/persistence/routine-repository";
+import styles from "./App.module.css";
 
 export function App() {
   const repository = useMemo(() => new LocalStorageRoutineRepository(), []);
@@ -26,7 +27,7 @@ export function App() {
     repository.save({ ...persisted, metronomeSound, updatedAt: new Date().toISOString() });
   };
   return (
-    <div className="app-shell">
+    <div className={styles.appShell}>
       {activeRoutine ? (
         <SessionPlayer
           routine={activeRoutine}

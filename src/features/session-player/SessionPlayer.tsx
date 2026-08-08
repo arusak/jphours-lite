@@ -9,6 +9,7 @@ import { SessionTimer } from "./SessionTimer";
 import { StopSlider } from "./StopSlider";
 import { stepMetadata } from "./stepMetadata";
 import { useSessionPlayer } from "./useSessionPlayer";
+import styles from "./SessionPlayer.module.css";
 
 export interface SessionPlayerProps {
   routine: Routine;
@@ -86,14 +87,14 @@ export function SessionPlayer({
   const title = isQuickRest ? "Quick Rest" : isBreak ? "Break" : step.title;
   const tone = isQuickRest ? "quick-rest" : isBreak ? "break" : "exercise";
   return (
-    <main className={`session-player ${tone}-session`} aria-live="polite">
-      <header className="session-header">
+    <main className={styles.sessionPlayer} aria-live="polite">
+      <header className={styles.sessionHeader}>
         <button
-          className="now-playing-trigger"
+          className={styles.nowPlayingTrigger}
           onClick={() => setNowPlayingOpen(true)}
           aria-haspopup="dialog"
         >
-          <span className="eyebrow">NOW PLAYING</span>
+          <span className={styles.eyebrow}>NOW PLAYING</span>
           <span>{routine.name}</span>
         </button>
       </header>
@@ -103,9 +104,9 @@ export function SessionPlayer({
         tone={tone}
         label="Session progress"
       />
-      <section className="session-heading">
+      <section className={styles.sessionHeading}>
         <h1>{title}</h1>
-        {nextStep && <p className="next-step">Up next: {stepMetadata(nextStep)}</p>}
+        {nextStep && <p className={styles.nextStep}>Up next: {stepMetadata(nextStep)}</p>}
       </section>
       <SessionTimer
         tempo={currentTempo}
@@ -123,7 +124,7 @@ export function SessionPlayer({
       />
       {isExercise && currentTempo !== null && (
         <>
-          <div className="metronome-sound-control">
+          <div className={styles.metronomeSoundControl}>
             <label>
               <span>Metronome sound</span>
               <select
@@ -141,20 +142,20 @@ export function SessionPlayer({
               <button onClick={player.saveSound}>Save sound</button>
             )}
           </div>
-          <div className="beat-indicator" aria-label="Metronome beat">
+          <div className={styles.beatIndicator} aria-label="Metronome beat">
             {[0, 1, 2, 3].map((dot) => (
-              <span key={dot} className={dot === player.beat && !paused ? "active" : ""} />
+              <span key={dot} className={dot === player.beat && !paused ? styles.active : ""} />
             ))}
           </div>
         </>
       )}
       {!player.audioAvailable && (
-        <p role="status" className="session-banner">
+        <p role="status" className={styles.sessionBanner}>
           Audio is unavailable. Timers and controls still work.
         </p>
       )}
       {state.status === "interrupted" && (
-        <p role="alert" className="session-banner">
+        <p role="alert" className={styles.sessionBanner}>
           Session paused while the app was in the background.
         </p>
       )}

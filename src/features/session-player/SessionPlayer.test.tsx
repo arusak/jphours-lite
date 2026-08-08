@@ -125,7 +125,7 @@ describe("SessionPlayer", () => {
       />,
     );
     expect(await screen.findByRole("heading", { name: "Break" })).toBeInTheDocument();
-    expect(screen.getByTestId("timer-ring")).toHaveClass("timer-ring--break");
+    expect(screen.getByTestId("timer-ring")).toHaveAttribute("data-tone", "break");
     expect(screen.getByTestId("break-silhouette")).toBeInTheDocument();
   });
 });

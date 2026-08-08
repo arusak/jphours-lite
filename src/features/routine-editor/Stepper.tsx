@@ -1,3 +1,5 @@
+import styles from "./RoutineEditor.module.css";
+
 interface StepperProps {
   label: string;
   value: string;
@@ -7,7 +9,7 @@ interface StepperProps {
 
 export function Stepper({ label, value, onDecrease, onIncrease }: StepperProps) {
   return (
-    <div className="setting-stepper">
+    <div className={styles.settingStepper}>
       <span>{label}</span>
       <button aria-label={`Decrease ${label}`} onClick={onDecrease}>
         −

@@ -4,6 +4,7 @@ import { RoutineEntryList } from "./RoutineEntryList";
 import { RoutineSettings } from "./RoutineSettings";
 import { useRoutineEditor } from "./useRoutineEditor";
 import type { RoutineEditorProps } from "./types";
+import styles from "./RoutineEditor.module.css";
 
 export type { RoutineEditorProps } from "./types";
 export { routineTotal } from "./routineTotal";
@@ -11,18 +12,18 @@ export { routineTotal } from "./routineTotal";
 export function RoutineEditor({ repository, onStartSession }: RoutineEditorProps) {
   const editor = useRoutineEditor(repository);
   return (
-    <section className="routine-editor" aria-labelledby="routine-editor-title">
-      <header className="routine-header compact">
+    <section className={styles.routineEditor} aria-labelledby="routine-editor-title">
+      <header className={`${styles.routineHeader} ${styles.compact}`}>
         <h1 id="routine-editor-title">{editor.routine.name.trim() || "Practice routine"}</h1>
         <button
-          className="routine-edit"
+          className={styles.routineEdit}
           aria-label="Edit routine name"
           onClick={() => editor.setSheet({ kind: "routine", name: editor.routine.name })}
         >
           ✎
         </button>
         <span
-          className="routine-total"
+          className={styles.routineTotal}
           aria-label={`${editor.total.approximate ? "approximately " : ""}${editor.total.minutes} minutes`}
         >
           {editor.total.approximate ? "≈" : ""}
@@ -43,28 +44,28 @@ export function RoutineEditor({ repository, onStartSession }: RoutineEditorProps
         }
         onDelete={editor.remove}
       />
-      <div className="entry-actions">
+      <div className={styles.entryActions}>
         <button
-          className="add-exercise"
+          className={styles.addExercise}
           onClick={() => editor.setSheet({ kind: "entry", entry: createExercise(), index: null })}
         >
           ＋ Add exercise
         </button>
         <button
-          className="add-exercise"
+          className={styles.addExercise}
           onClick={() => editor.setSheet({ kind: "entry", entry: createBreak(), index: null })}
         >
           ＋ Add break
         </button>
       </div>
       {!editor.valid && (
-        <p className="editor-error" role="alert">
+        <p className={styles.editorError} role="alert">
           {editor.validation.entries || "Complete each routine entry."}
         </p>
       )}
-      <footer className="editor-footer">
+      <footer className={styles.editorFooter}>
         <button
-          className="primary-action"
+          className={styles.primaryAction}
           disabled={!editor.valid}
           onClick={() => {
             editor.flush();

@@ -1,3 +1,5 @@
+import styles from "./SessionPlayer.module.css";
+
 interface SessionControlsProps {
   paused: boolean;
   quickRest: boolean;
@@ -15,12 +17,12 @@ export function SessionControls({
   onFinishOrSkip,
 }: SessionControlsProps) {
   return (
-    <div className="player-controls" aria-label="Session controls">
+    <div className={styles.playerControls} aria-label="Session controls">
       <button aria-label="Rewind step" title="Rewind step" onClick={onRewind}>
         ↺
       </button>
       <button
-        className="primary"
+        className={styles.primary}
         aria-label={paused ? "Resume session" : "Pause session"}
         title={paused ? "Resume session" : "Pause session"}
         onClick={onPauseResume}

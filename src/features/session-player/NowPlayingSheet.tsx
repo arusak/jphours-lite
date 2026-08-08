@@ -1,6 +1,7 @@
 import { BottomSheet } from "../../components";
 import type { SessionStep } from "../../domain/session";
 import { stepMetadata } from "./stepMetadata";
+import styles from "./SessionPlayer.module.css";
 
 interface NowPlayingSheetProps {
   steps: SessionStep[];
@@ -11,7 +12,7 @@ interface NowPlayingSheetProps {
 export function NowPlayingSheet({ steps, currentIndex, quickRest, onClose }: NowPlayingSheetProps) {
   return (
     <BottomSheet title="Now Playing" onClose={onClose}>
-      <ol className="now-playing-list">
+      <ol className={styles.nowPlayingList}>
         {steps.map((item, itemIndex) => (
           <li
             key={item.id}

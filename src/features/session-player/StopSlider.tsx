@@ -1,5 +1,6 @@
 import { useRef, useState, type CSSProperties, type PointerEvent } from "react";
 import { practiceConfig } from "../../config/practice-config";
+import styles from "./SessionPlayer.module.css";
 
 interface StopSliderProps {
   onStop(): void;
@@ -27,7 +28,7 @@ export function StopSlider({ onStop }: StopSliderProps) {
   };
   return (
     <div
-      className="stop-slider"
+      className={styles.stopSlider}
       style={{ "--slider-value": value / 100 } as CSSProperties}
       role="slider"
       tabIndex={0}

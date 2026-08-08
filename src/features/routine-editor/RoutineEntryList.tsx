@@ -1,5 +1,6 @@
 import type { Routine } from "../../domain/routine";
 import { RoutineEntryCard } from "./RoutineEntryCard";
+import styles from "./RoutineEditor.module.css";
 
 interface RoutineEntryListProps {
   routine: Routine;
@@ -9,7 +10,7 @@ interface RoutineEntryListProps {
 
 export function RoutineEntryList({ routine, onEdit, onDelete }: RoutineEntryListProps) {
   return (
-    <div className="exercise-list" aria-label="Routine entries">
+    <div className={styles.exerciseList} aria-label="Routine entries">
       {routine.entries.map((entry, index) => (
         <RoutineEntryCard
           key={entry.id}

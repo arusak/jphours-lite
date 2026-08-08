@@ -1,6 +1,7 @@
 import { practiceConfig } from "../../config/practice-config";
 import type { Routine } from "../../domain/routine";
 import { Stepper } from "./Stepper";
+import styles from "./RoutineEditor.module.css";
 
 interface RoutineSettingsProps {
   routine: Routine;
@@ -10,7 +11,7 @@ interface RoutineSettingsProps {
 
 export function RoutineSettings({ routine, onUpdateSetting, onSoundChange }: RoutineSettingsProps) {
   return (
-    <section className="routine-settings" aria-label="Routine settings">
+    <section className={styles.routineSettings} aria-label="Routine settings">
       <Stepper
         label="Quick Rest"
         value={`${routine.quickRestDurationSec}s`}

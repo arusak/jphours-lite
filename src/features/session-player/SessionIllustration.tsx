@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import styles from "./SessionPlayer.module.css";
 
 type SessionIllustrationKind = "break" | "quick-rest" | "exercise";
 
@@ -11,7 +12,7 @@ export function SessionIllustration({ kind }: { kind: SessionIllustrationKind })
 function Illustration({ children, kind }: { children: ReactNode; kind: SessionIllustrationKind }) {
   return (
     <svg
-      className={`session-illustration session-illustration--${kind}`}
+      className={`${styles.sessionIllustration} ${kind === "break" ? styles.illustrationBreak : kind === "quick-rest" ? styles.illustrationQuickRest : ""}`}
       data-testid={`${kind}-silhouette`}
       viewBox="0 0 64 64"
       aria-hidden="true"

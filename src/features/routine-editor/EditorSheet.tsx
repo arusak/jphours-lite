@@ -3,6 +3,7 @@ import { practiceConfig } from "../../config/practice-config";
 import type { Exercise, RoutineEntry } from "../../domain/routine";
 import { validateEntry } from "../../domain/validation";
 import type { EditorSheet as Sheet } from "./types";
+import styles from "./RoutineEditor.module.css";
 
 interface EditorSheetProps {
   sheet: Sheet;
@@ -61,7 +62,7 @@ export function EditorSheet({ sheet, submitted, onChange, onSave, onCancel }: Ed
           </>
           <>
             {entry!.kind === "exercise" && (
-              <label className="editor-stepper">
+              <label className={styles.editorStepper}>
                 Tempo (BPM)
                 <span>
                   <button
@@ -103,7 +104,7 @@ export function EditorSheet({ sheet, submitted, onChange, onSave, onCancel }: Ed
               </label>
             )}
           </>
-          <label className="editor-stepper">
+          <label className={styles.editorStepper}>
             Duration (minutes)
             <span>
               <button aria-label="Decrease duration" onClick={() => durationChange(-minute)}>
@@ -125,15 +126,23 @@ export function EditorSheet({ sheet, submitted, onChange, onSave, onCancel }: Ed
               </button>
             </span>
           </label>
-          {errors.title && <p role="alert">{errors.title}</p>}
-          {errors.durationSec && <p role="alert">{errors.durationSec}</p>}
+          {errors.title && (
+            <p className={styles.editorAlert} role="alert">
+              {errors.title}
+            </p>
+          )}
+          {errors.durationSec && (
+            <p className={styles.editorAlert} role="alert">
+              {errors.durationSec}
+            </p>
+          )}
         </>
       )}
-      <div className="sheet-actions">
-        <button className="primary-action" onClick={onSave}>
+      <div className={styles.sheetActions}>
+        <button className={styles.primaryAction} onClick={onSave}>
           Save
         </button>
-        <button className="secondary-action" onClick={onCancel}>
+        <button className={styles.secondaryAction} onClick={onCancel}>
           Cancel
         </button>
       </div>

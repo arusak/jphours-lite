@@ -1,3 +1,5 @@
+import styles from "./ProgressSegments.module.css";
+
 interface ProgressSegmentsProps {
   count: number;
   current: number;
@@ -13,7 +15,7 @@ export function ProgressSegments({
 }: ProgressSegmentsProps) {
   return (
     <div
-      className={`progress-segments${count > 12 ? " progress-segments--dense" : ""}${tone === "break" ? " progress-segments--break" : ""}${tone === "quick-rest" ? " progress-segments--quick-rest" : ""}`}
+      className={`${styles.progressSegments} ${count > 12 ? styles.dense : ""} ${tone === "break" ? styles.break : ""} ${tone === "quick-rest" ? styles.quickRest : ""}`}
       role="progressbar"
       aria-label={label}
       aria-valuemin={0}
@@ -22,7 +24,7 @@ export function ProgressSegments({
     >
       {Array.from({ length: Math.max(0, count) }, (_, index) => (
         <span
-          className="progress-segment"
+          className={styles.segment}
           data-state={index < current ? "complete" : index === current ? "current" : "future"}
           key={index}
         />

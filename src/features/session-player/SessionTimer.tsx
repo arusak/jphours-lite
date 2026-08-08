@@ -1,6 +1,7 @@
 import { TimerRing } from "../../components";
 import { SessionIllustration } from "./SessionIllustration";
 import { formatTime } from "./formatTime";
+import styles from "./SessionPlayer.module.css";
 
 interface SessionTimerProps {
   tempo: number | null;
@@ -31,7 +32,7 @@ export function SessionTimer({
     <TimerRing
       value={
         tempo !== null ? (
-          <div className="ring-tempo-control">
+          <div className={styles.ringTempoControl}>
             <button aria-label="Decrease tempo" onClick={() => onChangeTempo(-1)}>
               −
             </button>
@@ -43,7 +44,7 @@ export function SessionTimer({
               +
             </button>
             {tempo !== savedTempo && (
-              <button className="ring-save" aria-label="Save tempo" onClick={onSaveTempo}>
+              <button className={styles.ringSave} aria-label="Save tempo" onClick={onSaveTempo}>
                 Save
               </button>
             )}
@@ -53,7 +54,7 @@ export function SessionTimer({
             <SessionIllustration
               kind={isBreak ? "break" : isQuickRest ? "quick-rest" : "exercise"}
             />
-            <span className="ring-time">{time}</span>
+            <span className={styles.ringTime}>{time}</span>
           </>
         )
       }

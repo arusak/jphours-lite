@@ -1,0 +1,95 @@
+.timerRing {
+  position: relative;
+  width: min(268px, calc(100vw - 48px));
+  aspect-ratio: 1;
+  margin: 28px auto 0;
+}
+
+.break {
+  margin-top: 40px;
+}
+
+.timerRing::before {
+  content: "";
+  position: absolute;
+  inset: 24px;
+  border-radius: 50%;
+  background: radial-gradient(circle, oklch(0.81 0.145 74 / 20%), transparent 68%);
+  filter: blur(32px);
+}
+
+.break::before {
+  background: radial-gradient(circle, oklch(0.63 0.16 42 / 22%), transparent 68%);
+}
+
+.quickRest::before {
+  background: radial-gradient(circle, oklch(0.65 0.14 190 / 20%), transparent 68%);
+}
+
+.timerRing svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.timerRing circle {
+  fill: none;
+  stroke-width: 12;
+}
+
+.track {
+  stroke: oklch(0.98 0.01 80 / 8%);
+}
+
+.progress {
+  transform: rotate(-90deg);
+  transform-origin: center;
+  stroke-linecap: round;
+  stroke: oklch(0.78 0.16 67);
+  transition: stroke-dashoffset 250ms linear;
+}
+
+.break .progress {
+  stroke: oklch(0.63 0.18 42);
+}
+
+.quickRest .progress {
+  stroke: oklch(0.65 0.14 190);
+}
+
+.content {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.value {
+  font: 600 72px/1 var(--font-display);
+  letter-spacing: -0.04em;
+  font-variant-numeric: tabular-nums;
+}
+
+.label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  color: var(--color-muted-foreground);
+  font-size: 12px;
+  letter-spacing: 0.22em;
+}
+
+@media (max-width: 359px) {
+  .timerRing {
+    width: min(268px, calc(100vw - 32px));
+  }
+
+  .value {
+    font-size: 60px;
+  }
+}

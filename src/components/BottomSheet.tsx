@@ -1,4 +1,5 @@
 import { useEffect, useRef, type ReactNode } from "react";
+import styles from "./BottomSheet.module.css";
 
 interface BottomSheetProps {
   title: string;
@@ -47,19 +48,19 @@ export function BottomSheet({ title, children, onClose }: BottomSheetProps) {
   }, []);
   return (
     <div
-      className="sheet-backdrop"
+      className={styles.sheetBackdrop}
       onMouseDown={(event) => {
         if (event.target === event.currentTarget) onCloseRef.current();
       }}
     >
       <div
         ref={sheet}
-        className="bottom-sheet"
+        className={styles.bottomSheet}
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
       >
-        <div className="sheet-grabber" />
+        <div className={styles.sheetGrabber} />
         <h2 id={titleId}>{title}</h2>
         {children}
       </div>

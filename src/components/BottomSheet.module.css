@@ -1,0 +1,65 @@
+.sheetBackdrop {
+  position: fixed;
+  z-index: 20;
+  inset: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  background: rgb(0 0 0 / 55%);
+}
+
+.bottomSheet {
+  width: min(100%, 460px);
+  max-height: 85dvh;
+  overflow-y: auto;
+  padding: 16px 24px max(24px, env(safe-area-inset-bottom));
+  border: 1px solid var(--color-border);
+  border-bottom: 0;
+  border-radius: 32px 32px 0 0;
+  background: var(--color-card);
+  animation: sheetIn 180ms ease-out;
+}
+
+.sheetGrabber {
+  width: 40px;
+  height: 4px;
+  margin: 0 auto;
+  border-radius: 2px;
+  background: var(--color-muted);
+}
+
+.bottomSheet h2 {
+  margin: 16px 0 20px;
+  font-size: 20px;
+}
+
+.bottomSheet label {
+  display: block;
+  margin-top: 16px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.bottomSheet input {
+  display: block;
+  width: 100%;
+  min-height: 48px;
+  margin-top: 6px;
+  padding: 0 12px;
+  color: var(--color-foreground);
+  background: var(--color-input);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+}
+
+.bottomSheet input[aria-invalid="true"] {
+  border-color: var(--color-destructive);
+}
+
+@keyframes sheetIn {
+  from {
+    transform: translateY(100%);
+  }
+}
