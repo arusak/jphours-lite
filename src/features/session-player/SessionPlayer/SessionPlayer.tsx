@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import {
   BottomSheet,
   MetronomeIcon,
@@ -41,6 +41,14 @@ export function SessionPlayer({
   const [stopOpen, setStopOpen] = useState(false)
   const [stopPendingExit, setStopPendingExit] = useState(false)
   const [soundPickerOpen, setSoundPickerOpen] = useState(false)
+  const [completionScreenVisible, setCompletionScreenVisible] = useState(false)
+  const lastPacedTimer = useRef<{
+    tempo: number
+    savedTempo: number
+    displaySeconds: number | null
+    elapsedSeconds: number
+    tone: 'exercise'
+  } | null>(null)
   const { state } = player
   const step =
     state.currentStepIndex === null ? null : (state.steps[state.currentStepIndex] ?? null)
@@ -84,6 +92,31 @@ export function SessionPlayer({
       : state.currentStepStartedAt === null
         ? 0
         : Math.max(0, Math.floor((player.now - state.currentStepStartedAt) / 1000))
+  useEffect(() => {
+    if (state.status !== 'completed') {
+      setCompletionScreenVisible(false)
+      return
+    }
+    if (!lastPacedTimer.current) return
+    const frame = window.requestAnimationFrame(() => setCompletionScreenVisible(true))
+    return () => window.cancelAnimationFrame(frame)
+  }, [state.status])
+  if (state.status === 'completed' && lastPacedTimer.current && !completionScreenVisible) {
+    const timer = lastPacedTimer.current
+    return (
+      <main className={styles.sessionPlayer} aria-live="polite">
+        <SessionTimer
+          {...timer}
+          isBreak={false}
+          isQuickRest={false}
+          progress={1}
+          discreteProgress
+          onChangeTempo={() => undefined}
+          onSaveTempo={() => undefined}
+        />
+      </main>
+    )
+  }
   if (state.status === 'completed')
     return (
       <EndScreen
@@ -134,6 +167,14 @@ export function SessionPlayer({
   const progress = pacedRing ? beatProgress : countdownProgress
   const title = isQuickRest ? 'Quick Rest' : isBreak ? 'Break' : step.title
   const tone = isQuickRest ? 'quick-rest' : isBreak ? 'break' : 'exercise'
+  if (pacedRing && currentTempo !== null && savedTempo !== null)
+    lastPacedTimer.current = {
+      tempo: currentTempo,
+      savedTempo,
+      displaySeconds,
+      elapsedSeconds: elapsedSec,
+      tone: 'exercise',
+    }
   return (
     <main className={styles.sessionPlayer} aria-live="polite">
       <header className={styles.sessionHeader}>

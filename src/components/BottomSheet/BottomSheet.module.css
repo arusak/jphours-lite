@@ -9,7 +9,6 @@
 }
 
 .sheetBackdrop[data-state="closing"] {
-  pointer-events: none;
   animation: backdropOut 180ms ease-in forwards;
 }
 

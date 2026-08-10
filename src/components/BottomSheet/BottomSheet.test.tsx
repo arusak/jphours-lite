@@ -61,6 +61,17 @@ describe('BottomSheet', () => {
     expect(onSave).not.toHaveBeenCalled()
   })
 
+  it('keeps its backdrop available to intercept pointer input while closing', () => {
+    render(<SheetHarness />)
+    fireEvent.click(screen.getByRole('button', { name: 'Open sheet' }))
+    const dialog = screen.getByRole('dialog', { name: 'Example sheet' })
+
+    fireEvent.keyDown(document, { key: 'Escape' })
+
+    expect(dialog.parentElement).toHaveAttribute('data-state', 'closing')
+    expect(dialog.parentElement).not.toHaveStyle({ pointerEvents: 'none' })
+  })
+
   it('runs an action once and retains its final payload until the exit ends', () => {
     const onSave = vi.fn()
     render(<SheetHarness onSave={onSave} />)

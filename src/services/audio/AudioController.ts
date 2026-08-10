@@ -28,6 +28,7 @@ export class AudioController {
   private cueGain?: GainNode
   private scheduler?: ReturnType<typeof setInterval>
   private nextBeatTime = 0
+  private lastScheduledBeatTime: number | null = null
   private beatIndex = 0
   private metronome?: MetronomeOptions
   private readonly activeSources = new Set<OscillatorNode>()
@@ -68,6 +69,7 @@ export class AudioController {
       alternateBeatTone: options.alternateBeatTone ?? true,
     }
     this.beatIndex = 0
+    this.lastScheduledBeatTime = null
     this.beatClock.start(options.bpm)
     this.nextBeatTime = this.context!.currentTime + START_DELAY_SEC
     this.scheduleBeats()
@@ -81,6 +83,11 @@ export class AudioController {
     if (!isValidBpm(bpm) || !this.metronome || !this.getContext()) return false
     if (this.warningScheduled && !this.warningAnchoredToScheduledBeat) this.cancelScheduledWarning()
     this.metronome = { ...this.metronome, bpm }
+    if (
+      this.lastScheduledBeatTime !== null &&
+      this.lastScheduledBeatTime > this.context!.currentTime
+    )
+      this.nextBeatTime = this.lastScheduledBeatTime + 60 / bpm
     return true
   }
 
@@ -124,6 +131,8 @@ export class AudioController {
     if (!this.metronome || !this.getContext()) return false
     this.clearScheduler()
     this.cancelActiveSources()
+    this.beatClock.start(this.metronome.bpm)
+    this.lastScheduledBeatTime = null
     this.nextBeatTime = this.context!.currentTime + START_DELAY_SEC
     this.scheduleBeats()
     this.scheduler = this.setIntervalFn(() => this.scheduleBeats(), this.schedulerPollMs)
@@ -137,6 +146,7 @@ export class AudioController {
     this.metronome = undefined
     this.beatIndex = 0
     this.nextBeatTime = 0
+    this.lastScheduledBeatTime = null
     this.warningTargetTime = null
     this.cancelScheduledWarning()
   }
@@ -210,6 +220,7 @@ export class AudioController {
         (scheduledBeat.time - this.context.currentTime) * 1000,
       )
       this.scheduleWarningOnGrid(scheduledBeat.time, 60 / metronome.bpm)
+      this.lastScheduledBeatTime = scheduledBeat.time
       this.beatIndex += 1
       this.nextBeatTime += 60 / metronome.bpm
     }

@@ -120,13 +120,14 @@ describe('AudioController', () => {
     expect(context.oscillators[0]?.stop).toHaveBeenCalled()
   })
 
-  it('keeps the pending Beat in place and applies live Tempo after it', () => {
+  it('keeps an already queued Beat in place and applies live Tempo after it', () => {
     const context = makeContext()
     const intervals: Array<() => void> = []
     const clearIntervalFn = vi.fn()
     const onBeatScheduled = vi.fn()
     const controller = new AudioController({
       contextFactory: () => context,
+      scheduleAheadSec: 1,
       setIntervalFn: ((callback: () => void) => {
         intervals.push(callback)
         return intervals.length
@@ -134,25 +135,59 @@ describe('AudioController', () => {
       clearIntervalFn: clearIntervalFn as unknown as typeof clearInterval,
     })
     controller.startMetronome({ bpm: 120, onBeatScheduled })
-    const oldSource = context.oscillators[0]!
-    const scheduledStopCalls = oldSource.stop.mock.calls.length
+    expect(onBeatScheduled).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({ beatIndex: 1, time: 0.55, tempoBpm: 120 }),
+    )
 
     context.now = 0.2
     expect(controller.updateMetronomeTempo(60)).toBe(true)
     expect(clearIntervalFn).not.toHaveBeenCalled()
-    expect(oldSource.stop).toHaveBeenCalledTimes(scheduledStopCalls)
 
-    context.now = 0.45
-    intervals[0]!()
-    expect(onBeatScheduled).toHaveBeenLastCalledWith(
-      expect.objectContaining({ beatIndex: 1, time: 0.55, tempoBpm: 60 }),
-    )
-
-    context.now = 1.46
+    context.now = 0.96
     intervals[0]!()
     expect(onBeatScheduled).toHaveBeenLastCalledWith(
       expect.objectContaining({ beatIndex: 2, time: 1.55, tempoBpm: 60 }),
     )
+  })
+
+  it('restarts audible Beat snapshots when a paused Metronome resumes', () => {
+    vi.useFakeTimers()
+    const context = makeContext()
+    const controller = new AudioController({ contextFactory: () => context })
+
+    controller.startMetronome({ bpm: 120 })
+    vi.advanceTimersByTime(50)
+    expect(controller.getBeatSnapshot()).toMatchObject({ beatIndex: 0, running: true })
+
+    controller.pauseMetronome()
+    expect(controller.getBeatSnapshot()).toMatchObject({ running: false })
+
+    expect(controller.resumeMetronome()).toBe(true)
+    vi.advanceTimersByTime(50)
+    expect(controller.getBeatSnapshot()).toMatchObject({ beatIndex: 1, running: true })
+  })
+
+  it('uses a changed Metronome sound only for Beats scheduled afterwards', () => {
+    const context = makeContext()
+    const intervals: Array<() => void> = []
+    const controller = new AudioController({
+      contextFactory: () => context,
+      setIntervalFn: ((callback: () => void) => {
+        intervals.push(callback)
+        return intervals.length
+      }) as typeof setInterval,
+    })
+
+    controller.startMetronome({ bpm: 120, sound: 'classic' })
+    const alreadyScheduled = context.oscillators[0]!
+    expect(controller.updateMetronomeSound('wood')).toBe(true)
+    expect(alreadyScheduled.frequency.value).toBe(1100)
+
+    context.now = 0.45
+    intervals[0]!()
+    expect(context.oscillators[1]!.frequency.value).toBeCloseTo(720 * 2 ** (-3 / 12))
+    expect(context.oscillators[1]!.type).toBe('triangle')
   })
 
   it('uses alternate tone on secondary Beats while preserving waveform and decay', () => {

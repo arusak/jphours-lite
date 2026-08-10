@@ -1,5 +1,5 @@
-import { fireEvent, render, screen } from '@testing-library/react'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { act, fireEvent, render, screen } from '@testing-library/react'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { createBreak, createExercise, createRoutine } from '../../../domain/routine'
 import { SessionPlayer } from '../SessionPlayer/SessionPlayer'
 
@@ -46,6 +46,10 @@ const routineWith = (...entries: ReturnType<typeof createExercise>[]) => createR
 
 describe('SessionPlayer', () => {
   beforeEach(() => vi.clearAllMocks())
+  afterEach(() => {
+    vi.useRealTimers()
+    vi.unstubAllGlobals()
+  })
 
   it('puts tempo controls in the paced exercise ring and saves a divergent tempo', async () => {
     const onSaveTempo = vi.fn()
@@ -174,5 +178,35 @@ describe('SessionPlayer', () => {
     expect(await screen.findByRole('heading', { name: 'Break' })).toBeInTheDocument()
     expect(screen.getByTestId('timer-ring')).toHaveAttribute('data-tone', 'break')
     expect(screen.getByTestId('break-icon')).toBeInTheDocument()
+  })
+
+  it('shows a paced TimerRing at Completion before presenting the Completion screen', async () => {
+    vi.useFakeTimers()
+    let showCompletionScreen: FrameRequestCallback | undefined
+    vi.stubGlobal(
+      'requestAnimationFrame',
+      vi.fn((callback: FrameRequestCallback) => {
+        showCompletionScreen = callback
+        return 1
+      }),
+    )
+    vi.stubGlobal('cancelAnimationFrame', vi.fn())
+    render(
+      <SessionPlayer
+        routine={routineWith(createExercise({ title: 'Scales', tempoBpm: 90, durationSec: 1 }))}
+        onExit={vi.fn()}
+      />,
+    )
+
+    await act(async () => Promise.resolve())
+    act(() => vi.advanceTimersByTime(1_000))
+
+    const ring = screen.getByTestId('timer-ring')
+    expect(ring).toHaveAttribute('data-discrete-progress', 'true')
+    expect(ring.querySelectorAll('circle')[1]).toHaveAttribute('stroke-dashoffset', '0')
+    expect(screen.queryByText('Routine complete')).not.toBeInTheDocument()
+
+    act(() => showCompletionScreen?.(0))
+    expect(screen.getByText('Routine complete')).toBeInTheDocument()
   })
 })
