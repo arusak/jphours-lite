@@ -6,8 +6,8 @@
 .exerciseCard {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 16px 0;
+  gap: 8px;
+  padding: 10px 0;
   border-block: 1px solid var(--color-border);
   background: oklch(0.215 0.018 52 / 40%);
   transition: opacity 150ms ease;
@@ -25,23 +25,23 @@
 .exerciseTitleRow {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
 }
 
 .exerciseTitleRow > span {
   display: grid;
-  flex: 0 0 24px;
-  height: 24px;
+  flex: 0 0 20px;
+  height: 20px;
   place-items: center;
   border-radius: var(--radius-md);
   color: var(--color-primary);
   background: oklch(0.81 0.145 74 / 15%);
-  font: 700 12px var(--font-display);
+  font: 700 11px var(--font-display);
 }
 
 .exerciseTitleRow h3 {
   overflow: hidden;
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 600;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -50,12 +50,12 @@
 .exerciseMeta {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 12px;
+  gap: 6px;
+  margin-top: 6px;
 }
 
 .badge {
-  padding: 4px 10px;
+  padding: 3px 8px;
   border: 1px solid var(--color-border);
   border-radius: 999px;
   background: oklch(0.95 0.012 80 / 5%);
@@ -70,8 +70,8 @@
 }
 
 .cardAction {
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
   padding: 0;
   border-radius: var(--radius-md);
   background: transparent;
@@ -79,13 +79,15 @@
 
 .dragHandle {
   display: grid;
+  flex: 0 0 32px;
   width: 32px;
   height: 32px;
   padding: 0;
   place-items: center;
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
-  color: var(--color-muted);
-  background: transparent;
+  color: var(--color-muted-foreground);
+  background: oklch(0.95 0.012 80 / 5%);
   cursor: grab;
   touch-action: none;
 }
@@ -101,8 +103,8 @@
 }
 
 .dragHandle svg {
-  width: 18px;
-  height: 18px;
+  width: 20px;
+  height: 20px;
 }
 
 .cardAction:hover {

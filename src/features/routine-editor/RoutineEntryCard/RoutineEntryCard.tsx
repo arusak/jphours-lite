@@ -32,6 +32,16 @@ export function RoutineEntryCard({
       className={`${styles.exerciseCard} ${entry.kind === 'break' ? styles.entryCardBreak : ''}`}
       data-dragging={dragging || undefined}
     >
+      {sortable && (
+        <button
+          ref={dragHandleRef}
+          className={styles.dragHandle}
+          aria-label={`Reorder ${name}`}
+          type="button"
+        >
+          <DragHandleIcon />
+        </button>
+      )}
       <div className={styles.exerciseCardContent}>
         <div className={styles.exerciseTitleRow}>
           <span>{index + 1}</span>
@@ -46,16 +56,6 @@ export function RoutineEntryCard({
           </span>
         </div>
       </div>
-      {sortable && (
-        <button
-          ref={dragHandleRef}
-          className={styles.dragHandle}
-          aria-label={`Reorder ${name}`}
-          type="button"
-        >
-          <DragHandleIcon />
-        </button>
-      )}
       <button className={styles.cardAction} aria-label={`Edit ${name}`} onClick={onEdit}>
         ✎
       </button>

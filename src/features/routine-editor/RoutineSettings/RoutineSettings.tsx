@@ -36,7 +36,7 @@ export function RoutineSettings({
             <span>
               <strong>Session settings</strong>
               <small>
-                Quick Rest {routine.quickRestDurationSec}s · Warning cue {warningLabel} ·{' '}
+                Quick Rest {routine.quickRestDurationSec}s · Warning cue {warningLabel} · Click:{' '}
                 {soundLabel}
               </small>
             </span>

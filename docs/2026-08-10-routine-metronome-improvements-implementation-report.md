@@ -32,3 +32,11 @@ Date: 2026-08-10
 ## Follow-up Status
 
 The five review findings have been implemented and verified. No deviations from the agreed implementation plan were required. The follow-up commit is recorded after this report update.
+
+## Editor Visual Follow-up
+
+- Restored a clear, touch-friendly six-dot drag handle for every sortable Routine entry.
+- Styled the collapsed Session settings summary as a transparent, bordered, rounded block.
+- Reduced Routine entry padding, control sizes, title size, and metadata spacing for denser Exercise rows.
+
+Verification for this visual follow-up: `pnpm test` (61 passed), `pnpm build`, `pnpm lint`, `pnpm format:check`, and `git diff --check` all passed.

@@ -3,7 +3,10 @@
 }
 
 .settingsHeader {
-  margin-bottom: 10px;
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  background: transparent;
 }
 
 .settingsHeader h2 {
@@ -15,9 +18,11 @@
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  padding: 0 4px;
+  min-height: 64px;
+  padding: 12px 14px 12px 16px;
   color: var(--color-foreground);
   text-align: left;
+  background: none;
 }
 
 .settingsHeader button > span {
@@ -55,11 +60,13 @@
 .settingsDisclosure {
   display: grid;
   grid-template-rows: 0fr;
+  opacity: 0;
   transition: grid-template-rows 180ms ease-out;
 }
 
 .settingsDisclosure[aria-hidden="false"] {
   grid-template-rows: 1fr;
+  opacity: 1;
 }
 
 .settingsDisclosure > * {
