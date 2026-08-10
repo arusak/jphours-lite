@@ -26,6 +26,11 @@ export function App() {
     const persisted = repository.load()
     repository.save({ ...persisted, metronomeSound, updatedAt: new Date().toISOString() })
   }
+  const saveSessionAlternateBeatTone = (alternateBeatTone: boolean) => {
+    if (!activeRoutine) return
+    const persisted = repository.load()
+    repository.save({ ...persisted, alternateBeatTone, updatedAt: new Date().toISOString() })
+  }
   return (
     <div className={styles.appShell}>
       {activeRoutine ? (
@@ -34,6 +39,7 @@ export function App() {
           onExit={() => setActiveRoutine(null)}
           onSaveTempo={saveSessionTempo}
           onSaveMetronomeSound={saveSessionMetronomeSound}
+          onSaveAlternateBeatTone={saveSessionAlternateBeatTone}
         />
       ) : (
         <RoutineEditor repository={repository} onStartSession={setActiveRoutine} />

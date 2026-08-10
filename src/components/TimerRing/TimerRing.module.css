@@ -43,6 +43,10 @@
   transition: stroke-dashoffset 250ms linear;
 }
 
+.discrete {
+  transition: stroke-dashoffset 150ms ease-out;
+}
+
 .break .progress {
   stroke: oklch(0.63 0.18 42);
 }

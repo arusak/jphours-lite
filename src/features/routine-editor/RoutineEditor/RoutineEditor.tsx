@@ -37,6 +37,9 @@ export function RoutineEditor({ repository, onStartSession }: RoutineEditorProps
         onSoundChange={(sound) =>
           editor.update((routine) => ({ ...routine, metronomeSound: sound }))
         }
+        onAlternateBeatToneChange={(alternateBeatTone) =>
+          editor.update((routine) => ({ ...routine, alternateBeatTone }))
+        }
       />
       <RoutineEntryList
         routine={editor.routine}
@@ -44,6 +47,7 @@ export function RoutineEditor({ repository, onStartSession }: RoutineEditorProps
           editor.setSheet({ kind: 'entry', entry: { ...editor.routine.entries[index]! }, index })
         }
         onDelete={editor.remove}
+        onReorder={editor.reorder}
       />
       <div className={styles.entryActions}>
         <button
@@ -77,15 +81,13 @@ export function RoutineEditor({ repository, onStartSession }: RoutineEditorProps
           Start session
         </button>
       </footer>
-      {editor.sheet && (
-        <EditorSheet
-          sheet={editor.sheet}
-          submitted={editor.submitted}
-          onChange={editor.setSheet}
-          onSave={editor.save}
-          onCancel={editor.close}
-        />
-      )}
+      <EditorSheet
+        sheet={editor.sheet}
+        submitted={editor.submitted}
+        onChange={editor.setSheet}
+        onSave={editor.save}
+        onCancel={editor.close}
+      />
     </section>
   )
 }

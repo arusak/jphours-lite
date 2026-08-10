@@ -10,6 +10,11 @@
   padding: 16px 0;
   border-block: 1px solid var(--color-border);
   background: oklch(0.215 0.018 52 / 40%);
+  transition: opacity 150ms ease;
+}
+
+.exerciseCard[data-dragging="true"] {
+  opacity: 0.35;
 }
 
 .exerciseCardContent {
@@ -70,6 +75,34 @@
   padding: 0;
   border-radius: var(--radius-md);
   background: transparent;
+}
+
+.dragHandle {
+  display: grid;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  place-items: center;
+  border-radius: var(--radius-md);
+  color: var(--color-muted);
+  background: transparent;
+  cursor: grab;
+  touch-action: none;
+}
+
+.dragHandle:active {
+  cursor: grabbing;
+}
+
+.dragHandle:hover,
+.dragHandle:focus-visible {
+  color: var(--color-text);
+  background: oklch(0.95 0.012 80 / 5%);
+}
+
+.dragHandle svg {
+  width: 18px;
+  height: 18px;
 }
 
 .cardAction:hover {

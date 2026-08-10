@@ -43,12 +43,16 @@ export function validateEntry(entry: RoutineEntry): EntryErrors {
 }
 
 export function validateRoutine(routine: Routine): FieldErrors<
-  'entries' | 'quickRestDurationSec' | 'warningLeadTimeSec' | 'metronomeSound'
+  'entries' | 'quickRestDurationSec' | 'warningLeadTimeSec' | 'metronomeSound' | 'alternateBeatTone'
 > & {
   entriesById: Record<string, EntryErrors>
 } {
   const errors: FieldErrors<
-    'entries' | 'quickRestDurationSec' | 'warningLeadTimeSec' | 'metronomeSound'
+    | 'entries'
+    | 'quickRestDurationSec'
+    | 'warningLeadTimeSec'
+    | 'metronomeSound'
+    | 'alternateBeatTone'
   > & { entriesById: Record<string, EntryErrors> } = {
     entriesById: Object.fromEntries(
       routine.entries.map((entry) => [entry.id, validateEntry(entry)]),
@@ -61,6 +65,8 @@ export function validateRoutine(routine: Routine): FieldErrors<
     errors.warningLeadTimeSec = 'Use a Warning lead time in the configured range.'
   if (!(routine.metronomeSound in practiceConfig.metronome.sounds))
     errors.metronomeSound = 'Choose a Metronome sound.'
+  if (typeof routine.alternateBeatTone !== 'boolean')
+    errors.alternateBeatTone = 'Choose whether even Beats use the alternate tone.'
   return errors
 }
 
@@ -80,6 +86,7 @@ export function isRoutineValid(routine: Routine): boolean {
     !validation.quickRestDurationSec &&
     !validation.warningLeadTimeSec &&
     !validation.metronomeSound &&
+    !validation.alternateBeatTone &&
     Object.values(validation.entriesById).every((errors) => Object.keys(errors).length === 0)
   )
 }

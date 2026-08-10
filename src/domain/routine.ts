@@ -28,6 +28,7 @@ export interface Routine {
   quickRestDurationSec: number
   warningLeadTimeSec: number
   metronomeSound: MetronomeSound
+  alternateBeatTone: boolean
   autoAdvance: true
   updatedAt: string
 }
@@ -66,6 +67,7 @@ export function createRoutine(overrides: Partial<Routine> = {}): Routine {
     quickRestDurationSec: practiceConfig.quickRestDuration.default,
     warningLeadTimeSec: practiceConfig.warningLeadTime.default,
     metronomeSound: practiceConfig.metronome.defaultSound,
+    alternateBeatTone: true,
     autoAdvance: true,
     updatedAt: new Date().toISOString(),
     ...overrides,

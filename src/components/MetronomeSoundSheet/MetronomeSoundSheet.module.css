@@ -40,3 +40,68 @@
   border-color: var(--color-primary);
   background: var(--color-primary);
 }
+
+.alternateBeatTone {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  color: var(--color-foreground);
+  background: var(--color-secondary);
+}
+
+.alternateBeatTone > span {
+  display: grid;
+  gap: 2px;
+}
+
+.alternateBeatTone strong {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.alternateBeatTone small {
+  color: var(--color-muted-foreground);
+  font-size: 12px;
+}
+
+.alternateBeatTone button {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  width: 44px;
+  height: 26px;
+  padding: 3px;
+  border-radius: 999px;
+  background: var(--color-muted);
+  transition: background-color 180ms ease-out;
+}
+
+.alternateBeatTone button span {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--color-muted-foreground);
+  transition:
+    transform 180ms ease-out,
+    background-color 180ms ease-out;
+}
+
+.alternateBeatTone button[aria-checked="true"] {
+  background: var(--color-primary);
+}
+
+.alternateBeatTone button[aria-checked="true"] span {
+  transform: translateX(18px);
+  background: var(--color-primary-foreground);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .alternateBeatTone button,
+  .alternateBeatTone button span {
+    transition-duration: 0ms;
+  }
+}

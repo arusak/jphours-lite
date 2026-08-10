@@ -4,14 +4,21 @@ import { stepMetadata } from '../stepMetadata'
 import styles from './NowPlayingSheet.module.css'
 
 interface NowPlayingSheetProps {
+  open: boolean
   steps: SessionStep[]
   currentIndex: number
   quickRest: boolean
   onClose(): void
 }
-export function NowPlayingSheet({ steps, currentIndex, quickRest, onClose }: NowPlayingSheetProps) {
+export function NowPlayingSheet({
+  open,
+  steps,
+  currentIndex,
+  quickRest,
+  onClose,
+}: NowPlayingSheetProps) {
   return (
-    <BottomSheet title="Now Playing" onClose={onClose}>
+    <BottomSheet open={open} title="Now Playing" onClose={onClose}>
       <ol className={styles.nowPlayingList}>
         {steps.map((item, itemIndex) => (
           <li

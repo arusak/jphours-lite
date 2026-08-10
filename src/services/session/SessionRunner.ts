@@ -26,6 +26,7 @@ export interface SessionRunnerHooks {
   onStepStart?(step: SessionStep, state: SessionState): void
   onStepStop?(step: SessionStep, reason: SessionCommand['type'] | 'DISPOSE'): void
   onWarning?(step: SessionStep): void
+  usesBeatClockForWarning?(step: SessionStep): boolean
   onQuickRestStart?(rest: QuickRestTransition, state: SessionState): void
   onQuickRestStop?(rest: QuickRestTransition, reason: SessionCommand['type'] | 'DISPOSE'): void
   onSessionComplete?(): void
@@ -175,6 +176,7 @@ export class SessionRunner {
       this.state.phase === 'step' &&
       step !== null &&
       isTimedStep(step) &&
+      !this.hooks.usesBeatClockForWarning?.(step) &&
       this.warningLeadTimeSec > 0 &&
       step.durationSec! > this.warningLeadTimeSec &&
       this.state.warningPlayedForStepId !== step.id

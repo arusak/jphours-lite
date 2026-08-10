@@ -8,6 +8,11 @@
   background: rgb(0 0 0 / 55%);
 }
 
+.sheetBackdrop[data-state="closing"] {
+  pointer-events: none;
+  animation: backdropOut 180ms ease-in forwards;
+}
+
 .bottomSheet {
   width: min(100%, 460px);
   max-height: 85dvh;
@@ -18,6 +23,10 @@
   border-radius: 32px 32px 0 0;
   background: var(--color-card);
   animation: sheetIn 180ms ease-out;
+}
+
+.bottomSheet[data-state="closing"] {
+  animation: sheetOut 180ms ease-in forwards;
 }
 
 .sheetGrabber {
@@ -61,5 +70,17 @@
 @keyframes sheetIn {
   from {
     transform: translateY(100%);
+  }
+}
+
+@keyframes sheetOut {
+  to {
+    transform: translateY(100%);
+  }
+}
+
+@keyframes backdropOut {
+  to {
+    opacity: 0;
   }
 }

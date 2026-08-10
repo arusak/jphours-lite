@@ -1,2 +1,10 @@
 export { AudioController } from './AudioController'
-export type { AudioControllerOptions, AudioCue, MetronomeOptions, ScheduledBeat } from './types'
+export { BeatClock } from './BeatClock'
+export type {
+  AudioControllerOptions,
+  AudioCue,
+  BeatAccent,
+  BeatSnapshot,
+  MetronomeOptions,
+  ScheduledBeat,
+} from './types'

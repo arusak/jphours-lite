@@ -39,10 +39,17 @@ describe('LocalStorageRoutineRepository', () => {
       quickRestDurationSec: 30,
       warningLeadTimeSec: 20,
       metronomeSound: 'classic',
+      alternateBeatTone: true,
     })
     expect(migrated.entries).toEqual([
       { id: 'first', kind: 'exercise', title: 'Scales', tempoBpm: 80, durationSec: 300 },
       { id: 'second', kind: 'exercise', title: 'Free', tempoBpm: null, durationSec: null },
     ])
+  })
+
+  it('normalizes saved current Routines without the Alternate beat tone setting to enabled', () => {
+    const { alternateBeatTone: _alternateBeatTone, ...savedWithoutSetting } = createRoutine()
+
+    expect(migrateRoutine(savedWithoutSetting)).toMatchObject({ alternateBeatTone: true })
   })
 })

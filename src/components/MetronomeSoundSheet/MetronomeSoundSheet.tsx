@@ -3,8 +3,11 @@ import { BottomSheet } from '../BottomSheet/BottomSheet'
 import styles from './MetronomeSoundSheet.module.css'
 
 interface MetronomeSoundSheetProps {
+  open: boolean
   sound: MetronomeSound
   onChange(sound: MetronomeSound): void
+  alternateBeatTone: boolean
+  onAlternateBeatToneChange(enabled: boolean): void
   onClose(): void
 }
 
@@ -12,9 +15,16 @@ function soundLabel(sound: MetronomeSound) {
   return sound[0]!.toUpperCase() + sound.slice(1)
 }
 
-export function MetronomeSoundSheet({ sound, onChange, onClose }: MetronomeSoundSheetProps) {
+export function MetronomeSoundSheet({
+  open,
+  sound,
+  onChange,
+  alternateBeatTone,
+  onAlternateBeatToneChange,
+  onClose,
+}: MetronomeSoundSheetProps) {
   return (
-    <BottomSheet title="Metronome sound" onClose={onClose}>
+    <BottomSheet open={open} title="Metronome sound" onClose={onClose}>
       <div className={styles.soundList} role="radiogroup" aria-label="Metronome sound">
         {(Object.keys(practiceConfig.metronome.sounds) as MetronomeSound[]).map((option) => (
           <button
@@ -30,6 +40,21 @@ export function MetronomeSoundSheet({ sound, onChange, onClose }: MetronomeSound
             </span>
           </button>
         ))}
+      </div>
+      <div className={styles.alternateBeatTone}>
+        <span>
+          <strong>Alternate beat tone</strong>
+          <small>Even beats use a lower tone.</small>
+        </span>
+        <button
+          type="button"
+          role="switch"
+          aria-checked={alternateBeatTone}
+          aria-label="Alternate beat tone"
+          onClick={() => onAlternateBeatToneChange(!alternateBeatTone)}
+        >
+          <span aria-hidden="true" />
+        </button>
       </div>
     </BottomSheet>
   )

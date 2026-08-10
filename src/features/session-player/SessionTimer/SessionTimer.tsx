@@ -11,6 +11,7 @@ interface SessionTimerProps {
   displaySeconds: number | null
   elapsedSeconds: number
   progress: number | null
+  discreteProgress?: boolean
   tone: 'exercise' | 'break' | 'quick-rest'
   onChangeTempo(delta: number): void
   onSaveTempo(): void
@@ -23,6 +24,7 @@ export function SessionTimer({
   displaySeconds,
   elapsedSeconds,
   progress,
+  discreteProgress = false,
   tone,
   onChangeTempo,
   onSaveTempo,
@@ -30,7 +32,12 @@ export function SessionTimer({
   const time = formatTime(displaySeconds ?? elapsedSeconds)
   const timerDescription = displaySeconds === null ? 'Elapsed time' : 'Remaining time'
   return (
-    <TimerRing accessibleName={`${timerDescription}: ${time}`} progress={progress} tone={tone}>
+    <TimerRing
+      accessibleName={`${timerDescription}: ${time}`}
+      progress={progress}
+      tone={tone}
+      discreteProgress={discreteProgress}
+    >
       {tempo !== null ? (
         <div className={styles.ringTempoControl}>
           <button aria-label="Decrease tempo" onClick={() => onChangeTempo(-1)}>

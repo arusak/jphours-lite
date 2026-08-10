@@ -7,7 +7,7 @@ import sharedStyles from '../RoutineEditor.module.css'
 import styles from './EditorSheet.module.css'
 
 interface EditorSheetProps {
-  sheet: Sheet
+  sheet: Sheet | null
   submitted: boolean
   onChange(value: Sheet): void
   onSave(): void
@@ -15,14 +15,14 @@ interface EditorSheetProps {
 }
 const minute = 60
 export function EditorSheet({ sheet, submitted, onChange, onSave, onCancel }: EditorSheetProps) {
-  const entry = sheet.kind === 'entry' ? sheet.entry : null
+  const entry = sheet?.kind === 'entry' ? sheet.entry : null
   const errors = entry && submitted ? validateEntry(entry) : {}
   const mutate = (value: Partial<Exercise>) =>
     entry &&
     onChange({
       kind: 'entry',
       entry: { ...entry, ...value } as RoutineEntry,
-      index: sheet.kind === 'entry' ? sheet.index : null,
+      index: sheet?.kind === 'entry' ? sheet.index : null,
     })
   const durationChange = (delta: number) => {
     if (!entry) return
@@ -32,14 +32,14 @@ export function EditorSheet({ sheet, submitted, onChange, onSave, onCancel }: Ed
     mutate({ durationSec: Math.max(policy.min, Math.min(policy.max, base + delta)) })
   }
   const title =
-    sheet.kind === 'routine'
+    sheet?.kind === 'routine'
       ? 'Edit routine'
-      : sheet.index === null
-        ? `Add ${entry!.kind}`
-        : `Edit ${entry!.kind}`
+      : sheet?.index === null
+        ? `Add ${entry?.kind ?? 'entry'}`
+        : `Edit ${entry?.kind ?? 'entry'}`
   return (
-    <BottomSheet title={title} onClose={onCancel}>
-      {sheet.kind === 'routine' ? (
+    <BottomSheet open={sheet !== null} title={title} onClose={onCancel}>
+      {sheet?.kind === 'routine' ? (
         <label>
           Routine name
           <input
@@ -47,7 +47,7 @@ export function EditorSheet({ sheet, submitted, onChange, onSave, onCancel }: Ed
             onChange={(event) => onChange({ kind: 'routine', name: event.target.value })}
           />
         </label>
-      ) : (
+      ) : sheet?.kind === 'entry' ? (
         <>
           <>
             {entry!.kind === 'exercise' && (
@@ -138,7 +138,7 @@ export function EditorSheet({ sheet, submitted, onChange, onSave, onCancel }: Ed
             </p>
           )}
         </>
-      )}
+      ) : null}
       <div className={styles.sheetActions}>
         <button className={sharedStyles.primaryAction} onClick={onSave}>
           Save

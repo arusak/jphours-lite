@@ -84,6 +84,21 @@ export function ChevronRightIcon(props: IconProps) {
   )
 }
 
+export function DragHandleIcon(props: IconProps) {
+  return (
+    <svg
+      {...iconProps}
+      {...props}
+      fill="none"
+      stroke="currentColor"
+      strokeLinecap="round"
+      strokeWidth="2"
+    >
+      <path d="M9 6h.01M15 6h.01M9 12h.01M15 12h.01M9 18h.01M15 18h.01" />
+    </svg>
+  )
+}
+
 export function BreakIcon(props: IconProps) {
   return (
     <svg

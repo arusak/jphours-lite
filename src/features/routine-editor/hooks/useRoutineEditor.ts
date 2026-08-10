@@ -5,6 +5,7 @@ import { isRoutineValid, validateEntry, validateRoutine } from '../../../domain/
 import { DebouncedRoutineSaver } from '../../../services/persistence/debounced-routine-saver'
 import type { RoutineRepository } from '../../../services/persistence/routine-repository'
 import { routineTotal } from '../routineTotal'
+import { moveRoutineEntry } from '../moveRoutineEntry'
 import type { EditorSheet } from '../types'
 
 const touch = (routine: Routine): Routine => ({ ...routine, updatedAt: new Date().toISOString() })
@@ -59,6 +60,11 @@ export function useRoutineEditor(repository: RoutineRepository) {
       const entries = current.entries.filter((_, itemIndex) => itemIndex !== index)
       return { ...current, entries: entries.length ? entries : [createExercise()] }
     })
+  const reorder = (activeEntryId: string, targetEntryId: string) =>
+    update((current) => ({
+      ...current,
+      entries: moveRoutineEntry(current.entries, activeEntryId, targetEntryId),
+    }))
   return {
     routine,
     sheet,
@@ -72,6 +78,7 @@ export function useRoutineEditor(repository: RoutineRepository) {
     save,
     close,
     remove,
+    reorder,
     flush: () => saver.current.flush(),
   }
 }

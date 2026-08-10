@@ -88,15 +88,14 @@
 }
 
 .beatIndicator span {
-  width: 10px;
-  height: 10px;
+  width: 14px;
+  height: 14px;
   border-radius: 50%;
   background: oklch(0.95 0.012 80 / 15%);
 }
 
 .beatIndicator span.active {
   background: var(--color-primary);
-  animation: beat-pulse 280ms ease-out;
 }
 
 .sessionBanner {
@@ -114,19 +113,6 @@
   border-color: transparent;
   background: var(--color-primary);
   box-shadow: 0 10px 24px oklch(0.81 0.145 74 / 25%);
-}
-
-@keyframes beat-pulse {
-  0%,
-  100% {
-    opacity: 0.35;
-    transform: scale(0.72);
-  }
-
-  50% {
-    opacity: 1;
-    transform: scale(1);
-  }
 }
 
 @media (max-width: 359px) {

@@ -6,6 +6,7 @@ interface TimerRingProps {
   progress?: number | null
   tone?: 'exercise' | 'break' | 'quick-rest'
   accessibleName?: string
+  discreteProgress?: boolean
 }
 
 const RADIUS = 128
@@ -16,6 +17,7 @@ export function TimerRing({
   progress = null,
   tone = 'exercise',
   accessibleName,
+  discreteProgress = false,
 }: TimerRingProps) {
   const gradientId = useId()
   const fraction = Math.min(1, Math.max(0, progress ?? 0))
@@ -26,6 +28,7 @@ export function TimerRing({
       data-testid="timer-ring"
       data-open-ended={progress === null}
       data-tone={tone}
+      data-discrete-progress={discreteProgress}
     >
       <svg viewBox="0 0 268 268" aria-hidden="true">
         <defs>
@@ -58,7 +61,7 @@ export function TimerRing({
         />
         {progress !== null && (
           <circle
-            className={styles.progress}
+            className={`${styles.progress} ${discreteProgress ? styles.discrete : ''}`}
             cx="134"
             cy="134"
             r={RADIUS}

@@ -10,6 +10,7 @@ const routine = (entries: RoutineEntry[], quickRestDurationSec = 10): Routine =>
   entries,
   quickRestDurationSec,
   metronomeSound: 'classic',
+  alternateBeatTone: true,
   warningLeadTimeSec: 20,
   autoAdvance: true,
   updatedAt: '2026-01-01T00:00:00.000Z',

@@ -3,22 +3,68 @@
 }
 
 .settingsHeader {
-  display: flex;
-  align-items: end;
-  justify-content: space-between;
   margin-bottom: 10px;
-  padding: 0 4px;
 }
 
 .settingsHeader h2 {
+  margin: 0;
+}
+
+.settingsHeader button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0 4px;
+  color: var(--color-foreground);
+  text-align: left;
+}
+
+.settingsHeader button > span {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+}
+
+.settingsHeader strong {
   font-size: 15px;
+  font-weight: 700;
   letter-spacing: -0.01em;
 }
 
-.settingsHeader p {
-  margin-top: 2px;
+.settingsHeader small {
   color: var(--color-muted-foreground);
   font-size: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.settingsHeader button > svg {
+  flex: 0 0 auto;
+  width: 18px;
+  height: 18px;
+  color: var(--color-muted-foreground);
+  transition: transform 180ms ease-out;
+}
+
+.settingsHeader button[aria-expanded="true"] > svg {
+  transform: rotate(90deg);
+}
+
+.settingsDisclosure {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 180ms ease-out;
+}
+
+.settingsDisclosure[aria-hidden="false"] {
+  grid-template-rows: 1fr;
+}
+
+.settingsDisclosure > * {
+  min-height: 0;
+  overflow: hidden;
 }
 
 .settingsCard {
@@ -81,4 +127,11 @@
   width: 16px;
   height: 16px;
   color: var(--color-muted-foreground);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .settingsHeader button > svg,
+  .settingsDisclosure {
+    transition-duration: 0ms;
+  }
 }

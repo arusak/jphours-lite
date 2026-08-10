@@ -11,7 +11,7 @@
     "src/styles.css": "Global application styles.",
     "src/vite-env.d.ts": "Vite TypeScript ambient declarations.",
     "src/app/": "Top-level application state, screen switching, and shell layout.",
-    "src/components/BottomSheet/": "Reusable accessible bottom-sheet dialog component and styles.",
+    "src/components/BottomSheet/": "Reusable accessible bottom-sheet dialog, controlled presence lifecycle, styles, and focused tests.",
     "src/components/Icons/": "Reusable current-color SVG UI icons.",
     "src/components/MetronomeSoundSheet/": "Reusable auto-committing Metronome sound selection sheet.",
     "src/components/ProgressSegments/": "Segmented session-progress indicator component and styles.",
@@ -44,6 +44,9 @@
     "tsconfig.node.json": "TypeScript configuration for Vite and Node-side configuration.",
     "vite.config.ts": "Vite, React, PWA, and test-runner configuration.",
     "docs/": "Project plans, implementation reports, ubiquitous language, and this inventory.",
+    "docs/2026-08-10-beat-synchronization-architecture.md": "Russian architecture decision document describing current Beat timing, synchronization risks, and three candidate approaches.",
+    "docs/2026-08-10-routine-metronome-improvements-plan.md": "Agreed implementation plan for Routine entry DnD, Metronome timing and tone, synchronized visuals, collapsible settings, and Bottom Sheet presence.",
+    "docs/2026-08-10-routine-metronome-improvements-implementation-report.md": "English implementation report for the Routine ordering, Metronome, settings disclosure, and Bottom Sheet work.",
     "docs/2026-08-08-timer-ring-children-implementation-report.md": "Implementation report for the TimerRing children API refactor."
   }
 }

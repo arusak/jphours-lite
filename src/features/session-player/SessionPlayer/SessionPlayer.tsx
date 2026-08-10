@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import {
   BottomSheet,
   MetronomeIcon,
@@ -21,6 +21,7 @@ export interface SessionPlayerProps {
   onExit(): void
   onSaveTempo?(sourceExerciseId: string, tempoBpm: number): void
   onSaveMetronomeSound?(sound: MetronomeSound): void
+  onSaveAlternateBeatTone?(alternateBeatTone: boolean): void
 }
 
 export function SessionPlayer({
@@ -28,10 +29,17 @@ export function SessionPlayer({
   onExit,
   onSaveTempo,
   onSaveMetronomeSound,
+  onSaveAlternateBeatTone,
 }: SessionPlayerProps) {
-  const player = useSessionPlayer({ routine, onSaveTempo, onSaveMetronomeSound })
+  const player = useSessionPlayer({
+    routine,
+    onSaveTempo,
+    onSaveMetronomeSound,
+    onSaveAlternateBeatTone,
+  })
   const [nowPlayingOpen, setNowPlayingOpen] = useState(false)
   const [stopOpen, setStopOpen] = useState(false)
+  const [stopPendingExit, setStopPendingExit] = useState(false)
   const [soundPickerOpen, setSoundPickerOpen] = useState(false)
   const { state } = player
   const step =
@@ -41,6 +49,30 @@ export function SessionPlayer({
     state.phase === 'quick-rest'
       ? (state.quickRests.find((rest) => rest.afterStepId === step?.id) ?? null)
       : null
+  const durationForRing =
+    state.phase === 'quick-rest' ? (quickRest?.durationSec ?? null) : (step?.durationSec ?? null)
+  const pacedRing = state.phase === 'step' && step?.kind === 'exercise' && step.tempoBpm !== null
+  const beatProgress = useMemo(() => {
+    if (
+      !pacedRing ||
+      durationForRing === null ||
+      state.currentStepStartedAt === null ||
+      state.status === 'paused' ||
+      state.status === 'interrupted'
+    )
+      return null
+    return Math.min(
+      1,
+      Math.max(0, (performance.now() - state.currentStepStartedAt) / 1000 / durationForRing),
+    )
+  }, [
+    pacedRing,
+    durationForRing,
+    state.currentStepStartedAt,
+    state.status,
+    player.beatSnapshot.generation,
+    player.beatSnapshot.beatIndex,
+  ])
   const nextStep = state.steps[index + 1] ?? null
   const remainingSec =
     state.currentStepEndsAt === null
@@ -60,7 +92,26 @@ export function SessionPlayer({
         onExit={onExit}
       />
     )
-  if (!step) return null
+  if (!step)
+    return (
+      <main className={styles.sessionPlayer}>
+        <BottomSheet
+          key="stop-sheet"
+          open={stopOpen}
+          title="Stop session"
+          onClose={() => setStopOpen(false)}
+          onAfterClose={() => stopPendingExit && onExit()}
+        >
+          <StopSlider
+            onStop={() => {
+              setStopOpen(false)
+              setStopPendingExit(true)
+              player.stop()
+            }}
+          />
+        </BottomSheet>
+      </main>
+    )
   const paused = state.status === 'paused' || state.status === 'interrupted'
   const displaySeconds =
     paused && state.pausedRemainingSec !== null ? Math.ceil(state.pausedRemainingSec) : remainingSec
@@ -76,10 +127,11 @@ export function SessionPlayer({
       ? (player.savedTempos[step.sourceExerciseId] ?? step.tempoBpm)
       : null
   const duration = isQuickRest ? (quickRest?.durationSec ?? null) : step.durationSec
-  const progress =
+  const countdownProgress =
     duration === null || displaySeconds === null
       ? null
       : Math.min(1, Math.max(0, (duration - displaySeconds) / duration))
+  const progress = pacedRing ? beatProgress : countdownProgress
   const title = isQuickRest ? 'Quick Rest' : isBreak ? 'Break' : step.title
   const tone = isQuickRest ? 'quick-rest' : isBreak ? 'break' : 'exercise'
   return (
@@ -122,6 +174,7 @@ export function SessionPlayer({
         displaySeconds={displaySeconds}
         elapsedSeconds={elapsedSec}
         progress={progress}
+        discreteProgress={pacedRing}
         tone={tone}
         onChangeTempo={(delta) =>
           currentTempo !== null && player.changeTempo(step, currentTempo, delta)
@@ -132,7 +185,16 @@ export function SessionPlayer({
         <>
           <div className={styles.beatIndicator} aria-label="Metronome beat">
             {[0, 1, 2, 3].map((dot) => (
-              <span key={dot} className={dot === player.beat && !paused ? styles.active : ''} />
+              <span
+                key={dot}
+                className={
+                  dot === player.beatSnapshot.positionInPattern &&
+                  !paused &&
+                  player.beatSnapshot.running
+                    ? styles.active
+                    : ''
+                }
+              />
             ))}
           </div>
         </>
@@ -155,32 +217,36 @@ export function SessionPlayer({
         onStop={() => setStopOpen(true)}
         onFinishOrSkip={() => player.finishOrSkip(paused)}
       />
-      {nowPlayingOpen && (
-        <NowPlayingSheet
-          steps={state.steps}
-          currentIndex={index}
-          quickRest={isQuickRest}
-          onClose={() => setNowPlayingOpen(false)}
+      <NowPlayingSheet
+        open={nowPlayingOpen}
+        steps={state.steps}
+        currentIndex={index}
+        quickRest={isQuickRest}
+        onClose={() => setNowPlayingOpen(false)}
+      />
+      <MetronomeSoundSheet
+        open={soundPickerOpen}
+        sound={player.soundOverride}
+        onChange={(sound) => player.changeSound(sound, true)}
+        alternateBeatTone={player.alternateBeatTone}
+        onAlternateBeatToneChange={player.changeAlternateBeatTone}
+        onClose={() => setSoundPickerOpen(false)}
+      />
+      <BottomSheet
+        key="stop-sheet"
+        open={stopOpen}
+        title="Stop session"
+        onClose={() => setStopOpen(false)}
+        onAfterClose={() => stopPendingExit && onExit()}
+      >
+        <StopSlider
+          onStop={() => {
+            setStopOpen(false)
+            player.stop()
+            setStopPendingExit(true)
+          }}
         />
-      )}
-      {soundPickerOpen && (
-        <MetronomeSoundSheet
-          sound={player.soundOverride}
-          onChange={(sound) => player.changeSound(sound, true)}
-          onClose={() => setSoundPickerOpen(false)}
-        />
-      )}
-      {stopOpen && (
-        <BottomSheet title="Stop session" onClose={() => setStopOpen(false)}>
-          <StopSlider
-            onStop={() => {
-              setStopOpen(false)
-              player.stop()
-              onExit()
-            }}
-          />
-        </BottomSheet>
-      )}
+      </BottomSheet>
     </main>
   )
 }

@@ -83,13 +83,25 @@ describe('AudioController', () => {
 
     expect(controller.startMetronome({ bpm: 120, onBeatScheduled })).toBe(true)
     expect(onBeatScheduled).toHaveBeenCalledTimes(1)
-    expect(onBeatScheduled).toHaveBeenLastCalledWith({ beat: 0, time: 0.05 })
+    expect(onBeatScheduled).toHaveBeenLastCalledWith({
+      beatIndex: 0,
+      positionInPattern: 0,
+      accent: 'primary',
+      tempoBpm: 120,
+      time: 0.05,
+    })
 
     intervals[0]!()
     expect(onBeatScheduled).toHaveBeenCalledTimes(1)
     context.now = 0.45
     intervals[0]!()
-    expect(onBeatScheduled).toHaveBeenLastCalledWith({ beat: 1, time: 0.55 })
+    expect(onBeatScheduled).toHaveBeenLastCalledWith({
+      beatIndex: 1,
+      positionInPattern: 1,
+      accent: 'secondary',
+      tempoBpm: 120,
+      time: 0.55,
+    })
     expect(onBeatScheduled).toHaveBeenCalledTimes(2)
   })
 
@@ -108,7 +120,7 @@ describe('AudioController', () => {
     expect(context.oscillators[0]?.stop).toHaveBeenCalled()
   })
 
-  it('changes live tempo from a clean beat boundary and retains the beat callback', () => {
+  it('keeps the pending Beat in place and applies live Tempo after it', () => {
     const context = makeContext()
     const intervals: Array<() => void> = []
     const clearIntervalFn = vi.fn()
@@ -123,25 +135,35 @@ describe('AudioController', () => {
     })
     controller.startMetronome({ bpm: 120, onBeatScheduled })
     const oldSource = context.oscillators[0]!
+    const scheduledStopCalls = oldSource.stop.mock.calls.length
 
     context.now = 0.2
     expect(controller.updateMetronomeTempo(60)).toBe(true)
-    expect(clearIntervalFn).toHaveBeenCalledWith(1)
-    expect(oldSource.stop).toHaveBeenCalled()
-    expect(onBeatScheduled).toHaveBeenLastCalledWith({ beat: 1, time: 0.25 })
+    expect(clearIntervalFn).not.toHaveBeenCalled()
+    expect(oldSource.stop).toHaveBeenCalledTimes(scheduledStopCalls)
 
-    context.now = 1.2
-    intervals.at(-1)!()
-    expect(onBeatScheduled).toHaveBeenLastCalledWith({ beat: 2, time: 1.25 })
+    context.now = 0.45
+    intervals[0]!()
+    expect(onBeatScheduled).toHaveBeenLastCalledWith(
+      expect.objectContaining({ beatIndex: 1, time: 0.55, tempoBpm: 60 }),
+    )
+
+    context.now = 1.46
+    intervals[0]!()
+    expect(onBeatScheduled).toHaveBeenLastCalledWith(
+      expect.objectContaining({ beatIndex: 2, time: 1.55, tempoBpm: 60 }),
+    )
   })
 
-  it('switches presets immediately, cancelling old clicks and using YAML synthesis parameters', () => {
+  it('uses alternate tone on secondary Beats while preserving waveform and decay', () => {
     const context = makeContext()
-    const clearIntervalFn = vi.fn()
+    const intervals: Array<() => void> = []
     const controller = new AudioController({
       contextFactory: () => context,
-      setIntervalFn: vi.fn(() => 1) as unknown as typeof setInterval,
-      clearIntervalFn: clearIntervalFn as unknown as typeof clearInterval,
+      setIntervalFn: ((callback: () => void) => {
+        intervals.push(callback)
+        return intervals.length
+      }) as typeof setInterval,
     })
     controller.startMetronome({ bpm: 120, sound: 'classic' })
     const classic = context.oscillators[0]!
@@ -150,12 +172,60 @@ describe('AudioController', () => {
     const beatEnvelope = context.gains.at(-1)!
     expect(beatEnvelope.gain.exponentialRampToValueAtTime.mock.calls[0]?.[0]).toBe(0.35)
 
+    context.now = 0.45
+    intervals[0]!()
+    const alternate = context.oscillators.at(-1)!
+    expect(alternate.frequency.value).toBeCloseTo(1100 * 2 ** (-3 / 12))
+    expect(alternate.type).toBe('sine')
+    expect(context.gains.at(-1)!.gain.exponentialRampToValueAtTime.mock.calls[1]?.[1]).toBeCloseTo(
+      0.55 + 0.06,
+    )
+
+    expect(controller.updateAlternateBeatTone(false)).toBe(true)
+    context.now = 0.95
+    intervals[0]!()
+    expect(context.oscillators.at(-1)!.frequency.value).toBe(1100)
+  })
+
+  it('notifies visual consumers only at an audible Beat boundary', () => {
+    vi.useFakeTimers()
+    const context = makeContext()
+    const controller = new AudioController({ contextFactory: () => context })
+    const observed = vi.fn()
+    controller.subscribeToBeats(observed)
+
+    controller.startMetronome({ bpm: 120 })
+    expect(controller.getBeatSnapshot().beatIndex).toBe(-1)
+    vi.advanceTimersByTime(49)
+    expect(controller.getBeatSnapshot().beatIndex).toBe(-1)
+    vi.advanceTimersByTime(1)
+    expect(controller.getBeatSnapshot()).toEqual(
+      expect.objectContaining({ beatIndex: 0, positionInPattern: 0, running: true }),
+    )
+    expect(observed).toHaveBeenCalledTimes(3)
+    vi.useRealTimers()
+  })
+
+  it('aligns a paced Warning cue with the tempo-adjusted Beat grid', () => {
+    const context = makeContext()
+    const intervals: Array<() => void> = []
+    const controller = new AudioController({
+      contextFactory: () => context,
+      setIntervalFn: ((callback: () => void) => {
+        intervals.push(callback)
+        return intervals.length
+      }) as typeof setInterval,
+    })
+    controller.startMetronome({ bpm: 120 })
+    expect(controller.scheduleWarningAt(600)).toBe(true)
+
     context.now = 0.2
-    expect(controller.updateMetronomeSound('wood')).toBe(true)
-    expect(clearIntervalFn).toHaveBeenCalled()
-    expect(classic.stop).toHaveBeenCalled()
-    expect(context.oscillators.at(-1)!.frequency.value).toBe(720)
-    expect(context.oscillators.at(-1)!.type).toBe('triangle')
+    controller.updateMetronomeTempo(60)
+    context.now = 0.45
+    intervals[0]!()
+
+    expect(context.oscillators.map((oscillator) => oscillator.frequency.value)).toContain(660)
+    expect(context.oscillators.at(-2)!.start).toHaveBeenCalledWith(0.55)
   })
 
   it('rejects an invalid live tempo without disturbing the active metronome', () => {

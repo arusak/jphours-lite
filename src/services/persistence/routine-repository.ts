@@ -25,7 +25,8 @@ type LegacyRoutine = {
 
 /** The only place persisted schema compatibility is decided. */
 export function migrateRoutine(value: unknown): Routine {
-  if (isCurrentRoutine(value)) return value
+  if (isCurrentRoutine(value))
+    return { ...value, alternateBeatTone: value.alternateBeatTone ?? true }
   if (isLegacyRoutine(value))
     return createRoutine({
       id: value.id,
@@ -34,6 +35,7 @@ export function migrateRoutine(value: unknown): Routine {
       quickRestDurationSec: value.defaultBreakDurationSec,
       warningLeadTimeSec: value.warningLeadTimeSec,
       metronomeSound: practiceConfig.metronome.defaultSound,
+      alternateBeatTone: true,
       autoAdvance: value.autoAdvance,
       updatedAt: value.updatedAt,
     })
@@ -68,6 +70,8 @@ function isCurrentRoutine(value: unknown): value is Routine {
     typeof candidate.quickRestDurationSec === 'number' &&
     typeof candidate.warningLeadTimeSec === 'number' &&
     typeof candidate.metronomeSound === 'string' &&
+    (candidate.alternateBeatTone === undefined ||
+      typeof candidate.alternateBeatTone === 'boolean') &&
     candidate.autoAdvance === true &&
     typeof candidate.updatedAt === 'string'
   )

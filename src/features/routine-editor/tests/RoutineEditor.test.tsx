@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 import { createBreak, createExercise, createRoutine, type Routine } from '../../../domain/routine'
 import type { RoutineRepository } from '../../../services/persistence/routine-repository'
@@ -65,6 +65,7 @@ describe('RoutineEditor', () => {
   it('edits Metronome sound in the shared sheet without a save action', () => {
     render(<RoutineEditor repository={repository(createRoutine())} />)
 
+    fireEvent.click(screen.getByRole('button', { name: /session settings/i }))
     fireEvent.click(screen.getByRole('button', { name: /metronome sound/i }))
     expect(screen.getByRole('dialog', { name: 'Metronome sound' })).toBeInTheDocument()
 
@@ -74,5 +75,64 @@ describe('RoutineEditor', () => {
     expect(screen.queryByRole('button', { name: 'Save sound' })).not.toBeInTheDocument()
     fireEvent.keyDown(document, { key: 'Escape' })
     expect(screen.getByRole('button', { name: /metronome sound/i })).toHaveTextContent('Wood')
+  })
+
+  it('starts settings collapsed, exposes the current summary, and removes hidden controls from navigation', () => {
+    render(
+      <RoutineEditor
+        repository={repository(
+          createRoutine({
+            quickRestDurationSec: 30,
+            warningLeadTimeSec: 0,
+            metronomeSound: 'wood',
+          }),
+        )}
+      />,
+    )
+    const disclosure = screen.getByRole('button', { name: /session settings/i })
+    const panel = document.getElementById('routine-settings-panel')
+    expect(disclosure).toHaveAttribute('aria-expanded', 'false')
+    expect(disclosure).toHaveTextContent('Quick Rest 30s · Warning cue Off · Wood')
+    expect(panel).toHaveAttribute('aria-hidden', 'true')
+    expect(panel).toHaveAttribute('inert')
+
+    fireEvent.click(disclosure)
+
+    expect(disclosure).toHaveAttribute('aria-expanded', 'true')
+    expect(panel).toHaveAttribute('aria-hidden', 'false')
+    expect(panel).not.toHaveAttribute('inert')
+    expect(screen.getByRole('button', { name: 'Increase Quick Rest' })).toBeInTheDocument()
+  })
+
+  it('auto-commits Alternate beat tone changes from the shared sound sheet', () => {
+    render(<RoutineEditor repository={repository(createRoutine())} />)
+
+    fireEvent.click(screen.getByRole('button', { name: /session settings/i }))
+    fireEvent.click(screen.getByRole('button', { name: /metronome sound/i }))
+    const alternateBeatTone = screen.getByRole('switch', { name: 'Alternate beat tone' })
+    expect(alternateBeatTone).toHaveAttribute('aria-checked', 'true')
+
+    fireEvent.click(alternateBeatTone)
+
+    expect(alternateBeatTone).toHaveAttribute('aria-checked', 'false')
+  })
+
+  it('activates the dnd-kit Keyboard sensor only from the drag handle', async () => {
+    render(
+      <RoutineEditor
+        repository={repository(createRoutine({ entries: [createExercise({ title: 'Scales' })] }))}
+      />,
+    )
+
+    const handle = screen.getByRole('button', { name: 'Reorder Scales' })
+    await waitFor(() => expect(handle).toHaveAttribute('aria-roledescription', 'draggable'))
+    fireEvent.keyDown(handle, { code: 'Space' })
+    await waitFor(() => expect(handle).toHaveAttribute('aria-grabbed', 'true'))
+    fireEvent.keyDown(document, { code: 'Escape' })
+    await waitFor(() => expect(handle).toHaveAttribute('aria-grabbed', 'false'))
+
+    fireEvent.click(screen.getByRole('button', { name: 'Edit Scales' }))
+    expect(screen.getByRole('dialog', { name: 'Edit exercise' })).toBeInTheDocument()
+    expect(handle).toHaveAttribute('aria-grabbed', 'false')
   })
 })

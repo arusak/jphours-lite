@@ -1,5 +1,11 @@
 .exerciseList {
   display: grid;
-  gap: 12px;
+  gap: 0;
   margin-top: 12px;
+}
+
+.dragOverlay {
+  width: min(calc(100vw - 32px), 560px);
+  border-radius: 0;
+  box-shadow: 0 12px 30px oklch(0 0 0 / 35%);
 }

@@ -1,4 +1,5 @@
 import { practiceConfig, type MetronomeSound } from '../../config/practice-config'
+import { BeatClock, type BeatAccent, type BeatSnapshot } from './BeatClock'
 import type { AudioControllerOptions, AudioCue, MetronomeOptions } from './types'
 
 const DEFAULT_POLL_MS = 25
@@ -27,9 +28,14 @@ export class AudioController {
   private cueGain?: GainNode
   private scheduler?: ReturnType<typeof setInterval>
   private nextBeatTime = 0
-  private beat = 0
+  private beatIndex = 0
   private metronome?: MetronomeOptions
   private readonly activeSources = new Set<OscillatorNode>()
+  private readonly beatClock = new BeatClock()
+  private warningTargetTime: number | null = null
+  private warningScheduled = false
+  private warningAnchoredToScheduledBeat = false
+  private readonly warningSources = new Set<OscillatorNode>()
 
   public constructor(options: AudioControllerOptions = {}) {
     this.contextFactory = options.contextFactory ?? defaultContextFactory
@@ -56,8 +62,13 @@ export class AudioController {
     if (!isValidBpm(options.bpm) || !this.getContext()) return false
 
     this.stopMetronome()
-    this.metronome = { ...options, sound: options.sound ?? practiceConfig.metronome.defaultSound }
-    this.beat = 0
+    this.metronome = {
+      ...options,
+      sound: options.sound ?? practiceConfig.metronome.defaultSound,
+      alternateBeatTone: options.alternateBeatTone ?? true,
+    }
+    this.beatIndex = 0
+    this.beatClock.start(options.bpm)
     this.nextBeatTime = this.context!.currentTime + START_DELAY_SEC
     this.scheduleBeats()
     const fn = () => this.scheduleBeats()
@@ -65,23 +76,39 @@ export class AudioController {
     return true
   }
 
-  /** Applies a session-only tempo and drops clicks queued at the old tempo. */
+  /** Applies Tempo after the next already-planned boundary without restarting the grid. */
   public updateMetronomeTempo(bpm: number): boolean {
     if (!isValidBpm(bpm) || !this.metronome || !this.getContext()) return false
-    this.clearScheduler()
-    this.cancelActiveSources()
+    if (this.warningScheduled && !this.warningAnchoredToScheduledBeat) this.cancelScheduledWarning()
     this.metronome = { ...this.metronome, bpm }
-    this.nextBeatTime = this.context!.currentTime + START_DELAY_SEC
-    this.scheduleBeats()
-    this.scheduler = this.setIntervalFn(() => this.scheduleBeats(), this.schedulerPollMs)
     return true
   }
 
-  /** Applies a session-only sound preset and drops clicks queued with the old sound. */
+  /** Applies a session-only sound preset to Beats which have not yet been scheduled. */
   public updateMetronomeSound(sound: MetronomeSound): boolean {
     if (!this.metronome || !practiceConfig.metronome.sounds[sound] || !this.getContext())
       return false
-    this.restartMetronome({ ...this.metronome, sound })
+    this.metronome = { ...this.metronome, sound }
+    return true
+  }
+
+  /** Applies the lower secondary tone to Beats which have not yet been scheduled. */
+  public updateAlternateBeatTone(enabled: boolean): boolean {
+    if (!this.metronome || !this.getContext()) return false
+    this.metronome = { ...this.metronome, alternateBeatTone: enabled }
+    return true
+  }
+
+  getBeatSnapshot = (): BeatSnapshot => this.beatClock.getSnapshot()
+
+  subscribeToBeats = (listener: () => void): (() => void) => this.beatClock.subscribe(listener)
+
+  /** Queues the Warning cue on the nearest Beat once that portion of the grid is known. */
+  public scheduleWarningAt(delayMs: number): boolean {
+    const context = this.getContext()
+    if (!context || !this.metronome || !Number.isFinite(delayMs)) return false
+    this.warningTargetTime = context.currentTime + Math.max(0, delayMs) / 1000
+    this.cancelScheduledWarning()
     return true
   }
 
@@ -89,6 +116,7 @@ export class AudioController {
   public pauseMetronome(): void {
     this.clearScheduler()
     this.cancelActiveSources()
+    this.beatClock.stop()
   }
 
   /** Restarts from a new beat boundary; missed beats are deliberately not recreated. */
@@ -105,9 +133,12 @@ export class AudioController {
   public stopMetronome(): void {
     this.clearScheduler()
     this.cancelActiveSources()
+    this.beatClock.stop()
     this.metronome = undefined
-    this.beat = 0
+    this.beatIndex = 0
     this.nextBeatTime = 0
+    this.warningTargetTime = null
+    this.cancelScheduledWarning()
   }
 
   public setMetronomeVolume(volume: number): void {
@@ -127,12 +158,20 @@ export class AudioController {
     if (!context || !gain) return false
 
     const start = context.currentTime + 0.01
+    this.scheduleCue(cue, start)
+    return true
+  }
+
+  private scheduleCue(cue: AudioCue, start: number): OscillatorNode[] {
+    const gain = this.getCueGain()
+    if (!gain) return []
     const peak =
       cue === 'warning' ? practiceConfig.audio.warningPeak : practiceConfig.audio.completionPeak
-    cuePatterns[cue].forEach((frequency, index) => {
-      this.scheduleTone(frequency, start + index * 0.16, 0.1, gain, peak)
-    })
-    return true
+    return cuePatterns[cue]
+      .map((frequency, index) =>
+        this.scheduleTone(frequency, start + index * 0.16, 0.1, gain, peak),
+      )
+      .filter((source): source is OscillatorNode => source !== undefined)
   }
 
   public dispose(): void {
@@ -145,20 +184,38 @@ export class AudioController {
 
   private scheduleBeats(): void {
     if (!this.context || !this.metronome) return
-    const interval = 60 / this.metronome.bpm
     const horizon = this.context.currentTime + this.scheduleAheadSec
 
     while (this.nextBeatTime <= horizon) {
-      this.scheduleClick(this.nextBeatTime)
-      this.metronome.onBeatScheduled?.({
+      const metronome = this.metronome
+      const positionInPattern = this.beatIndex % 4
+      const accent: BeatAccent = positionInPattern % 2 === 0 ? 'primary' : 'secondary'
+      const scheduledBeat = {
         time: this.nextBeatTime,
-        beat: this.beat++,
-      })
-      this.nextBeatTime += interval
+        beatIndex: this.beatIndex,
+        positionInPattern,
+        accent,
+        tempoBpm: metronome.bpm,
+      }
+      this.scheduleClick(
+        scheduledBeat.time,
+        accent === 'secondary' && metronome.alternateBeatTone === true,
+      )
+      metronome.onBeatScheduled?.(scheduledBeat)
+      this.beatClock.schedule(
+        {
+          ...scheduledBeat,
+          audioTime: scheduledBeat.time,
+        },
+        (scheduledBeat.time - this.context.currentTime) * 1000,
+      )
+      this.scheduleWarningOnGrid(scheduledBeat.time, 60 / metronome.bpm)
+      this.beatIndex += 1
+      this.nextBeatTime += 60 / metronome.bpm
     }
   }
 
-  private scheduleClick(time: number): void {
+  private scheduleClick(time: number, alternate: boolean): void {
     const gain = this.getMetronomeGain()
     const sound =
       practiceConfig.metronome.sounds[
@@ -166,13 +223,27 @@ export class AudioController {
       ]
     if (gain)
       this.scheduleTone(
-        sound.frequency,
+        alternate ? sound.frequency * 2 ** (-3 / 12) : sound.frequency,
         time,
         sound.decay,
         gain,
         practiceConfig.audio.beatPeak,
         sound.waveform,
       )
+  }
+
+  private scheduleWarningOnGrid(beatTime: number, interval: number): void {
+    if (this.warningTargetTime === null || this.warningScheduled || !this.context) return
+    const nextBeatTime = beatTime + interval
+    if (this.warningTargetTime < beatTime || this.warningTargetTime > nextBeatTime) return
+    const cueTime =
+      this.warningTargetTime - beatTime <= nextBeatTime - this.warningTargetTime
+        ? beatTime
+        : nextBeatTime
+    if (cueTime < this.context.currentTime) return
+    this.scheduleCue('warning', cueTime).forEach((source) => this.warningSources.add(source))
+    this.warningScheduled = true
+    this.warningAnchoredToScheduledBeat = cueTime === beatTime
   }
 
   private scheduleTone(
@@ -182,9 +253,9 @@ export class AudioController {
     destination: GainNode,
     peak: number,
     waveform: OscillatorType = 'sine',
-  ): void {
+  ): OscillatorNode | undefined {
     const context = this.context
-    if (!context) return
+    if (!context) return undefined
     const oscillator = context.createOscillator()
     const envelope = context.createGain()
     oscillator.frequency.value = frequency
@@ -202,6 +273,20 @@ export class AudioController {
     }
     oscillator.start(time)
     oscillator.stop(time + duration + 0.01)
+    return oscillator
+  }
+
+  private cancelScheduledWarning(): void {
+    for (const source of this.warningSources) {
+      try {
+        source.stop()
+      } catch {
+        /* source has already stopped */
+      }
+    }
+    this.warningSources.clear()
+    this.warningScheduled = false
+    this.warningAnchoredToScheduledBeat = false
   }
 
   private getContext(): AudioContext | undefined {
@@ -235,15 +320,6 @@ export class AudioController {
   private clearScheduler(): void {
     if (this.scheduler !== undefined) this.clearIntervalFn(this.scheduler)
     this.scheduler = undefined
-  }
-
-  private restartMetronome(options: MetronomeOptions): void {
-    this.clearScheduler()
-    this.cancelActiveSources()
-    this.metronome = options
-    this.nextBeatTime = this.context!.currentTime + START_DELAY_SEC
-    this.scheduleBeats()
-    this.scheduler = this.setIntervalFn(() => this.scheduleBeats(), this.schedulerPollMs)
   }
 
   private cancelActiveSources(): void {

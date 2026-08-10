@@ -3,14 +3,27 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { createBreak, createExercise, createRoutine } from '../../../domain/routine'
 import { SessionPlayer } from '../SessionPlayer/SessionPlayer'
 
+const silentBeatSnapshot = {
+  beatIndex: -1,
+  positionInPattern: 0,
+  accent: 'primary' as const,
+  audioTime: null,
+  tempoBpm: null,
+  running: false,
+  generation: 0,
+}
 const audio = {
   unlock: vi.fn().mockResolvedValue(true),
   startMetronome: vi.fn(),
   updateMetronomeTempo: vi.fn(),
   updateMetronomeSound: vi.fn(),
+  updateAlternateBeatTone: vi.fn(),
+  scheduleWarningAt: vi.fn(),
   stopMetronome: vi.fn(),
   playCue: vi.fn(),
   dispose: vi.fn(),
+  subscribeToBeats: vi.fn(() => vi.fn()),
+  getBeatSnapshot: vi.fn(() => silentBeatSnapshot),
 }
 vi.mock('../../../services/audio', () => ({
   AudioController: class {
@@ -68,6 +81,25 @@ describe('SessionPlayer', () => {
     expect(onSaveMetronomeSound).toHaveBeenCalledWith('wood')
     expect(screen.getByRole('radio', { name: 'Wood' })).toHaveAttribute('aria-checked', 'true')
     expect(screen.queryByRole('button', { name: 'Save sound' })).not.toBeInTheDocument()
+  })
+
+  it('auto-commits an Alternate beat tone change from the sound sheet', async () => {
+    const onSaveAlternateBeatTone = vi.fn()
+    render(
+      <SessionPlayer
+        routine={routineWith(createExercise({ id: 'scales', title: 'Scales', tempoBpm: 90 }))}
+        onExit={vi.fn()}
+        onSaveAlternateBeatTone={onSaveAlternateBeatTone}
+      />,
+    )
+
+    fireEvent.click(await screen.findByRole('button', { name: 'Choose metronome sound' }))
+    const alternateBeatTone = screen.getByRole('switch', { name: 'Alternate beat tone' })
+    fireEvent.click(alternateBeatTone)
+
+    expect(alternateBeatTone).toHaveAttribute('aria-checked', 'false')
+    expect(audio.updateAlternateBeatTone).toHaveBeenCalledWith(false)
+    expect(onSaveAlternateBeatTone).toHaveBeenCalledWith(false)
   })
 
   it('uses the neutral, accessible elapsed-time ring for an unpaced open-ended exercise', async () => {
@@ -130,6 +162,8 @@ describe('SessionPlayer', () => {
     fireEvent.blur(slider)
     expect(screen.queryByText('Session stopped')).not.toBeInTheDocument()
     fireEvent.keyDown(slider, { key: 'End' })
+    expect(onExit).not.toHaveBeenCalled()
+    fireEvent.animationEnd(screen.getByRole('dialog', { name: 'Stop session' }))
     expect(onExit).toHaveBeenCalledOnce()
     expect(screen.queryByText('Session stopped')).not.toBeInTheDocument()
   })
