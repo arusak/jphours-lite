@@ -9,13 +9,13 @@ importers:
   .:
     dependencies:
       '@dnd-kit/react':
-        specifier: ^0.5.0
+        specifier: latest
         version: 0.5.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       '@vitejs/plugin-react':
         specifier: latest
         version: 6.0.5(vite@8.2.1(terser@5.49.2)(yaml@2.9.0))
       clsx:
-        specifier: ^2.1.1
+        specifier: latest
         version: 2.1.1
       react:
         specifier: latest
@@ -33,7 +33,7 @@ importers:
         specifier: latest
         version: 0.6.1(vite@8.2.1(terser@5.49.2)(yaml@2.9.0))
       workbox-window:
-        specifier: ^7.4.1
+        specifier: latest
         version: 7.4.1
     devDependencies:
       '@rollup/plugin-yaml':
