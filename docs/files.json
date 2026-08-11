@@ -1,16 +1,14 @@
 {
   "description": "Repository navigation inventory for agentic code discovery.",
   "entries": {
-    ".zed/": "Project-level Zed editor settings, including oxfmt formatter integration.",
     "index.html": "Vite HTML entry document.",
-    "package.json": "Project metadata, dependencies, and package scripts.",
-    "pnpm-lock.yaml": "Locked dependency graph for pnpm.",
     "scripts/": "Supporting scripts, including source-icon conversion.",
     "public/": "Static application assets and installable-app icons.",
     "src/main.tsx": "React application bootstrap and root mount.",
     "src/styles.css": "Global application styles.",
     "src/vite-env.d.ts": "Vite TypeScript ambient declarations.",
     "src/app/": "Top-level application state, screen switching, and shell layout.",
+    "src/components/AppUpdateBanner/": "Application-update notice, pre-update callback handling, and focused tests.",
     "src/components/BottomSheet/": "Reusable accessible bottom-sheet dialog, controlled presence lifecycle, styles, and focused tests.",
     "src/components/Icons/": "Reusable current-color SVG UI icons.",
     "src/components/MetronomeSoundSheet/": "Reusable auto-committing Metronome sound selection sheet.",
@@ -36,17 +34,13 @@
     "src/features/session-player/StopSlider/": "Accessible slide-to-confirm stop control.",
     "src/services/audio/": "Web Audio scheduling, playback cues, interfaces, and tests.",
     "src/services/persistence/": "Browser-storage routine persistence and debounced saving.",
-    "src/services/platform/": "Browser platform lifecycle and wake-lock integrations.",
+    "src/services/platform/": "Browser platform lifecycle, service-worker registration context, and wake-lock integrations.",
     "src/services/session/": "Session planning, progression, timing, reducer logic, and tests.",
     "src/test/": "Vitest and Testing Library test-environment setup.",
     "tsconfig.json": "Base TypeScript project configuration.",
     "tsconfig.app.json": "TypeScript configuration for browser application code.",
     "tsconfig.node.json": "TypeScript configuration for Vite and Node-side configuration.",
     "vite.config.ts": "Vite, React, PWA, and test-runner configuration.",
-    "docs/": "Project plans, implementation reports, ubiquitous language, and this inventory.",
-    "docs/2026-08-10-beat-synchronization-architecture.md": "Russian architecture decision document describing current Beat timing, synchronization risks, and three candidate approaches.",
-    "docs/2026-08-10-routine-metronome-improvements-plan.md": "Agreed implementation plan for Routine entry DnD, Metronome timing and tone, synchronized visuals, collapsible settings, and Bottom Sheet presence.",
-    "docs/2026-08-10-routine-metronome-improvements-implementation-report.md": "English implementation report for the Routine ordering, Metronome, settings disclosure, and Bottom Sheet work.",
-    "docs/2026-08-08-timer-ring-children-implementation-report.md": "Implementation report for the TimerRing children API refactor."
+    "docs/": "Project plans, implementation reports, ubiquitous language, and this inventory."
   }
 }
