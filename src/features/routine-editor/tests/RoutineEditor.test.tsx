@@ -4,6 +4,11 @@ import { createBreak, createExercise, createRoutine, type Routine } from '../../
 import type { RoutineRepository } from '../../../services/persistence/routine-repository'
 import { RoutineEditor, routineTotal } from '../RoutineEditor/RoutineEditor'
 
+vi.mock('../../../components', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('../../../components')>()),
+  AppUpdateBanner: () => null,
+}))
+
 function repository(initial: Routine): RoutineRepository {
   return { load: () => initial, save: vi.fn() }
 }

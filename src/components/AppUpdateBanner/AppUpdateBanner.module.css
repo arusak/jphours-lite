@@ -1,0 +1,32 @@
+.banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin: calc(-32px - env(safe-area-inset-top)) -24px 24px;
+  padding: max(12px, env(safe-area-inset-top)) 24px 12px;
+  background: var(--color-primary);
+  color: var(--color-primary-foreground);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.action {
+  flex: none;
+  min-height: 36px;
+  padding: 8px 14px;
+  border-radius: var(--radius-xl);
+  background: oklch(0.2 0.03 55 / 16%);
+  font-weight: 700;
+}
+
+.action:hover {
+  background: oklch(0.2 0.03 55 / 25%);
+}
+
+@media (max-width: 359px) {
+  .banner {
+    margin-inline: -16px;
+    padding-inline: 16px;
+  }
+}

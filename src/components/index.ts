@@ -1,3 +1,4 @@
+export * from './AppUpdateBanner/AppUpdateBanner'
 export * from './BottomSheet/BottomSheet'
 export * from './Icons/Icons'
 export * from './MetronomeSoundSheet/MetronomeSoundSheet'

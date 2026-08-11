@@ -1,5 +1,5 @@
 import { createBreak, createExercise } from '../../../domain/routine'
-import { PlayIcon } from '../../../components'
+import { AppUpdateBanner, PlayIcon } from '../../../components'
 import { EditorSheet } from '../EditorSheet/EditorSheet'
 import { RoutineEntryList } from '../RoutineEntryList/RoutineEntryList'
 import { RoutineSettings } from '../RoutineSettings/RoutineSettings'
@@ -14,6 +14,7 @@ export function RoutineEditor({ repository, onStartSession }: RoutineEditorProps
   const editor = useRoutineEditor(repository)
   return (
     <section className={styles.routineEditor} aria-labelledby="routine-editor-title">
+      <AppUpdateBanner onBeforeUpdate={editor.flush} />
       <header className={`${styles.routineHeader} ${styles.compact}`}>
         <h1 id="routine-editor-title">{editor.routine.name.trim() || 'Practice routine'}</h1>
         <button

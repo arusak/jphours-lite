@@ -9,6 +9,7 @@ import styles from './App.module.css'
 export function App() {
   const repository = useMemo(() => new LocalStorageRoutineRepository(), [])
   const [activeRoutine, setActiveRoutine] = useState<Routine | null>(null)
+
   const saveSessionTempo = (sourceExerciseId: string, tempoBpm: number) => {
     if (!activeRoutine) return
     const persisted = repository.load()
