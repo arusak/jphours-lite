@@ -1,10 +1,22 @@
+import * as z from 'zod/mini'
+import { v4 as uuidv4 } from 'uuid'
+import { practiceConfig } from '../../config/practice-config'
 import {
+  createExercise,
   createRoutine,
   ROUTINE_SCHEMA_VERSION,
-  type Exercise,
   type Routine,
 } from '../../domain/routine'
-import { practiceConfig } from '../../config/practice-config'
+import { normalizeExerciseName, normalizeRoutineName } from '../../domain/name-normalization'
+import {
+  breakDurationSchema,
+  exerciseDurationSchema,
+  metronomeSoundSchema,
+  quickRestDurationSchema,
+  routineSchema,
+  tempoSchema,
+  warningLeadTimeSchema,
+} from '../../domain/routine-schema'
 
 export const ROUTINE_STORAGE_KEY = 'rhythm-practice-trainer/routine'
 export interface RoutineRepository {
@@ -12,35 +24,89 @@ export interface RoutineRepository {
   save(routine: Routine): void
 }
 
-type LegacyRoutine = {
-  schemaVersion: 1
-  id: string
-  name: string
-  exercises: Omit<Exercise, 'kind'>[]
-  defaultBreakDurationSec: number
-  warningLeadTimeSec: number
-  updatedAt: string
-}
+const ingressIdSchema = z.string()
+const ingressExerciseSchema = z.looseObject({
+  id: ingressIdSchema,
+  kind: z.literal('exercise'),
+  title: z.string(),
+  tempoBpm: z.nullable(tempoSchema),
+  durationSec: z.nullable(exerciseDurationSchema),
+})
+const ingressBreakSchema = z.looseObject({
+  id: ingressIdSchema,
+  kind: z.literal('break'),
+  durationSec: breakDurationSchema,
+})
+const currentRoutineIngressSchema = z.looseObject({
+  schemaVersion: z.literal(ROUTINE_SCHEMA_VERSION),
+  id: ingressIdSchema,
+  name: z.string(),
+  entries: z.array(z.discriminatedUnion('kind', [ingressExerciseSchema, ingressBreakSchema])),
+  quickRestDurationSec: quickRestDurationSchema,
+  warningLeadTimeSec: warningLeadTimeSchema,
+  metronomeSound: metronomeSoundSchema,
+  alternateBeatTone: z.optional(z.boolean()),
+  updatedAt: z.iso.datetime({ precision: 3 }).check(z.length(24)),
+})
+const legacyExerciseSchema = z.looseObject({
+  id: ingressIdSchema,
+  title: z.string(),
+  tempoBpm: z.nullable(tempoSchema),
+  durationSec: z.nullable(exerciseDurationSchema),
+})
+const legacyRoutineIngressSchema = z.looseObject({
+  schemaVersion: z.literal(1),
+  id: ingressIdSchema,
+  name: z.string(),
+  exercises: z.array(legacyExerciseSchema).check(z.minLength(1)),
+  defaultBreakDurationSec: quickRestDurationSchema,
+  warningLeadTimeSec: warningLeadTimeSchema,
+  updatedAt: z.iso.datetime({ precision: 3 }).check(z.length(24)),
+})
 
 /** The only place persisted schema compatibility is decided. */
 export function migrateRoutine(value: unknown): Routine {
-  if (isCurrentRoutine(value)) {
-    const { autoAdvance: _autoAdvance, ...routine } = value as Routine & {
-      autoAdvance?: unknown
+  const current = z.safeParse(currentRoutineIngressSchema, value)
+  if (current.success) {
+    const migrated = {
+      schemaVersion: ROUTINE_SCHEMA_VERSION,
+      id: validIdOrFresh(current.data.id),
+      name: normalizeRoutineName(current.data.name),
+      entries: current.data.entries.map((entry) => ({
+        ...entry,
+        id: validIdOrFresh(entry.id),
+        ...(entry.kind === 'exercise' ? { title: normalizeExerciseName(entry.title) } : {}),
+      })),
+      quickRestDurationSec: current.data.quickRestDurationSec,
+      warningLeadTimeSec: current.data.warningLeadTimeSec,
+      metronomeSound: current.data.metronomeSound,
+      alternateBeatTone: current.data.alternateBeatTone ?? true,
+      updatedAt: current.data.updatedAt,
     }
-    return { ...routine, alternateBeatTone: routine.alternateBeatTone ?? true }
+    const parsed = z.safeParse(routineSchema, migrated)
+    return parsed.success ? parsed.data : createRoutine()
   }
-  if (isLegacyRoutine(value))
-    return createRoutine({
-      id: value.id,
-      name: value.name,
-      entries: value.exercises.map((exercise) => ({ ...exercise, kind: 'exercise' })),
-      quickRestDurationSec: value.defaultBreakDurationSec,
-      warningLeadTimeSec: value.warningLeadTimeSec,
+
+  const legacy = z.safeParse(legacyRoutineIngressSchema, value)
+  if (legacy.success) {
+    const migrated = createRoutine({
+      name: normalizeRoutineName(legacy.data.name),
+      entries: legacy.data.exercises.map((exercise) =>
+        createExercise({
+          title: normalizeExerciseName(exercise.title),
+          tempoBpm: exercise.tempoBpm,
+          durationSec: exercise.durationSec,
+        }),
+      ),
+      quickRestDurationSec: legacy.data.defaultBreakDurationSec,
+      warningLeadTimeSec: legacy.data.warningLeadTimeSec,
       metronomeSound: practiceConfig.metronome.defaultSound,
       alternateBeatTone: true,
-      updatedAt: value.updatedAt,
+      updatedAt: legacy.data.updatedAt,
     })
+    const parsed = z.safeParse(routineSchema, migrated)
+    return parsed.success ? parsed.data : createRoutine()
+  }
   return createRoutine()
 }
 
@@ -61,32 +127,6 @@ export class LocalStorageRoutineRepository implements RoutineRepository {
   }
 }
 
-function isCurrentRoutine(value: unknown): value is Routine {
-  if (typeof value !== 'object' || value === null) return false
-  const candidate = value as Partial<Routine>
-  return (
-    candidate.schemaVersion === ROUTINE_SCHEMA_VERSION &&
-    typeof candidate.id === 'string' &&
-    typeof candidate.name === 'string' &&
-    Array.isArray(candidate.entries) &&
-    typeof candidate.quickRestDurationSec === 'number' &&
-    typeof candidate.warningLeadTimeSec === 'number' &&
-    typeof candidate.metronomeSound === 'string' &&
-    (candidate.alternateBeatTone === undefined ||
-      typeof candidate.alternateBeatTone === 'boolean') &&
-    typeof candidate.updatedAt === 'string'
-  )
-}
-function isLegacyRoutine(value: unknown): value is LegacyRoutine {
-  if (typeof value !== 'object' || value === null) return false
-  const candidate = value as Partial<LegacyRoutine>
-  return (
-    candidate.schemaVersion === 1 &&
-    typeof candidate.id === 'string' &&
-    typeof candidate.name === 'string' &&
-    Array.isArray(candidate.exercises) &&
-    typeof candidate.defaultBreakDurationSec === 'number' &&
-    typeof candidate.warningLeadTimeSec === 'number' &&
-    typeof candidate.updatedAt === 'string'
-  )
+function validIdOrFresh(id: string): string {
+  return z.safeParse(z.uuid(), id).success ? id : uuidv4()
 }

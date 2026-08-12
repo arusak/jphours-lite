@@ -1,6 +1,15 @@
 import { BottomSheet } from '../../../components'
 import { practiceConfig } from '../../../config/practice-config'
-import type { Exercise, RoutineEntry } from '../../../domain/routine'
+import {
+  EXERCISE_NAME_MAX_LENGTH,
+  ROUTINE_NAME_MAX_LENGTH,
+  type Exercise,
+  type RoutineEntry,
+} from '../../../domain/routine'
+import {
+  sanitizeExerciseNameInput,
+  sanitizeRoutineNameInput,
+} from '../../../domain/name-normalization'
 import { validateEntry } from '../../../domain/validation'
 import type { EditorSheet as Sheet } from '../types'
 import sharedStyles from '../RoutineEditor.module.css'
@@ -44,7 +53,10 @@ export function EditorSheet({ sheet, submitted, onChange, onSave, onCancel }: Ed
           Routine name
           <input
             value={sheet.name}
-            onChange={(event) => onChange({ kind: 'routine', name: event.target.value })}
+            maxLength={ROUTINE_NAME_MAX_LENGTH}
+            onChange={(event) =>
+              onChange({ kind: 'routine', name: sanitizeRoutineNameInput(event.target.value) })
+            }
           />
         </label>
       ) : sheet?.kind === 'entry' ? (
@@ -55,8 +67,11 @@ export function EditorSheet({ sheet, submitted, onChange, onSave, onCancel }: Ed
                 Exercise name
                 <input
                   value={entry!.title}
+                  maxLength={EXERCISE_NAME_MAX_LENGTH}
                   aria-invalid={Boolean(errors.title)}
-                  onChange={(event) => mutate({ title: event.target.value })}
+                  onChange={(event) =>
+                    mutate({ title: sanitizeExerciseNameInput(event.target.value) })
+                  }
                 />
               </label>
             )}
@@ -81,6 +96,9 @@ export function EditorSheet({ sheet, submitted, onChange, onSave, onCancel }: Ed
                   </button>
                   <input
                     type="number"
+                    min={practiceConfig.tempo.min}
+                    max={practiceConfig.tempo.max}
+                    step={practiceConfig.tempo.increment}
                     value={entry!.tempoBpm ?? ''}
                     onChange={(event) =>
                       mutate({
@@ -113,6 +131,16 @@ export function EditorSheet({ sheet, submitted, onChange, onSave, onCancel }: Ed
               </button>
               <input
                 type="number"
+                min={
+                  (entry!.kind === 'break'
+                    ? practiceConfig.breakDuration.min
+                    : practiceConfig.exerciseDuration.min) / minute
+                }
+                max={
+                  (entry!.kind === 'break'
+                    ? practiceConfig.breakDuration.max
+                    : practiceConfig.exerciseDuration.max) / minute
+                }
                 step="1"
                 value={entry!.durationSec === null ? '' : entry!.durationSec / minute}
                 onChange={(event) =>

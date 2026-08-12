@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { practiceConfig } from '../../../config/practice-config'
-import { createExercise, type Routine } from '../../../domain/routine'
-import { isRoutineValid, validateEntry, validateRoutine } from '../../../domain/validation'
+import { ROUTINE_ENTRY_MAX_COUNT, createExercise, type Routine } from '../../../domain/routine'
+import { normalizeExerciseName, normalizeRoutineName } from '../../../domain/name-normalization'
+import { validateEntry, validateRoutine } from '../../../domain/validation'
 import { DebouncedRoutineSaver } from '../../../services/persistence/debounced-routine-saver'
 import type { RoutineRepository } from '../../../services/persistence/routine-repository'
 import { routineTotal } from '../routineTotal'
@@ -14,9 +15,17 @@ export function useRoutineEditor(repository: RoutineRepository) {
   const [sheet, setSheet] = useState<EditorSheet | null>(null)
   const [submitted, setSubmitted] = useState(false)
   const saver = useRef(new DebouncedRoutineSaver(repository))
+  const persistedReplacement = useRef<Routine | null>(null)
   const validation = useMemo(() => validateRoutine(routine), [routine])
   const total = useMemo(() => routineTotal(routine), [routine])
-  useEffect(() => saver.current.schedule(routine), [routine])
+  useEffect(() => {
+    if (persistedReplacement.current === routine) {
+      persistedReplacement.current = null
+      return
+    }
+    persistedReplacement.current = null
+    saver.current.schedule(routine)
+  }, [routine])
   useEffect(() => () => saver.current.dispose(), [])
   const update = (change: (current: Routine) => Routine) =>
     setRoutine((current) => touch(change(current)))
@@ -38,11 +47,18 @@ export function useRoutineEditor(repository: RoutineRepository) {
   const save = () => {
     if (!sheet) return
     if (sheet.kind === 'routine') {
-      update((current) => ({ ...current, name: sheet.name.trim() }))
+      update((current) => ({ ...current, name: normalizeRoutineName(sheet.name) }))
       close()
       return
     }
-    if (Object.keys(validateEntry(sheet.entry)).length) {
+    const normalizedEntry =
+      sheet.entry.kind === 'exercise'
+        ? {
+            ...sheet.entry,
+            title: normalizeExerciseName(sheet.entry.title),
+          }
+        : sheet.entry
+    if (Object.keys(validateEntry(normalizedEntry)).length) {
       setSubmitted(true)
       return
     }
@@ -50,8 +66,10 @@ export function useRoutineEditor(repository: RoutineRepository) {
       ...current,
       entries:
         sheet.index === null
-          ? [...current.entries, sheet.entry]
-          : current.entries.map((entry, index) => (index === sheet.index ? sheet.entry : entry)),
+          ? [...current.entries, normalizedEntry]
+          : current.entries.map((entry, index) =>
+              index === sheet.index ? normalizedEntry : entry,
+            ),
     }))
     close()
   }
@@ -65,13 +83,21 @@ export function useRoutineEditor(repository: RoutineRepository) {
       ...current,
       entries: moveRoutineEntry(current.entries, activeEntryId, targetEntryId),
     }))
+  const replaceRoutine = (replacement: Routine) => {
+    repository.save(replacement)
+    saver.current.cancel()
+    persistedReplacement.current = replacement
+    setRoutine(replacement)
+    close()
+  }
   return {
     routine,
     sheet,
     submitted,
     total,
     validation,
-    valid: isRoutineValid(routine),
+    valid: validation.valid,
+    atEntryLimit: routine.entries.length >= ROUTINE_ENTRY_MAX_COUNT,
     setSheet,
     update,
     updateSetting,
@@ -79,6 +105,7 @@ export function useRoutineEditor(repository: RoutineRepository) {
     close,
     remove,
     reorder,
+    replaceRoutine,
     flush: () => saver.current.flush(),
   }
 }

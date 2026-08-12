@@ -1,0 +1,73 @@
+.actions {
+  display: inline-flex;
+  gap: 4px;
+}
+
+.action {
+  padding: 3px 5px;
+  border-radius: 6px;
+  color: var(--color-muted-foreground);
+  background: transparent;
+  font-size: 10px;
+  font-weight: 500;
+  opacity: 0.58;
+}
+
+.action:hover,
+.action:focus-visible {
+  opacity: 1;
+}
+
+.action:disabled {
+  opacity: 0.25;
+}
+
+.fileInput {
+  position: fixed;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+
+.status {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  max-width: 280px;
+  color: var(--color-muted-foreground);
+  font-size: 11px;
+  text-align: right;
+}
+
+.preview h3 {
+  margin-bottom: 4px;
+}
+
+.preview ul {
+  max-height: 220px;
+  margin: 16px 0;
+  padding-left: 20px;
+  overflow-y: auto;
+  color: var(--color-muted-foreground);
+}
+
+.replace,
+.cancel {
+  width: 100%;
+  min-height: 48px;
+  margin-top: 10px;
+  padding: 12px 18px;
+  border-radius: var(--radius-2xl);
+  font-weight: 600;
+}
+
+.replace {
+  color: var(--color-primary-foreground);
+  background: var(--color-primary);
+}
+
+.cancel {
+  border: 1px solid var(--color-border);
+  background: var(--color-secondary);
+}

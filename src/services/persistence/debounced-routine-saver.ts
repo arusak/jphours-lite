@@ -24,6 +24,12 @@ export class DebouncedRoutineSaver {
     this.pending = undefined
   }
 
+  cancel(): void {
+    if (this.timeoutId !== undefined) clearTimeout(this.timeoutId)
+    this.timeoutId = undefined
+    this.pending = undefined
+  }
+
   dispose(): void {
     this.flush()
   }

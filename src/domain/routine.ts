@@ -1,6 +1,12 @@
+import { v4 as uuidv4 } from 'uuid'
 import { practiceConfig, type MetronomeSound } from '../config/practice-config'
 
 export const ROUTINE_SCHEMA_VERSION = 2 as const
+export const ROUTINE_NAME_MAX_LENGTH = 60
+export const EXERCISE_NAME_MAX_LENGTH = 60
+export const ROUTINE_ENTRY_MAX_COUNT = 1_000
+export const DEFAULT_ROUTINE_NAME = 'Practice routine'
+export const DEFAULT_EXERCISE_NAME = 'Exercise'
 
 export interface Exercise {
   id: string
@@ -30,15 +36,11 @@ export interface Routine {
   updatedAt: string
 }
 
-const createId = (): string =>
-  globalThis.crypto?.randomUUID?.() ??
-  `routine-${Date.now()}-${Math.random().toString(36).slice(2)}`
-
 export function createExercise(overrides: Partial<Omit<Exercise, 'kind'>> = {}): Exercise {
   return {
-    id: createId(),
+    id: uuidv4(),
     kind: 'exercise',
-    title: 'Exercise',
+    title: DEFAULT_EXERCISE_NAME,
     tempoBpm: practiceConfig.tempo.default,
     durationSec: practiceConfig.exerciseDuration.default,
     ...overrides,
@@ -47,7 +49,7 @@ export function createExercise(overrides: Partial<Omit<Exercise, 'kind'>> = {}):
 
 export function createBreak(overrides: Partial<Omit<Break, 'kind'>> = {}): Break {
   return {
-    id: createId(),
+    id: uuidv4(),
     kind: 'break',
     durationSec: practiceConfig.breakDuration.default,
     ...overrides,
@@ -55,12 +57,11 @@ export function createBreak(overrides: Partial<Omit<Break, 'kind'>> = {}): Break
 }
 
 export function createRoutine(overrides: Partial<Routine> = {}): Routine {
-  const defaultExercise = createExercise()
   return {
     schemaVersion: ROUTINE_SCHEMA_VERSION,
-    id: createId(),
-    name: '',
-    entries: [defaultExercise],
+    id: uuidv4(),
+    name: DEFAULT_ROUTINE_NAME,
+    entries: [createExercise()],
     quickRestDurationSec: practiceConfig.quickRestDuration.default,
     warningLeadTimeSec: practiceConfig.warningLeadTime.default,
     metronomeSound: practiceConfig.metronome.defaultSound,

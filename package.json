@@ -18,10 +18,12 @@
     "clsx": "latest",
     "react": "latest",
     "react-dom": "latest",
+    "uuid": "latest",
     "vite": "latest",
     "vite-plugin-pwa": "latest",
     "vite-plugin-readable-css-modules": "latest",
-    "workbox-window": "latest"
+    "workbox-window": "latest",
+    "zod": "latest"
   },
   "devDependencies": {
     "@rollup/plugin-yaml": "latest",
@@ -33,8 +35,7 @@
     "oxfmt": "latest",
     "oxlint": "latest",
     "typescript": "latest",
-    "vitest": "latest",
-    "yaml": "latest"
+    "vitest": "latest"
   },
   "devEngines": {
     "runtime": {

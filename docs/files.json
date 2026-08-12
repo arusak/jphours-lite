@@ -20,6 +20,7 @@
     "src/features/routine-editor/": "Routine editor feature, including hooks, forms, components, styles, and tests.",
     "src/features/routine-editor/EditorSheet/": "Bottom-sheet forms for routine names and routine entries.",
     "src/features/routine-editor/RoutineEditor/": "Routine editor feature composition and public props.",
+    "src/features/routine-editor/RoutineFileActions/": "Routine file import/export actions, validation status, preview, and replacement confirmation UI.",
     "src/features/routine-editor/RoutineEntryCard/": "Single routine-entry summary, edit, and delete controls.",
     "src/features/routine-editor/RoutineEntryList/": "Ordered list of editable routine entries.",
     "src/features/routine-editor/RoutineSettings/": "Quick Rest, warning, and Metronome sound settings UI.",
@@ -34,6 +35,7 @@
     "src/features/session-player/StopSlider/": "Accessible slide-to-confirm stop control.",
     "src/services/audio/": "Web Audio scheduling, playback cues, interfaces, and tests.",
     "src/services/persistence/": "Browser-storage routine persistence and debounced saving.",
+    "src/services/routine-files/": "Versioned Routine JSON serialization, strict import parsing, filename sanitization, and adversarial tests.",
     "src/services/platform/": "Browser platform lifecycle, service-worker registration context, and wake-lock integrations.",
     "src/services/session/": "Session planning, progression, timing, reducer logic, and tests.",
     "src/test/": "Vitest and Testing Library test-environment setup.",
@@ -42,6 +44,7 @@
     "tsconfig.node.json": "TypeScript configuration for Vite and Node-side configuration.",
     "vite.config.ts": "Vite, React, PWA, and test-runner configuration.",
     "docs/2026-08-12-dead-session-code-cleanup-report.md": "Implementation report for removing obsolete Routine and Session model, command, wrapper, and styling code.",
+    "docs/2026-08-12-routine-file-refactor-report.md": "Implementation report for the Routine file transfer, validation, migration, and editor refactor.",
     "docs/": "Project plans, implementation reports, ubiquitous language, and this inventory."
   }
 }

@@ -1,6 +1,7 @@
 import { createBreak, createExercise } from '../../../domain/routine'
 import { AppUpdateBanner, PlayIcon } from '../../../components'
 import { EditorSheet } from '../EditorSheet/EditorSheet'
+import { RoutineFileActions } from '../RoutineFileActions/RoutineFileActions'
 import { RoutineEntryList } from '../RoutineEntryList/RoutineEntryList'
 import { RoutineSettings } from '../RoutineSettings/RoutineSettings'
 import { useRoutineEditor } from '../hooks/useRoutineEditor'
@@ -9,6 +10,8 @@ import styles from '../RoutineEditor.module.css'
 
 export type { RoutineEditorProps } from '../types'
 export { routineTotal } from '../routineTotal'
+
+const validationErrorId = 'routine-validation-error'
 
 export function RoutineEditor({ repository, onStartSession }: RoutineEditorProps) {
   const editor = useRoutineEditor(repository)
@@ -31,6 +34,12 @@ export function RoutineEditor({ repository, onStartSession }: RoutineEditorProps
           {editor.total.approximate ? '≈' : ''}
           {editor.total.minutes} min
         </span>
+        <RoutineFileActions
+          routine={editor.routine}
+          exportDisabled={!editor.valid}
+          exportErrorId={validationErrorId}
+          onImport={editor.replaceRoutine}
+        />
       </header>
       <RoutineSettings
         routine={editor.routine}
@@ -53,26 +62,42 @@ export function RoutineEditor({ repository, onStartSession }: RoutineEditorProps
       <div className={styles.entryActions}>
         <button
           className={styles.addExercise}
+          disabled={editor.atEntryLimit}
+          aria-describedby={editor.atEntryLimit ? 'routine-entry-limit' : undefined}
           onClick={() => editor.setSheet({ kind: 'entry', entry: createExercise(), index: null })}
         >
           ＋ Add exercise
         </button>
         <button
           className={styles.addExercise}
+          disabled={editor.atEntryLimit}
+          aria-describedby={editor.atEntryLimit ? 'routine-entry-limit' : undefined}
           onClick={() => editor.setSheet({ kind: 'entry', entry: createBreak(), index: null })}
         >
           ＋ Add break
         </button>
       </div>
+      {editor.atEntryLimit && (
+        <p id="routine-entry-limit" className={styles.editorError}>
+          This Routine has reached the limit of 1,000 entries.
+        </p>
+      )}
       {!editor.valid && (
-        <p className={styles.editorError} role="alert">
-          {editor.validation.entries || 'Complete each routine entry.'}
+        <p id={validationErrorId} className={styles.editorError} role="alert">
+          {editor.validation.form ||
+            editor.validation.entries ||
+            editor.validation.quickRestDurationSec ||
+            editor.validation.warningLeadTimeSec ||
+            editor.validation.metronomeSound ||
+            editor.validation.alternateBeatTone ||
+            'Complete each routine entry.'}
         </p>
       )}
       <footer className={styles.editorFooter}>
         <button
           className={styles.primaryAction}
           disabled={!editor.valid}
+          aria-describedby={!editor.valid ? validationErrorId : undefined}
           onClick={() => {
             editor.flush()
             onStartSession?.(editor.routine)

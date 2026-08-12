@@ -7,10 +7,16 @@
 }
 
 .routineHeader {
+  position: relative;
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
   gap: 16px;
+}
+
+.addExercise:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
 }
 
 .routineHeader h1 {
