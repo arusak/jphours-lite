@@ -41,6 +41,7 @@
     "tsconfig.app.json": "TypeScript configuration for browser application code.",
     "tsconfig.node.json": "TypeScript configuration for Vite and Node-side configuration.",
     "vite.config.ts": "Vite, React, PWA, and test-runner configuration.",
+    "docs/2026-08-12-dead-session-code-cleanup-report.md": "Implementation report for removing obsolete Routine and Session model, command, wrapper, and styling code.",
     "docs/": "Project plans, implementation reports, ubiquitous language, and this inventory."
   }
 }

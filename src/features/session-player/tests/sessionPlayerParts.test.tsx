@@ -13,7 +13,6 @@ describe('session player parts', () => {
         id: 'open',
         kind: 'exercise',
         title: 'Improv',
-        mode: 'paced-open-ended',
         tempoBpm: 80,
         durationSec: null,
         sourceExerciseId: 'source',

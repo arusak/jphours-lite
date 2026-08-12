@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 import type { Routine, RoutineEntry } from '../../domain/routine'
-import { buildSessionPlan, buildSessionSteps } from './buildSessionSteps'
+import { buildSessionPlan } from './buildSessionSteps'
 import { SessionRunner, type Clock, type TimeoutScheduler } from './SessionRunner'
 
 const routine = (entries: RoutineEntry[], quickRestDurationSec = 10): Routine => ({
@@ -12,7 +12,6 @@ const routine = (entries: RoutineEntry[], quickRestDurationSec = 10): Routine =>
   metronomeSound: 'classic',
   alternateBeatTone: true,
   warningLeadTimeSec: 20,
-  autoAdvance: true,
   updatedAt: '2026-01-01T00:00:00.000Z',
 })
 
@@ -55,7 +54,7 @@ class FakeTime implements Clock, TimeoutScheduler {
   }
 }
 
-describe('buildSessionSteps', () => {
+describe('buildSessionPlan', () => {
   it('captures every ordered entry and models Quick Rest only between adjacent exercises', () => {
     const plan = buildSessionPlan(
       routine([
@@ -66,23 +65,22 @@ describe('buildSessionSteps', () => {
         exercise('open', null, null),
       ]),
     )
-    expect(plan.steps.map((step) => (step.kind === 'exercise' ? step.mode : step.kind))).toEqual([
-      'paced-timed',
-      'break',
-      'free-timed',
-      'paced-open-ended',
-      'open-ended',
+    expect(plan.steps).toMatchObject([
+      { kind: 'exercise', tempoBpm: 120, durationSec: 30 },
+      { kind: 'break', durationSec: 45 },
+      { kind: 'exercise', tempoBpm: null, durationSec: 30 },
+      { kind: 'exercise', tempoBpm: 90, durationSec: null },
+      { kind: 'exercise', tempoBpm: null, durationSec: null },
     ])
     expect(plan.quickRests).toEqual([
       expect.objectContaining({ afterStepId: 'exercise:free', durationSec: 10 }),
       expect.objectContaining({ afterStepId: 'exercise:paced-open', durationSec: 10 }),
     ])
-    expect(buildSessionSteps(routine([breakEntry('only', 30)], 0))).toHaveLength(1)
+    expect(buildSessionPlan(routine([breakEntry('only', 30)], 0)).steps).toHaveLength(1)
   })
 
   it('constructs a paced open-ended step without a duration', () => {
-    expect(buildSessionSteps(routine([exercise('paced-open', 100, null)]))[0]).toMatchObject({
-      mode: 'paced-open-ended',
+    expect(buildSessionPlan(routine([exercise('paced-open', 100, null)])).steps[0]).toMatchObject({
       tempoBpm: 100,
       durationSec: null,
     })
@@ -90,9 +88,8 @@ describe('buildSessionSteps', () => {
 
   it('captures consecutive Breaks as separate meaningful steps', () => {
     expect(
-      buildSessionSteps(
-        routine([breakEntry('first-break', 60), breakEntry('second-break', 120)], 0),
-      ),
+      buildSessionPlan(routine([breakEntry('first-break', 60), breakEntry('second-break', 120)], 0))
+        .steps,
     ).toMatchObject([
       { id: 'break:first-break', kind: 'break', durationSec: 60 },
       { id: 'break:second-break', kind: 'break', durationSec: 120 },
@@ -202,7 +199,7 @@ describe('SessionRunner', () => {
       routine([exercise('one', null, 1), breakEntry('rest', 10), exercise('two', null, 10)], 0),
     )
     time.advance(1_000)
-    runner.rewindBreak()
+    runner.rewind()
     time.advance(1_000)
     expect(runner.getState().currentStepIndex).toBe(1)
     time.advance(8_000)

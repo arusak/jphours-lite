@@ -65,9 +65,6 @@ export class SessionRunner {
   skipStep(): void {
     this.dispatch({ type: 'SKIP_STEP', now: this.clock.now() })
   }
-  rewindBreak(): void {
-    this.rewind()
-  }
   rewind(): void {
     this.dispatch({ type: 'REWIND', now: this.clock.now() })
   }
@@ -77,10 +74,6 @@ export class SessionRunner {
   appHidden(): void {
     this.dispatch({ type: 'APP_HIDDEN', now: this.clock.now() })
   }
-  appVisible(): void {
-    this.dispatch({ type: 'APP_VISIBLE' })
-  }
-
   dispatch(command: SessionCommand): void {
     const previous = this.state
     const previousStep = currentStep(previous)

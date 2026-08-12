@@ -41,6 +41,7 @@ describe('LocalStorageRoutineRepository', () => {
       metronomeSound: 'classic',
       alternateBeatTone: true,
     })
+    expect(migrated).not.toHaveProperty('autoAdvance')
     expect(migrated.entries).toEqual([
       { id: 'first', kind: 'exercise', title: 'Scales', tempoBpm: 80, durationSec: 300 },
       { id: 'second', kind: 'exercise', title: 'Free', tempoBpm: null, durationSec: null },
@@ -51,5 +52,11 @@ describe('LocalStorageRoutineRepository', () => {
     const { alternateBeatTone: _alternateBeatTone, ...savedWithoutSetting } = createRoutine()
 
     expect(migrateRoutine(savedWithoutSetting)).toMatchObject({ alternateBeatTone: true })
+  })
+
+  it('loads old current Routines while removing the obsolete autoAdvance setting', () => {
+    const migrated = migrateRoutine({ ...createRoutine(), autoAdvance: true })
+
+    expect(migrated).not.toHaveProperty('autoAdvance')
   })
 })

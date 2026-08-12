@@ -108,13 +108,6 @@
   font-size: 12px;
 }
 
-.primary {
-  color: var(--color-primary-foreground);
-  border-color: transparent;
-  background: var(--color-primary);
-  box-shadow: 0 10px 24px oklch(0.81 0.145 74 / 25%);
-}
-
 @media (max-width: 359px) {
   .sessionPlayer {
     padding-inline: 16px;

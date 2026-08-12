@@ -25,13 +25,10 @@ export type SessionCommand =
   | { type: 'RESUME'; now: number }
   | { type: 'SKIP_STEP'; now: number }
   | { type: 'REWIND'; now: number }
-  /** @deprecated Use REWIND. */
-  | { type: 'REWIND_BREAK'; now: number }
   | { type: 'STOP' }
   | { type: 'STEP_WARNING'; stepId: string }
   | { type: 'STEP_COMPLETED'; stepId: string; now: number }
   | { type: 'APP_HIDDEN'; now: number }
-  | { type: 'APP_VISIBLE' }
 
 export const initialSessionState: SessionState = {
   status: 'idle',
@@ -55,12 +52,9 @@ export function sessionReducer(state: SessionState, command: SessionCommand): Se
       return pause(state, command.now, command.type === 'APP_HIDDEN' ? 'interrupted' : 'paused')
     case 'RESUME':
       return resume(state, command.now)
-    case 'APP_VISIBLE':
-      return state
     case 'SKIP_STEP':
       return state.status === 'running' ? advance(state, command.now) : state
     case 'REWIND':
-    case 'REWIND_BREAK':
       return rewind(state, command.now)
     case 'STEP_WARNING':
       return canEmitForCurrentTimedStep(state, command.stepId) &&

@@ -2,8 +2,6 @@ import { practiceConfig, type MetronomeSound } from '../config/practice-config'
 
 export const ROUTINE_SCHEMA_VERSION = 2 as const
 
-export type ExerciseMode = 'paced-timed' | 'free-timed' | 'paced-open-ended' | 'open-ended'
-
 export interface Exercise {
   id: string
   kind: 'exercise'
@@ -29,7 +27,6 @@ export interface Routine {
   warningLeadTimeSec: number
   metronomeSound: MetronomeSound
   alternateBeatTone: boolean
-  autoAdvance: true
   updatedAt: string
 }
 
@@ -68,19 +65,7 @@ export function createRoutine(overrides: Partial<Routine> = {}): Routine {
     warningLeadTimeSec: practiceConfig.warningLeadTime.default,
     metronomeSound: practiceConfig.metronome.defaultSound,
     alternateBeatTone: true,
-    autoAdvance: true,
     updatedAt: new Date().toISOString(),
     ...overrides,
   }
 }
-
-export function deriveExerciseMode(
-  exercise: Pick<Exercise, 'tempoBpm' | 'durationSec'>,
-): ExerciseMode {
-  if (exercise.tempoBpm !== null && exercise.durationSec !== null) return 'paced-timed'
-  if (exercise.tempoBpm === null && exercise.durationSec !== null) return 'free-timed'
-  if (exercise.tempoBpm !== null) return 'paced-open-ended'
-  return 'open-ended'
-}
-
-export const exerciseMode = deriveExerciseMode

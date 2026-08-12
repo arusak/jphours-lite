@@ -73,7 +73,6 @@ export function useSessionPlayer({
     const current = runner.current
     const unsubscribe = observeVisibility((visible) => {
       if (visible) {
-        current.appVisible()
         void wakeLock.acquire()
       } else current.appHidden()
     })

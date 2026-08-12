@@ -1,13 +1,5 @@
-import { deriveExerciseMode, type Routine } from '../../domain/routine'
+import type { Routine } from '../../domain/routine'
 import type { ExerciseStep, SessionPlan, SessionStep } from '../../domain/session'
-
-/**
- * Builds the immutable execution snapshot used by a running session.  It never
- * retains references to the routine's exercise objects.
- */
-export function buildSessionSteps(routine: Routine): SessionStep[] {
-  return buildSessionPlan(routine).steps
-}
 
 /**
  * Captures the routine's ordered entries at session start. Quick Rests stay
@@ -25,7 +17,6 @@ export function buildSessionPlan(routine: Routine): SessionPlan {
       steps.push({
         id: `break:${entry.id}`,
         kind: 'break',
-        sourceBreakId: entry.id,
         title: 'Break',
         durationSec: entry.durationSec,
       })
@@ -36,7 +27,6 @@ export function buildSessionPlan(routine: Routine): SessionPlan {
       kind: 'exercise',
       sourceExerciseId: entry.id,
       title: entry.title.trim(),
-      mode: deriveExerciseMode(entry),
       tempoBpm: entry.tempoBpm,
       durationSec: entry.durationSec,
     }

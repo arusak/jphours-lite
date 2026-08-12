@@ -19,14 +19,17 @@ type LegacyRoutine = {
   exercises: Omit<Exercise, 'kind'>[]
   defaultBreakDurationSec: number
   warningLeadTimeSec: number
-  autoAdvance: true
   updatedAt: string
 }
 
 /** The only place persisted schema compatibility is decided. */
 export function migrateRoutine(value: unknown): Routine {
-  if (isCurrentRoutine(value))
-    return { ...value, alternateBeatTone: value.alternateBeatTone ?? true }
+  if (isCurrentRoutine(value)) {
+    const { autoAdvance: _autoAdvance, ...routine } = value as Routine & {
+      autoAdvance?: unknown
+    }
+    return { ...routine, alternateBeatTone: routine.alternateBeatTone ?? true }
+  }
   if (isLegacyRoutine(value))
     return createRoutine({
       id: value.id,
@@ -36,7 +39,6 @@ export function migrateRoutine(value: unknown): Routine {
       warningLeadTimeSec: value.warningLeadTimeSec,
       metronomeSound: practiceConfig.metronome.defaultSound,
       alternateBeatTone: true,
-      autoAdvance: value.autoAdvance,
       updatedAt: value.updatedAt,
     })
   return createRoutine()
@@ -72,7 +74,6 @@ function isCurrentRoutine(value: unknown): value is Routine {
     typeof candidate.metronomeSound === 'string' &&
     (candidate.alternateBeatTone === undefined ||
       typeof candidate.alternateBeatTone === 'boolean') &&
-    candidate.autoAdvance === true &&
     typeof candidate.updatedAt === 'string'
   )
 }
@@ -86,7 +87,6 @@ function isLegacyRoutine(value: unknown): value is LegacyRoutine {
     Array.isArray(candidate.exercises) &&
     typeof candidate.defaultBreakDurationSec === 'number' &&
     typeof candidate.warningLeadTimeSec === 'number' &&
-    candidate.autoAdvance === true &&
     typeof candidate.updatedAt === 'string'
   )
 }

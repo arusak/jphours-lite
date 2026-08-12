@@ -11,7 +11,7 @@ export function EndScreen({ title, copy, onExit }: EndScreenProps) {
     <main className={`${sharedStyles.sessionPlayer} ${styles.completion}`}>
       <h1>{title}</h1>
       <p>{copy}</p>
-      <button className={sharedStyles.primary} onClick={onExit}>
+      <button className={styles.primary} onClick={onExit}>
         Return to routine
       </button>
     </main>
