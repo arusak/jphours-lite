@@ -9,7 +9,6 @@ import { SessionControls } from '../SessionControls/SessionControls'
 import { SessionTimer } from '../SessionTimer/SessionTimer'
 import { SessionTitle } from '../SessionTitle/SessionTitle'
 import { StopSlider } from '../StopSlider/StopSlider'
-import { stepMetadata } from '../stepMetadata'
 import { useSessionPlayer } from '../hooks/useSessionPlayer'
 import styles from '../SessionPlayer.module.css'
 import { formatTime } from '../formatTime'
@@ -83,6 +82,17 @@ export function SessionPlayer({
     player.beatSnapshot.beatIndex,
   ])
   const nextStep = state.steps[index + 1] ?? null
+  const nextStepMetadata =
+    nextStep?.kind === 'exercise'
+      ? [
+          nextStep.tempoBpm === null ? null : `${nextStep.tempoBpm} BPM`,
+          nextStep.durationSec === null ? null : formatTime(nextStep.durationSec),
+        ]
+          .filter(Boolean)
+          .join(' · ')
+      : nextStep
+        ? formatTime(nextStep.durationSec)
+        : ''
   const remainingSec =
     state.currentStepEndsAt === null
       ? null
@@ -271,7 +281,19 @@ export function SessionPlayer({
       </div>
 
       <div className={styles.bottomControls}>
-        {nextStep && <p className={styles.nextStep}>Up next: {stepMetadata(nextStep)}</p>}
+        {nextStep && (
+          <div className={styles.nextStep}>
+            <span className={styles.nextStepLabel}>Up next</span>
+            <div className={styles.nextStepContent}>
+              <strong className={styles.nextStepTitle} title={nextStep.title}>
+                {nextStep.title}
+              </strong>
+              {nextStepMetadata && (
+                <span className={styles.nextStepMetadata}>{nextStepMetadata}</span>
+              )}
+            </div>
+          </div>
+        )}
 
         <SessionControls
           paused={paused}

@@ -66,11 +66,51 @@
 }
 
 .nextStep {
+  display: grid;
+  gap: 3px;
+  padding: 8px 12px 9px;
+  text-align: left;
+  background: var(--color-card);
+  border-radius: var(--radius-lg);
+}
+
+.nextStepLabel {
   color: var(--color-muted-foreground);
-  font-size: 16px;
-  padding: 12px 0 14px;
-  background: var(--color-secondary);
-  border-radius: 12px;
+  font-size: 9px;
+  font-weight: 650;
+  letter-spacing: 0.13em;
+  line-height: 1;
+  opacity: 0.75;
+  text-transform: uppercase;
+}
+
+.nextStepContent {
+  display: flex;
+  min-width: 0;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.nextStepTitle {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--color-muted-foreground);
+  font-size: 14px;
+  font-weight: 550;
+  line-height: 1.25;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.nextStepMetadata {
+  flex: none;
+  color: var(--color-muted-foreground);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 550;
+  opacity: 0.8;
+  white-space: nowrap;
 }
 
 .contentWrapper {

@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen } from '@testing-library/react'
+import { act, fireEvent, render, screen, within } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { createBreak, createExercise, createRoutine } from '../../../domain/routine'
 import { SessionPlayer } from '../SessionPlayer/SessionPlayer'
@@ -133,6 +133,23 @@ describe('SessionPlayer', () => {
     expect(screen.getByTestId('exercise-icon')).toBeInTheDocument()
   })
 
+  it('structures the next exercise title and metadata separately', async () => {
+    const longTitle = 'A deliberately long exercise name that needs truncating'
+    render(
+      <SessionPlayer
+        routine={routineWith(
+          createExercise({ title: 'One' }),
+          createExercise({ title: longTitle, tempoBpm: 96, durationSec: 90 }),
+        )}
+        onExit={vi.fn()}
+      />,
+    )
+
+    expect(await screen.findByText('Up next')).toBeInTheDocument()
+    expect(screen.getByText(longTitle)).toHaveAttribute('title', longTitle)
+    expect(screen.getByText('96 BPM · 1:30')).toBeInTheDocument()
+  })
+
   it('opens a read-only Now Playing list of meaningful steps and marks the next exercise during Quick Rest', async () => {
     const one = createExercise({ id: 'one', title: 'One', durationSec: 30 })
     const two = createExercise({ id: 'two', title: 'Two', durationSec: 30 })
@@ -149,7 +166,8 @@ describe('SessionPlayer', () => {
     expect(screen.queryByTestId('break-icon')).not.toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Skip Quick Rest' })).toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: /now playing/i }))
-    expect(await screen.findByText('Up next')).toBeInTheDocument()
+    const nowPlaying = await screen.findByRole('dialog', { name: 'Now Playing' })
+    expect(within(nowPlaying).getByText('Up next')).toBeInTheDocument()
   })
 
   it('presents the four media controls and only stops after slide confirmation', async () => {
