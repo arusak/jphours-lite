@@ -1,216 +1,68 @@
-<svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="1024"
-    height="1024"
-    viewBox="0 0 1024 1024"
-    role="img"
-    aria-labelledby="title desc"
->
-    <defs>
-        <radialGradient id="vignette" cx="50%" cy="45%" r="68%">
-            <stop offset="45%" stop-color="#000000" stop-opacity="0" />
-            <stop offset="75%" stop-color="#090202" stop-opacity=".23" />
-            <stop offset="100%" stop-color="#000000" stop-opacity=".8" />
-        </radialGradient>
+<svg xmlns="http://www.w3.org/2000/svg"
+     width="1024" height="1024" viewBox="0 0 1024 1024"
+     role="img" aria-labelledby="title desc">
+  <title id="title">Low compact stool</title>
+  <desc id="desc">A low, compact stool with shorter proportions.</desc>
 
-        <linearGradient
-            id="bg"
-            x1="100"
-            y1="60"
-            x2="918"
-            y2="966"
-            gradientUnits="userSpaceOnUse"
-        >
-            <stop stop-color="#140B0A" />
-            <stop offset=".52" stop-color="#32150F" />
-            <stop offset="1" stop-color="#2B111A" />
-        </linearGradient>
-        <linearGradient
-            id="ring"
-            x1="255"
-            y1="170"
-            x2="767"
-            y2="664"
-            gradientUnits="userSpaceOnUse"
-        >
-            <stop stop-color="#FFE6A3" />
-            <stop offset=".48" stop-color="#F7B84B" />
-            <stop offset="1" stop-color="#D86632" />
-        </linearGradient>
-        <linearGradient
-            id="seatTop"
-            x1="313"
-            y1="485"
-            x2="696"
-            y2="610"
-            gradientUnits="userSpaceOnUse"
-        >
-            <stop stop-color="#FFE7A8" />
-            <stop offset=".52" stop-color="#F6B64C" />
-            <stop offset="1" stop-color="#D86535" />
-        </linearGradient>
-        <linearGradient
-            id="seatFace"
-            x1="337"
-            y1="565"
-            x2="681"
-            y2="678"
-            gradientUnits="userSpaceOnUse"
-        >
-            <stop stop-color="#C4572E" />
-            <stop offset="1" stop-color="#7E2830" />
-        </linearGradient>
-        <linearGradient
-            id="frame"
-            x1="364"
-            y1="608"
-            x2="678"
-            y2="856"
-            gradientUnits="userSpaceOnUse"
-        >
-            <stop stop-color="#F8C565" />
-            <stop offset="1" stop-color="#B84932" />
-        </linearGradient>
-        <filter id="glow" x="-30%" y="-30%" width="160%" height="160%">
-            <feGaussianBlur stdDeviation="16" />
-        </filter>
-        <filter
-            id="noise"
-            x="0"
-            y="0"
-            width="100%"
-            height="100%"
-            color-interpolation-filters="sRGB"
-        >
-            <feTurbulence
-                type="fractalNoise"
-                baseFrequency=".55"
-                numOctaves="4"
-                seed="55"
-                stitchTiles="stitch"
-                result="texture"
-            />
-            <feColorMatrix
-                in="texture"
-                type="matrix"
-                values="
-                    1 0 0 0 0
-                    0 1 0 0 0
-                    0 0 1 0 0
-                    0 0 0 .35 0
-                "
-            />
-        </filter>
-        <clipPath id="iconClip">
-            <rect x="32" y="32" width="960" height="960" rx="224" />
-        </clipPath>
-    </defs>
-    <rect x="32" y="32" width="960" height="960" rx="224" fill="url(#bg)" />
-    <g clip-path="url(#iconClip)" opacity=".7">
-        <circle
-            cx="650"
-            cy="340"
-            r="490"
-            fill="#9436"
-            stroke="url(#ring)"
-            stroke-opacity=".25"
-            stroke-width="58"
-            filter="url(#glow)"
-        />
-        <circle
-            cx="650"
-            cy="340"
-            r="480"
-            fill="none"
-            stroke="url(#ring)"
-            stroke-width="29"
-            stroke-linecap="round"
-            stroke-dasharray="154 76"
-        />
-        <circle
-            cx="650"
-            cy="340"
-            r="390"
-            fill="#35150F"
-            fill-opacity=".34"
-            stroke="#FFE4B0"
-            stroke-opacity=".13"
-            stroke-width="5"
-        />
-        <g
-            fill="none"
-            stroke="#F7B84B"
-            stroke-width="28"
-            stroke-linecap="round"
-        >
-            <path d="M650 340L582 75M650 340L870 402" opacity=".13" />
-            <path d="M650 340L548 88M650 340L880 365" opacity=".28" />
-        </g>
-        <path
-            d="M650 340L515 104M650 340L884 322"
-            fill="none"
-            stroke="#FFF0C9"
-            stroke-width="36"
-            stroke-linecap="round"
-        />
-        <circle cx="650" cy="340" r="39" fill="#FFF0C9" />
-    </g>
-    <g transform="translate(-180 -120) scale(1.15)">
-        <ellipse
-            cx="512"
-            cy="835"
-            rx="235"
-            ry="48"
-            fill="#0D0504"
-            opacity=".58"
-        />
-        <g
-            fill="none"
-            stroke="url(#frame)"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-        >
-            <path d="M394 610L331 839" stroke-width="44" />
-            <path d="M630 610L693 839" stroke-width="44" />
-            <path d="M357 763H667" stroke-width="32" />
-        </g>
-        <path
-            d="M323 510C326 480 350 460 380 460H644C674 460 698 480 701 510L704 528H320L323 510Z"
-            fill="url(#seatTop)"
-        />
-        <path
-            d="M320 520H704V548C704 575 682 597 655 597H369C342 597 320 575 320 548V520Z"
-            fill="url(#seatFace)"
-        />
-        <path
-            d="M367 486H657"
-            stroke="#FFE8B5"
-            stroke-opacity=".52"
-            stroke-width="13"
-            stroke-linecap="round"
-        />
-    </g>
+  <defs>
+    <linearGradient id="bg" x1="100" y1="60" x2="918" y2="966" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#140B0A"/>
+      <stop offset=".52" stop-color="#32150F"/>
+      <stop offset="1" stop-color="#2B111A"/>
+    </linearGradient>
 
-    <rect
-        x="32"
-        y="32"
-        width="960"
-        height="960"
-        rx="224"
-        fill="url(#vignette)"
-        clip-path="url(#iconClip)"
-        pointer-events="none"
-    />
+    <radialGradient id="halo" cx="50%" cy="43%" r="54%">
+      <stop offset="0" stop-color="#7C2A18" stop-opacity=".34"/>
+      <stop offset=".68" stop-color="#4A1A14" stop-opacity=".08"/>
+      <stop offset="1" stop-color="#000" stop-opacity="0"/>
+    </radialGradient>
 
-    <!--<rect
-        x="32"
-        y="32"
-        width="960"
-        height="960"
-        rx="224"
-        clip-path="url(#iconClip)"
-        filter="url(#noise)"
-        pointer-events="none"
-        opacity="0.7"
-    />-->
+    <linearGradient id="seatTop" x1="290" y1="322" x2="740" y2="500" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFE7A8"/>
+      <stop offset=".52" stop-color="#F6B64C"/>
+      <stop offset="1" stop-color="#E87532"/>
+    </linearGradient>
+
+    <linearGradient id="seatFace" x1="292" y1="452" x2="732" y2="552" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#E97D2F"/>
+      <stop offset=".6" stop-color="#C4572E"/>
+      <stop offset="1" stop-color="#7E2830"/>
+    </linearGradient>
+
+    <linearGradient id="legLeft" x1="330" y1="530" x2="438" y2="826" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F8C565"/>
+      <stop offset=".55" stop-color="#E99638"/>
+      <stop offset="1" stop-color="#D56A31"/>
+    </linearGradient>
+
+    <linearGradient id="legRight" x1="592" y1="530" x2="698" y2="826" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F3B656"/>
+      <stop offset=".5" stop-color="#DE7C35"/>
+      <stop offset="1" stop-color="#B84932"/>
+    </linearGradient>
+
+    <linearGradient id="bar" x1="410" y1="650" x2="620" y2="735" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F3B652"/>
+      <stop offset="1" stop-color="#D66A31"/>
+    </linearGradient>
+
+    <radialGradient id="vignette" cx="50%" cy="48%" r="72%">
+      <stop offset=".58" stop-color="#000" stop-opacity="0"/>
+      <stop offset=".84" stop-color="#060202" stop-opacity=".16"/>
+      <stop offset="1" stop-color="#000" stop-opacity=".55"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="1024" height="1024" fill="url(#bg)"/>
+  <rect width="1024" height="1024" fill="url(#halo)"/>
+  <ellipse cx="512" cy="792" rx="260" ry="50" fill="#0D0504" opacity=".48"/>
+  <g>
+    <rect x="418" y="674" width="188" height="46" rx="14" fill="url(#bar)"/>
+    <path d="M378 566 H456 L424 790 Q420 812 398 812 H362 Q340 812 344 792 Z" fill="url(#legLeft)"/>
+    <path d="M568 566 H646 L680 792 Q684 812 662 812 H626 Q604 812 600 790 Z" fill="url(#legRight)"/>
+    <path d="M280 448 H744 V492 Q744 524 712 524 H312 Q280 524 280 492 Z" fill="url(#seatFace)"/>
+    <path d="M300 388 Q308 356 342 356 H682 Q716 356 724 388 L744 452 Q748 468 732 468 H292 Q276 468 280 452 Z" fill="url(#seatTop)"/>
+    <rect x="340" y="370" width="350" height="16" rx="8" fill="#FFE8B5" opacity=".34"/>
+  </g>
+  <rect width="1024" height="1024" fill="url(#vignette)" pointer-events="none"/>
 </svg>
