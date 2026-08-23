@@ -44,6 +44,7 @@ The script produces:
 
 | File | Purpose |
 | --- | --- |
+| `public/favicon-32.png` | 32×32 fallback browser-tab icon |
 | `public/icon-192.png` | Standard 192×192 PWA icon |
 | `public/icon-512.png` | Standard 512×512 PWA icon |
 | `public/icon-maskable-192.png` | Opaque 192×192 adaptive Android icon |
@@ -67,6 +68,7 @@ transparent or already-rounded icon.
 `index.html` must continue to declare:
 
 ```html
+<link rel="icon" href="%BASE_URL%favicon-32.png" sizes="32x32" type="image/png" />
 <link rel="icon" href="%BASE_URL%icon-dark.svg" type="image/svg+xml" />
 <link rel="apple-touch-icon" href="%BASE_URL%apple-touch-icon.png" />
 ```
@@ -88,6 +90,7 @@ Then verify:
 
 - The generated manifest contains 192px and 512px `any maskable` entries plus
   explicit `maskable` fallbacks.
+- The PNG favicon is exactly 32×32.
 - The standard files are exactly 192×192 and 512×512.
 - The maskable files are exactly 192×192 and 512×512 and contain no alpha
   channel.

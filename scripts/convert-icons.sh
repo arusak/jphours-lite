@@ -5,6 +5,12 @@ set -eu
 source="public/icon-dark.svg"
 background="#140B0A"
 
+rsvg-convert \
+    --width 32 \
+    --height 32 \
+    "$source" \
+    -o public/favicon-32.png
+
 for size in 192 512; do
     rsvg-convert \
         --width "$size" \
