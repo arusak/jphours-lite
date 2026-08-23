@@ -1,10 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import {
-  BottomSheet,
-  NoteIcon,
-  MetronomeSoundSheet,
-  ProgressSegments,
-} from '../../../components'
+import { BottomSheet, NoteIcon, MetronomeSoundSheet, ProgressSegments } from '../../../components'
 import { type MetronomeSound } from '../../../config/practice-config'
 import type { Routine } from '../../../domain/routine'
 import type { AudioController } from '../../../services/audio'
@@ -12,6 +7,7 @@ import { EndScreen } from '../EndScreen/EndScreen'
 import { NowPlayingSheet } from '../NowPlayingSheet/NowPlayingSheet'
 import { SessionControls } from '../SessionControls/SessionControls'
 import { SessionTimer } from '../SessionTimer/SessionTimer'
+import { SessionTitle } from '../SessionTitle/SessionTitle'
 import { StopSlider } from '../StopSlider/StopSlider'
 import { stepMetadata } from '../stepMetadata'
 import { useSessionPlayer } from '../hooks/useSessionPlayer'
@@ -188,7 +184,7 @@ export function SessionPlayer({
           onClick={() => setNowPlayingOpen(true)}
           aria-haspopup="dialog"
         >
-          <span className={styles.eyebrow}>NOW PLAYING</span>
+          <span className={styles.eyebrow}>Now playing</span>
           <span>{routine.name}</span>
         </button>
       </header>
@@ -198,79 +194,81 @@ export function SessionPlayer({
         tone={tone}
         label="Session progress"
       />
-      <section className={styles.sessionHeading}>
-        <h1>{title}</h1>
-        {step.durationSec !== null && elapsedSec !== null && (
-          <div className={styles.duration}>
-            <strong>{formatTime(elapsedSec)}</strong> of{' '}
-            <strong>{formatTime(step.durationSec)}</strong>
+      <div className={styles.contentWrapper}>
+        <section className={styles.sessionHeading}>
+          <SessionTitle title={title} />
+          {step.durationSec !== null && elapsedSec !== null && (
+            <div className={styles.duration}>
+              <strong>{formatTime(elapsedSec)}</strong> of{' '}
+              <strong>{formatTime(step.durationSec)}</strong>
+            </div>
+          )}
+        </section>
+        <div className={styles.timer}>
+          <SessionTimer
+            tempo={currentTempo}
+            savedTempo={savedTempo}
+            isBreak={isBreak}
+            isQuickRest={isQuickRest}
+            displaySeconds={displaySeconds}
+            elapsedSeconds={elapsedSec}
+            progress={progress}
+            discreteProgress={pacedRing}
+            tone={tone}
+            onChangeTempo={(delta) =>
+              currentTempo !== null && player.changeTempo(step, currentTempo, delta)
+            }
+            onSaveTempo={() => currentTempo !== null && player.saveTempo(step, currentTempo)}
+          />
+          {isExercise && currentTempo !== null && (
+            <button
+              className={styles.metronomeSoundTrigger}
+              onClick={() => setSoundPickerOpen(true)}
+              aria-label="Choose metronome sound"
+              aria-haspopup="dialog"
+            >
+              <NoteIcon />
+            </button>
+          )}
+        </div>
+
+        {isExercise && currentTempo !== null && (
+          <div className={styles.beats}>
+            <div className={styles.beatIndicator} aria-label="Metronome beat">
+              {[0, 1, 2, 3].map((dot) => (
+                <span
+                  key={dot}
+                  className={
+                    dot === player.beatSnapshot.positionInPattern &&
+                    !paused &&
+                    player.beatSnapshot.running
+                      ? styles.active
+                      : ''
+                  }
+                />
+              ))}
+            </div>
           </div>
         )}
-      </section>
-      <div className={styles.timer}>
-        <SessionTimer
-          tempo={currentTempo}
-          savedTempo={savedTempo}
-          isBreak={isBreak}
-          isQuickRest={isQuickRest}
-          displaySeconds={displaySeconds}
-          elapsedSeconds={elapsedSec}
-          progress={progress}
-          discreteProgress={pacedRing}
-          tone={tone}
-          onChangeTempo={(delta) =>
-            currentTempo !== null && player.changeTempo(step, currentTempo, delta)
-          }
-          onSaveTempo={() => currentTempo !== null && player.saveTempo(step, currentTempo)}
-        />
-        {isExercise && currentTempo !== null && (
-          <button
-            className={styles.metronomeSoundTrigger}
-            onClick={() => setSoundPickerOpen(true)}
-            aria-label="Choose metronome sound"
-            aria-haspopup="dialog"
-          >
-            <NoteIcon />
-          </button>
+        {player.audioState.status === 'activating' && (
+          <p role="status" className={styles.sessionBanner}>
+            Starting audio… Timers and controls still work.
+          </p>
+        )}
+        {player.audioState.status === 'unavailable' && (
+          <div role="status" className={styles.sessionBanner}>
+            <span>Audio is unavailable. Timers and controls still work.</span>
+            <button type="button" onClick={player.activateAudio}>
+              Retry audio
+            </button>
+          </div>
+        )}
+        {state.status === 'interrupted' && (
+          <p role="alert" className={styles.sessionBanner}>
+            Session paused while the app was in the background.
+          </p>
         )}
       </div>
-
-      {isExercise && currentTempo !== null && (
-        <div className={styles.beats}>
-          <div className={styles.beatIndicator} aria-label="Metronome beat">
-            {[0, 1, 2, 3].map((dot) => (
-              <span
-                key={dot}
-                className={
-                  dot === player.beatSnapshot.positionInPattern &&
-                  !paused &&
-                  player.beatSnapshot.running
-                    ? styles.active
-                    : ''
-                }
-              />
-            ))}
-          </div>
-        </div>
-      )}
-      {player.audioState.status === 'activating' && (
-        <p role="status" className={styles.sessionBanner}>
-          Starting audio… Timers and controls still work.
-        </p>
-      )}
-      {player.audioState.status === 'unavailable' && (
-        <div role="status" className={styles.sessionBanner}>
-          <span>Audio is unavailable. Timers and controls still work.</span>
-          <button type="button" onClick={player.activateAudio}>
-            Retry audio
-          </button>
-        </div>
-      )}
-      {state.status === 'interrupted' && (
-        <p role="alert" className={styles.sessionBanner}>
-          Session paused while the app was in the background.
-        </p>
-      )}
 
       <div className={styles.bottomControls}>
         {nextStep && <p className={styles.nextStep}>Up next: {stepMetadata(nextStep)}</p>}

@@ -32,6 +32,7 @@
     "src/features/session-player/SessionIllustration/": "Illustrations for exercise, break, and Quick Rest timer states.",
     "src/features/session-player/SessionPlayer/": "Session-player feature composition and public props.",
     "src/features/session-player/SessionTimer/": "Timer Ring content, tempo controls, and session illustration selection.",
+    "src/features/session-player/SessionTitle/": "Fixed-height Current phase title with responsive font fitting and overflow clamping.",
     "src/features/session-player/StopSlider/": "Accessible slide-to-confirm stop control.",
     "src/services/audio/": "Web Audio scheduling, playback cues, interfaces, and tests.",
     "src/services/persistence/": "Browser-storage routine persistence and debounced saving.",
