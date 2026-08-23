@@ -58,9 +58,11 @@ If the SVG background color changes, update both `background` in
 
 ## Keep platform declarations correct
 
-The web app manifest in `vite.config.ts` must declare standard icons with
-`purpose: 'any'` and maskable icons with `purpose: 'maskable'`. Never label a
-transparent or already-rounded icon as maskable.
+The web app manifest in `vite.config.ts` declares the full-bleed standard icons
+with `purpose: 'any maskable'` so Chrome cannot install them through its legacy
+white-background icon path. Dedicated maskable entries remain available as
+explicit adaptive-icon fallbacks. Never give `maskable` purpose to a
+transparent or already-rounded icon.
 
 `index.html` must continue to declare:
 
@@ -84,8 +86,8 @@ pnpm build
 
 Then verify:
 
-- The generated manifest contains 192px and 512px entries for both `any` and
-  `maskable` purposes.
+- The generated manifest contains 192px and 512px `any maskable` entries plus
+  explicit `maskable` fallbacks.
 - The standard files are exactly 192×192 and 512×512.
 - The maskable files are exactly 192×192 and 512×512 and contain no alpha
   channel.
