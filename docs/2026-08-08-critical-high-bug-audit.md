@@ -37,8 +37,8 @@ The existing unit suite does not cover these paths. Small, temporary Vitest prob
 
 ### Service-worker scope, navigation fallback, and updates
 
-- A service worker's default scope is the directory containing its script, and only clients within the registration scope are controlled. The generated build consistently registers `/jphours-proto/sw.js` with `/jphours-proto/` scope. See the Service Workers [registration algorithm and default-scope rule](https://www.w3.org/TR/service-workers/#start-register-algorithm).
-- Workbox requires `navigateFallback` to name an HTML document present in the precache. The production worker precaches `index.html` under its `/jphours-proto/` scope and binds navigation fallback to `/jphours-proto/index.html`, so the configured subpath is internally consistent. See the Workbox [`navigateFallback` contract](https://developer.chrome.com/docs/workbox/modules/workbox-build#type-GeneratePartial).
+- A service worker's default scope is the directory containing its script, and only clients within the registration scope are controlled. The generated build consistently registers `/jphours-lite/sw.js` with `/jphours-lite/` scope. See the Service Workers [registration algorithm and default-scope rule](https://www.w3.org/TR/service-workers/#start-register-algorithm).
+- Workbox requires `navigateFallback` to name an HTML document present in the precache. The production worker precaches `index.html` under its `/jphours-lite/` scope and binds navigation fallback to `/jphours-lite/index.html`, so the configured subpath is internally consistent. See the Workbox [`navigateFallback` contract](https://developer.chrome.com/docs/workbox/modules/workbox-build#type-GeneratePartial).
 - An installed replacement worker normally waits while an existing worker still controls clients; activation occurs once no client uses the old registration unless `skipWaiting()` is deliberately requested. A safe immediate-update flow must also coordinate the page reload and protect unsaved/transient state. See the Service Workers [activation conditions](https://www.w3.org/TR/service-workers/#try-activate-algorithm) and Workbox's [update-handling guidance](https://developer.chrome.com/docs/workbox/handling-service-worker-updates).
 - `vite-plugin-pwa`'s `registerType: 'prompt'` does not create a visible prompt by itself. Its documented prompt flow requires importing a registration virtual module, rendering update/offline-ready UI from its callbacks/state, and invoking the returned updater after user acceptance. The plugin can inject a basic registration script when no virtual module is imported, but that script only registers the worker. See the plugin's first-party [prompt-for-update](https://vite-pwa-org.netlify.app/guide/prompt-for-update.html) and [service-worker registration](https://vite-pwa-org.netlify.app/guide/register-service-worker) guides.
 
@@ -132,7 +132,7 @@ Ownership also fails in the opposite direction. The hook releases only during un
 - `pnpm test`: 9 files, 42 tests passed before the temporary audit probes were added.
 - `pnpm build`: passed; Vite generated a service worker precaching nine shell assets.
 - `pnpm lint` and `pnpm format:check`: passed.
-- The emitted manifest's `/jphours-proto/` `start_url` and `scope`, the service-worker registration scope, and the navigation fallback agree.
+- The emitted manifest's `/jphours-lite/` `start_url` and `scope`, the service-worker registration scope, and the navigation fallback agree.
 - The emitted manifest includes 192×192 and 512×512 PNG icons, and the generated worker precaches the HTML, hashed JavaScript/CSS, manifest, and icons.
 
 ## Release validation matrix

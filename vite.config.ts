@@ -6,7 +6,7 @@ import { VitePWA } from 'vite-plugin-pwa'
 import { readableCssModules } from 'vite-plugin-readable-css-modules'
 
 export default defineConfig({
-  base: '/jphours-proto/',
+  base: '/jphours-lite/',
   resolve: { tsconfigPaths: true },
   plugins: [
     react(),
@@ -50,7 +50,7 @@ export default defineConfig({
           },
         ],
       },
-      workbox: { navigateFallback: '/jphours-proto/index.html' },
+      workbox: { navigateFallback: '/jphours-lite/index.html' },
     }),
     readableCssModules(),
   ],
