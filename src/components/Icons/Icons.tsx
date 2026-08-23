@@ -49,7 +49,7 @@ export function StopIcon(props: IconProps) {
   )
 }
 
-export function MetronomeIcon(props: IconProps) {
+export function NoteIcon(props: IconProps) {
   return (
     <svg
       {...iconProps}
@@ -58,12 +58,11 @@ export function MetronomeIcon(props: IconProps) {
       stroke="currentColor"
       strokeLinecap="round"
       strokeLinejoin="round"
-      strokeWidth="1.75"
+      strokeWidth="2"
     >
-      <path d="M10 3.75h4l2.5 15.5h-9L10 3.75Z" />
-      <path d="M12 16.5 15.25 6" />
-      <path d="m14.55 5.8 2.15-.7.75 2.3-2.15.7z" fill="currentColor" stroke="none" />
-      <path d="M6.25 19.25h11.5v2H6.25z" />
+      <path d="M9 18V5l10-2v13" />
+      <ellipse cx="6.5" cy="18" rx="2.5" ry="2" fill="currentColor" stroke="none" />
+      <ellipse cx="16.5" cy="16" rx="2.5" ry="2" fill="currentColor" stroke="none" />
     </svg>
   )
 }
@@ -117,9 +116,9 @@ export function BreakIcon(props: IconProps) {
       strokeLinejoin="round"
       strokeWidth="3.5"
     >
-      <path d="M15 25h30v16a12 12 0 0 1-12 12h-6a12 12 0 0 1-12-12V25Z" />
+      <path d="M13 25h30v16a12 12 0 0 1-12 12h-6a12 12 0 0 1-12-12V25Z" />
       <path d="M45 30h4a7 7 0 0 1 0 14h-4" />
-      <path d="M13 55h40M23 19c-4-4 2-7-1-11M34 19c-4-4 2-7-1-11" />
+      <path d="M10 55h40M23 19c-4-4 2-7-1-11M30 19c-4-4 2-7-1-11M37 19c-4-4 2-7-1-11" />
     </svg>
   )
 }

@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import {
   BottomSheet,
-  MetronomeIcon,
+  NoteIcon,
   MetronomeSoundSheet,
   ProgressSegments,
 } from '../../../components'
@@ -230,7 +230,7 @@ export function SessionPlayer({
             aria-label="Choose metronome sound"
             aria-haspopup="dialog"
           >
-            <MetronomeIcon />
+            <NoteIcon />
           </button>
         )}
       </div>

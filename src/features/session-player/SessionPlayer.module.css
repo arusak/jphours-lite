@@ -67,10 +67,13 @@
 
 .bottomControls {
   margin-top: auto;
+  display: grid;
+  gap: 3rem;
+  row-rule: thin solid var(--color-border);
 }
 
 .nextStep {
-  color: var(--color-secondary-foreground);
+  color: var(--color-muted-foreground);
   font-size: 16px;
   padding: 12px 0 14px;
   background: var(--color-secondary);
