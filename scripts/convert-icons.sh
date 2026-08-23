@@ -4,6 +4,9 @@ set -eu
 
 source="public/icon-dark.svg"
 background="#140B0A"
+manifest_icons="public/assets"
+
+mkdir -p "$manifest_icons"
 
 rsvg-convert \
     --width 32 \
@@ -16,14 +19,14 @@ for size in 192 512; do
         --width "$size" \
         --height "$size" \
         "$source" \
-        -o "public/icon-${size}.png"
+        -o "$manifest_icons/manifest-icon-${size}.png"
 
     rsvg-convert \
         --width "$size" \
         --height "$size" \
         --background-color "$background" \
         "$source" \
-        -o "public/icon-maskable-${size}.png"
+        -o "$manifest_icons/manifest-icon-${size}.maskable.png"
 done
 
 rsvg-convert \

@@ -45,10 +45,10 @@ The script produces:
 | File | Purpose |
 | --- | --- |
 | `public/favicon-32.png` | 32×32 fallback browser-tab icon |
-| `public/icon-192.png` | Standard 192×192 PWA icon |
-| `public/icon-512.png` | Standard 512×512 PWA icon |
-| `public/icon-maskable-192.png` | Opaque 192×192 adaptive Android icon |
-| `public/icon-maskable-512.png` | Opaque 512×512 adaptive Android icon |
+| `public/assets/manifest-icon-192.png` | Standard 192×192 PWA icon |
+| `public/assets/manifest-icon-192.maskable.png` | Opaque 192×192 adaptive Android icon |
+| `public/assets/manifest-icon-512.png` | Standard 512×512 PWA icon |
+| `public/assets/manifest-icon-512.maskable.png` | Opaque 512×512 adaptive Android icon |
 | `public/apple-touch-icon.png` | Opaque 180×180 iOS/iPadOS Home Screen icon |
 
 The standard icons preserve the SVG's transparency. The maskable and Apple
@@ -59,11 +59,11 @@ If the SVG background color changes, update both `background` in
 
 ## Keep platform declarations correct
 
-The web app manifest in `vite.config.ts` declares the full-bleed standard icons
-with `purpose: 'any maskable'` so Chrome cannot install them through its legacy
-white-background icon path. Dedicated maskable entries remain available as
-explicit adaptive-icon fallbacks. Never give `maskable` purpose to a
-transparent or already-rounded icon.
+The web app manifest in `vite.config.ts` pairs each standard icon declared with
+`purpose: 'any'` with a dedicated adaptive icon declared with
+`purpose: 'maskable'`. Keep those purposes separate and keep each size pair
+adjacent in the manifest. Never give `maskable` purpose to a transparent or
+already-rounded icon.
 
 `index.html` must continue to declare:
 
@@ -88,8 +88,8 @@ pnpm build
 
 Then verify:
 
-- The generated manifest contains 192px and 512px `any maskable` entries plus
-  explicit `maskable` fallbacks.
+- The generated manifest contains adjacent `any` and `maskable` entries at both
+  192px and 512px.
 - The PNG favicon is exactly 32×32.
 - The standard files are exactly 192×192 and 512×512.
 - The maskable files are exactly 192×192 and 512×512 and contain no alpha
