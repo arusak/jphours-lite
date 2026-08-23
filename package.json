@@ -21,7 +21,7 @@
     "uuid": "latest",
     "vite": "latest",
     "vite-plugin-pwa": "latest",
-    "vite-plugin-readable-css-modules": "latest",
+    "vite-plugin-readable-css-modules": "0.7.0",
     "workbox-window": "latest",
     "zod": "latest"
   },

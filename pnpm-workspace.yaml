@@ -1,0 +1,2 @@
+minimumReleaseAgeExclude:
+  - vite-plugin-readable-css-modules@0.7.0
