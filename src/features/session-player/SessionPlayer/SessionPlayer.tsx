@@ -7,6 +7,7 @@ import {
 } from '../../../components'
 import { type MetronomeSound } from '../../../config/practice-config'
 import type { Routine } from '../../../domain/routine'
+import type { AudioController } from '../../../services/audio'
 import { EndScreen } from '../EndScreen/EndScreen'
 import { NowPlayingSheet } from '../NowPlayingSheet/NowPlayingSheet'
 import { SessionControls } from '../SessionControls/SessionControls'
@@ -19,6 +20,7 @@ import styles from '../SessionPlayer.module.css'
 export interface SessionPlayerProps {
   routine: Routine
   onExit(): void
+  audio?: AudioController
   onSaveTempo?(sourceExerciseId: string, tempoBpm: number): void
   onSaveMetronomeSound?(sound: MetronomeSound): void
   onSaveAlternateBeatTone?(alternateBeatTone: boolean): void
@@ -27,12 +29,14 @@ export interface SessionPlayerProps {
 export function SessionPlayer({
   routine,
   onExit,
+  audio,
   onSaveTempo,
   onSaveMetronomeSound,
   onSaveAlternateBeatTone,
 }: SessionPlayerProps) {
   const player = useSessionPlayer({
     routine,
+    audio,
     onSaveTempo,
     onSaveMetronomeSound,
     onSaveAlternateBeatTone,
@@ -240,10 +244,18 @@ export function SessionPlayer({
           </div>
         </>
       )}
-      {!player.audioAvailable && (
+      {player.audioState.status === 'activating' && (
         <p role="status" className={styles.sessionBanner}>
-          Audio is unavailable. Timers and controls still work.
+          Starting audio… Timers and controls still work.
         </p>
+      )}
+      {player.audioState.status === 'unavailable' && (
+        <div role="status" className={styles.sessionBanner}>
+          <span>Audio is unavailable. Timers and controls still work.</span>
+          <button type="button" onClick={player.activateAudio}>
+            Retry audio
+          </button>
+        </div>
       )}
       {state.status === 'interrupted' && (
         <p role="alert" className={styles.sessionBanner}>

@@ -1,9 +1,15 @@
 import { practiceConfig, type MetronomeSound } from '../../config/practice-config'
 import { BeatClock, type BeatAccent, type BeatSnapshot } from './BeatClock'
-import type { AudioControllerOptions, AudioCue, MetronomeOptions } from './types'
+import type {
+  AudioControllerOptions,
+  AudioCue,
+  AudioLifecycleSnapshot,
+  MetronomeOptions,
+} from './types'
 
 const DEFAULT_POLL_MS = 25
 const DEFAULT_SCHEDULE_AHEAD_SEC = 0.1
+const DEFAULT_ACTIVATION_TIMEOUT_MS = 1_500
 const START_DELAY_SEC = 0.05
 
 const cuePatterns: Record<AudioCue, readonly number[]> = {
@@ -13,17 +19,28 @@ const cuePatterns: Record<AudioCue, readonly number[]> = {
   'session-complete': [660, 880, 1040],
 }
 
+type ContextState = AudioContextState | 'interrupted'
+type ContextRecord = { context: AudioContext; generation: number; onStateChange: () => void }
+type ActiveSource = { oscillator: OscillatorNode; envelope: GainNode }
+type Listener = () => void
+
 /**
- * Owns the single Web Audio context used by a session. Beats are scheduled against
- * the audio clock; the browser timer merely fills a small look-ahead window.
+ * Owns one Web Audio context at a time. `ensureRunning()` is idempotent, must be
+ * started from a user gesture, and always settles within its configured bound.
  */
 export class AudioController {
   private readonly contextFactory: () => AudioContext | undefined
   private readonly setIntervalFn: typeof setInterval
   private readonly clearIntervalFn: typeof clearInterval
+  private readonly setTimeoutFn: typeof setTimeout
+  private readonly clearTimeoutFn: typeof clearTimeout
   private readonly schedulerPollMs: number
   private readonly scheduleAheadSec: number
-  private context?: AudioContext
+  private readonly activationTimeoutMs: number
+  private record?: ContextRecord
+  private activation?: Promise<boolean>
+  private snapshot: AudioLifecycleSnapshot = { status: 'idle', generation: 0 }
+  private readonly stateListeners = new Set<Listener>()
   private metronomeGain?: GainNode
   private cueGain?: GainNode
   private scheduler?: ReturnType<typeof setInterval>
@@ -31,7 +48,7 @@ export class AudioController {
   private lastScheduledBeatTime: number | null = null
   private beatIndex = 0
   private metronome?: MetronomeOptions
-  private readonly activeSources = new Set<OscillatorNode>()
+  private readonly activeSources = new Set<ActiveSource>()
   private readonly beatClock = new BeatClock()
   private warningTargetTime: number | null = null
   private warningScheduled = false
@@ -40,27 +57,42 @@ export class AudioController {
 
   public constructor(options: AudioControllerOptions = {}) {
     this.contextFactory = options.contextFactory ?? defaultContextFactory
-    this.setIntervalFn = options.setIntervalFn ?? window.setInterval.bind(window)
-    this.clearIntervalFn = options.clearIntervalFn ?? window.clearInterval.bind(window)
+    this.setIntervalFn = options.setIntervalFn ?? globalThis.setInterval.bind(globalThis)
+    this.clearIntervalFn = options.clearIntervalFn ?? globalThis.clearInterval.bind(globalThis)
+    this.setTimeoutFn = options.setTimeoutFn ?? globalThis.setTimeout.bind(globalThis)
+    this.clearTimeoutFn = options.clearTimeoutFn ?? globalThis.clearTimeout.bind(globalThis)
     this.schedulerPollMs = options.schedulerPollMs ?? DEFAULT_POLL_MS
     this.scheduleAheadSec = options.scheduleAheadSec ?? DEFAULT_SCHEDULE_AHEAD_SEC
+    this.activationTimeoutMs = options.activationTimeoutMs ?? DEFAULT_ACTIVATION_TIMEOUT_MS
   }
 
-  /** Must be called from a user gesture (for example, Start session). */
-  public async unlock(): Promise<boolean> {
-    const context = this.getContext()
-    if (!context) return false
+  public getStateSnapshot = (): AudioLifecycleSnapshot => this.snapshot
 
-    try {
-      if (context.state === 'suspended') await context.resume()
-      return context.state === 'running'
-    } catch {
-      return false
+  public subscribeToState = (listener: Listener): (() => void) => {
+    this.stateListeners.add(listener)
+    return () => this.stateListeners.delete(listener)
+  }
+
+  /** Starts or recovers Web Audio. Concurrent calls share one bounded attempt. */
+  public ensureRunning(): Promise<boolean> {
+    const record = this.record
+    if (record && isRunning(record.context)) {
+      this.publish('running', record.generation)
+      return Promise.resolve(true)
     }
+    if (this.activation) return this.activation
+
+    const activation = this.activate()
+    this.activation = activation
+    void activation.finally(() => {
+      if (this.activation === activation) this.activation = undefined
+    })
+    return activation
   }
 
   public startMetronome(options: MetronomeOptions): boolean {
-    if (!isValidBpm(options.bpm) || !this.getContext()) return false
+    const context = this.getRunningContext()
+    if (!isValidBpm(options.bpm) || !context) return false
 
     this.stopMetronome()
     this.metronome = {
@@ -71,69 +103,62 @@ export class AudioController {
     this.beatIndex = 0
     this.lastScheduledBeatTime = null
     this.beatClock.start(options.bpm)
-    this.nextBeatTime = this.context!.currentTime + START_DELAY_SEC
+    this.nextBeatTime = context.currentTime + START_DELAY_SEC
     this.scheduleBeats()
-    const fn = () => this.scheduleBeats()
-    this.scheduler = this.setIntervalFn(fn, this.schedulerPollMs)
+    this.scheduler = this.setIntervalFn(() => this.scheduleBeats(), this.schedulerPollMs)
     return true
   }
 
   /** Applies Tempo after the next already-planned boundary without restarting the grid. */
   public updateMetronomeTempo(bpm: number): boolean {
-    if (!isValidBpm(bpm) || !this.metronome || !this.getContext()) return false
+    const context = this.getRunningContext()
+    if (!isValidBpm(bpm) || !this.metronome || !context) return false
     if (this.warningScheduled && !this.warningAnchoredToScheduledBeat) this.cancelScheduledWarning()
     this.metronome = { ...this.metronome, bpm }
-    if (
-      this.lastScheduledBeatTime !== null &&
-      this.lastScheduledBeatTime > this.context!.currentTime
-    )
+    if (this.lastScheduledBeatTime !== null && this.lastScheduledBeatTime > context.currentTime)
       this.nextBeatTime = this.lastScheduledBeatTime + 60 / bpm
     return true
   }
 
-  /** Applies a session-only sound preset to Beats which have not yet been scheduled. */
   public updateMetronomeSound(sound: MetronomeSound): boolean {
-    if (!this.metronome || !practiceConfig.metronome.sounds[sound] || !this.getContext())
+    if (!this.metronome || !practiceConfig.metronome.sounds[sound] || !this.getRunningContext())
       return false
     this.metronome = { ...this.metronome, sound }
     return true
   }
 
-  /** Applies the lower secondary tone to Beats which have not yet been scheduled. */
   public updateAlternateBeatTone(enabled: boolean): boolean {
-    if (!this.metronome || !this.getContext()) return false
+    if (!this.metronome || !this.getRunningContext()) return false
     this.metronome = { ...this.metronome, alternateBeatTone: enabled }
     return true
   }
 
   getBeatSnapshot = (): BeatSnapshot => this.beatClock.getSnapshot()
 
-  subscribeToBeats = (listener: () => void): (() => void) => this.beatClock.subscribe(listener)
+  subscribeToBeats = (listener: Listener): (() => void) => this.beatClock.subscribe(listener)
 
-  /** Queues the Warning cue on the nearest Beat once that portion of the grid is known. */
   public scheduleWarningAt(delayMs: number): boolean {
-    const context = this.getContext()
+    const context = this.getRunningContext()
     if (!context || !this.metronome || !Number.isFinite(delayMs)) return false
     this.warningTargetTime = context.currentTime + Math.max(0, delayMs) / 1000
     this.cancelScheduledWarning()
     return true
   }
 
-  /** Stops future scheduling and cancels clicks which have not started yet. */
   public pauseMetronome(): void {
     this.clearScheduler()
     this.cancelActiveSources()
     this.beatClock.stop()
   }
 
-  /** Restarts from a new beat boundary; missed beats are deliberately not recreated. */
   public resumeMetronome(): boolean {
-    if (!this.metronome || !this.getContext()) return false
+    const context = this.getRunningContext()
+    if (!this.metronome || !context) return false
     this.clearScheduler()
     this.cancelActiveSources()
     this.beatClock.start(this.metronome.bpm)
     this.lastScheduledBeatTime = null
-    this.nextBeatTime = this.context!.currentTime + START_DELAY_SEC
+    this.nextBeatTime = context.currentTime + START_DELAY_SEC
     this.scheduleBeats()
     this.scheduler = this.setIntervalFn(() => this.scheduleBeats(), this.schedulerPollMs)
     return true
@@ -161,41 +186,143 @@ export class AudioController {
     if (gain) gain.gain.value = clampVolume(volume)
   }
 
-  /** Plays a recognisably distinct generated tone pattern, independently of clicks. */
   public playCue(cue: AudioCue): boolean {
-    const context = this.getContext()
+    const context = this.getRunningContext()
     const gain = this.getCueGain()
     if (!context || !gain) return false
-
-    const start = context.currentTime + 0.01
-    this.scheduleCue(cue, start)
+    this.scheduleCue(cue, context.currentTime + 0.01)
     return true
   }
 
-  private scheduleCue(cue: AudioCue, start: number): OscillatorNode[] {
-    const gain = this.getCueGain()
-    if (!gain) return []
-    const peak =
-      cue === 'warning' ? practiceConfig.audio.warningPeak : practiceConfig.audio.completionPeak
-    return cuePatterns[cue]
-      .map((frequency, index) =>
-        this.scheduleTone(frequency, start + index * 0.16, 0.1, gain, peak),
-      )
-      .filter((source): source is OscillatorNode => source !== undefined)
+  /** Safe under repeated calls; later activation creates a fresh context. */
+  public dispose(): void {
+    if (this.record) this.retire(this.record)
+    else if (this.snapshot.status === 'idle') return
+    else this.stopMetronome()
+    this.activation = undefined
+    this.publish('idle', this.snapshot.generation + 1)
   }
 
-  public dispose(): void {
+  private async activate(): Promise<boolean> {
+    let record = this.record ?? this.createContext()
+    if (record && (await this.activateRecord(record))) return true
+
+    if (record) this.retire(record)
+    record = this.createContext()
+    if (record && (await this.activateRecord(record))) return true
+
+    if (record && this.isCurrent(record)) this.retire(record)
+    this.publish('unavailable', this.snapshot.generation)
+    return false
+  }
+
+  private createContext(): ContextRecord | undefined {
+    let context: AudioContext | undefined
+    try {
+      context = this.contextFactory()
+    } catch {
+      return undefined
+    }
+    if (!context) return undefined
+    const generation = this.snapshot.generation + 1
+    const record: ContextRecord = {
+      context,
+      generation,
+      onStateChange: () => this.handleStateChange(record),
+    }
+    this.record = record
+    context.addEventListener?.('statechange', record.onStateChange)
+    this.publish('activating', generation)
+    return record
+  }
+
+  private async activateRecord(record: ContextRecord): Promise<boolean> {
+    if (!this.isCurrent(record)) return false
+    if (isRunning(record.context)) {
+      this.publish('running', record.generation)
+      return true
+    }
+    const state = record.context.state as ContextState
+    if (state !== 'suspended' && state !== 'interrupted') return false
+
+    this.publish('activating', record.generation)
+    const resumed = await this.withTimeout(Promise.resolve().then(() => record.context.resume()))
+    if (!resumed || !this.isCurrent(record) || !isRunning(record.context)) return false
+    this.publish('running', record.generation)
+    return true
+  }
+
+  private async withTimeout(operation: Promise<unknown>): Promise<boolean> {
+    let timer: ReturnType<typeof setTimeout> | undefined
+    try {
+      const result = await Promise.race([
+        operation.then(
+          () => true,
+          () => false,
+        ),
+        new Promise<boolean>((resolve) => {
+          timer = this.setTimeoutFn(() => resolve(false), this.activationTimeoutMs)
+        }),
+      ])
+      return result
+    } finally {
+      if (timer !== undefined) this.clearTimeoutFn(timer)
+    }
+  }
+
+  private handleStateChange(record: ContextRecord): void {
+    if (!this.isCurrent(record)) return
+    if (isRunning(record.context)) {
+      this.publish('running', record.generation)
+      return
+    }
+    if (record.context.state === 'closed') {
+      this.retire(record)
+      this.publish('unavailable', this.snapshot.generation)
+      return
+    }
+    this.pauseMetronome()
+    this.publish('unavailable', record.generation)
+  }
+
+  private retire(record: ContextRecord): void {
+    if (!this.isCurrent(record)) return
     this.stopMetronome()
+    record.context.removeEventListener?.('statechange', record.onStateChange)
     this.metronomeGain?.disconnect()
     this.cueGain?.disconnect()
     this.metronomeGain = undefined
     this.cueGain = undefined
+    this.record = undefined
+    this.snapshot = { ...this.snapshot, generation: record.generation + 1 }
+    try {
+      void Promise.resolve(record.context.close()).catch(() => undefined)
+    } catch {
+      // Closing is best-effort; a retired context must never escape this controller.
+    }
+  }
+
+  private isCurrent(record: ContextRecord): boolean {
+    return this.record === record && this.snapshot.generation === record.generation
+  }
+
+  private publish(status: AudioLifecycleSnapshot['status'], generation: number): void {
+    if (this.snapshot.status === status && this.snapshot.generation === generation) return
+    this.snapshot = { status, generation }
+    this.stateListeners.forEach((listener) => listener())
+  }
+
+  private getRunningContext(): AudioContext | undefined {
+    const record = this.record ?? this.createContext()
+    if (!record || !isRunning(record.context)) return undefined
+    this.publish('running', record.generation)
+    return record.context
   }
 
   private scheduleBeats(): void {
-    if (!this.context || !this.metronome) return
-    const horizon = this.context.currentTime + this.scheduleAheadSec
-
+    const context = this.getRunningContext()
+    if (!context || !this.metronome) return
+    const horizon = context.currentTime + this.scheduleAheadSec
     while (this.nextBeatTime <= horizon) {
       const metronome = this.metronome
       const positionInPattern = this.beatIndex % 4
@@ -213,11 +340,8 @@ export class AudioController {
       )
       metronome.onBeatScheduled?.(scheduledBeat)
       this.beatClock.schedule(
-        {
-          ...scheduledBeat,
-          audioTime: scheduledBeat.time,
-        },
-        (scheduledBeat.time - this.context.currentTime) * 1000,
+        { ...scheduledBeat, audioTime: scheduledBeat.time },
+        (scheduledBeat.time - context.currentTime) * 1000,
       )
       this.scheduleWarningOnGrid(scheduledBeat.time, 60 / metronome.bpm)
       this.lastScheduledBeatTime = scheduledBeat.time
@@ -244,17 +368,30 @@ export class AudioController {
   }
 
   private scheduleWarningOnGrid(beatTime: number, interval: number): void {
-    if (this.warningTargetTime === null || this.warningScheduled || !this.context) return
+    const context = this.getRunningContext()
+    if (this.warningTargetTime === null || this.warningScheduled || !context) return
     const nextBeatTime = beatTime + interval
     if (this.warningTargetTime < beatTime || this.warningTargetTime > nextBeatTime) return
     const cueTime =
       this.warningTargetTime - beatTime <= nextBeatTime - this.warningTargetTime
         ? beatTime
         : nextBeatTime
-    if (cueTime < this.context.currentTime) return
+    if (cueTime < context.currentTime) return
     this.scheduleCue('warning', cueTime).forEach((source) => this.warningSources.add(source))
     this.warningScheduled = true
     this.warningAnchoredToScheduledBeat = cueTime === beatTime
+  }
+
+  private scheduleCue(cue: AudioCue, start: number): OscillatorNode[] {
+    const gain = this.getCueGain()
+    if (!gain) return []
+    const peak =
+      cue === 'warning' ? practiceConfig.audio.warningPeak : practiceConfig.audio.completionPeak
+    return cuePatterns[cue]
+      .map((frequency, index) =>
+        this.scheduleTone(frequency, start + index * 0.16, 0.1, gain, peak),
+      )
+      .filter((source): source is OscillatorNode => source !== undefined)
   }
 
   private scheduleTone(
@@ -265,7 +402,7 @@ export class AudioController {
     peak: number,
     waveform: OscillatorType = 'sine',
   ): OscillatorNode | undefined {
-    const context = this.context
+    const context = this.getRunningContext()
     if (!context) return undefined
     const oscillator = context.createOscillator()
     const envelope = context.createGain()
@@ -276,9 +413,10 @@ export class AudioController {
     envelope.gain.exponentialRampToValueAtTime(0.0001, time + duration)
     oscillator.connect(envelope)
     envelope.connect(destination)
-    this.activeSources.add(oscillator)
+    const activeSource = { oscillator, envelope }
+    this.activeSources.add(activeSource)
     oscillator.onended = () => {
-      this.activeSources.delete(oscillator)
+      this.activeSources.delete(activeSource)
       oscillator.disconnect()
       envelope.disconnect()
     }
@@ -292,7 +430,7 @@ export class AudioController {
       try {
         source.stop()
       } catch {
-        /* source has already stopped */
+        /* already stopped */
       }
     }
     this.warningSources.clear()
@@ -300,14 +438,8 @@ export class AudioController {
     this.warningAnchoredToScheduledBeat = false
   }
 
-  private getContext(): AudioContext | undefined {
-    if (this.context) return this.context
-    this.context = this.contextFactory()
-    return this.context
-  }
-
   private getMetronomeGain(): GainNode | undefined {
-    const context = this.getContext()
+    const context = this.getRunningContext()
     if (!context) return undefined
     if (!this.metronomeGain) {
       this.metronomeGain = context.createGain()
@@ -318,7 +450,7 @@ export class AudioController {
   }
 
   private getCueGain(): GainNode | undefined {
-    const context = this.getContext()
+    const context = this.getRunningContext()
     if (!context) return undefined
     if (!this.cueGain) {
       this.cueGain = context.createGain()
@@ -334,12 +466,14 @@ export class AudioController {
   }
 
   private cancelActiveSources(): void {
-    for (const source of this.activeSources) {
+    for (const { oscillator, envelope } of this.activeSources) {
       try {
-        source.stop()
+        oscillator.stop()
       } catch {
-        /* source has already stopped */
+        /* already stopped */
       }
+      oscillator.disconnect()
+      envelope.disconnect()
     }
     this.activeSources.clear()
   }
@@ -347,9 +481,7 @@ export class AudioController {
 
 function defaultContextFactory(): AudioContext | undefined {
   if (typeof window === 'undefined') return undefined
-  const legacyWindow = window as typeof window & {
-    webkitAudioContext?: typeof AudioContext
-  }
+  const legacyWindow = window as typeof window & { webkitAudioContext?: typeof AudioContext }
   const Constructor = legacyWindow.AudioContext ?? legacyWindow.webkitAudioContext
   return Constructor ? new Constructor() : undefined
 }
@@ -357,7 +489,9 @@ function defaultContextFactory(): AudioContext | undefined {
 function isValidBpm(bpm: number): boolean {
   return Number.isFinite(bpm) && bpm >= practiceConfig.tempo.min && bpm <= practiceConfig.tempo.max
 }
-
 function clampVolume(volume: number): number {
   return Math.min(1, Math.max(0, Number.isFinite(volume) ? volume : 1))
+}
+function isRunning(context: AudioContext | undefined): boolean {
+  return (context?.state as ContextState | undefined) === 'running'
 }

@@ -12,8 +12,15 @@ const silentBeatSnapshot = {
   running: false,
   generation: 0,
 }
+let audioSnapshot: {
+  status: 'running' | 'activating' | 'unavailable' | 'idle'
+  generation: number
+} = {
+  status: 'running',
+  generation: 1,
+}
 const audio = {
-  unlock: vi.fn().mockResolvedValue(true),
+  ensureRunning: vi.fn().mockResolvedValue(true),
   startMetronome: vi.fn(),
   updateMetronomeTempo: vi.fn(),
   updateMetronomeSound: vi.fn(),
@@ -24,6 +31,8 @@ const audio = {
   dispose: vi.fn(),
   subscribeToBeats: vi.fn(() => vi.fn()),
   getBeatSnapshot: vi.fn(() => silentBeatSnapshot),
+  subscribeToState: vi.fn(() => vi.fn()),
+  getStateSnapshot: vi.fn(() => audioSnapshot),
 }
 vi.mock('../../../services/audio', () => ({
   AudioController: class {
@@ -45,7 +54,10 @@ vi.mock('../../../services/platform/visibilityLifecycle', () => ({
 const routineWith = (...entries: ReturnType<typeof createExercise>[]) => createRoutine({ entries })
 
 describe('SessionPlayer', () => {
-  beforeEach(() => vi.clearAllMocks())
+  beforeEach(() => {
+    vi.clearAllMocks()
+    audioSnapshot = { status: 'running', generation: 1 }
+  })
   afterEach(() => {
     vi.useRealTimers()
     vi.unstubAllGlobals()
@@ -208,5 +220,37 @@ describe('SessionPlayer', () => {
 
     act(() => showCompletionScreen?.(0))
     expect(screen.getByText('Routine complete')).toBeInTheDocument()
+  })
+
+  it('keeps the Current phase visible and lets the practitioner retry unavailable audio', async () => {
+    audioSnapshot = { status: 'unavailable', generation: 1 }
+    render(
+      <SessionPlayer
+        routine={routineWith(createExercise({ title: 'Scales', tempoBpm: 90 }))}
+        onExit={vi.fn()}
+      />,
+    )
+
+    expect(await screen.findByRole('heading', { name: 'Scales' })).toBeInTheDocument()
+    expect(screen.getByRole('status')).toHaveTextContent(
+      'Audio is unavailable. Timers and controls still work.',
+    )
+    fireEvent.click(screen.getByRole('button', { name: 'Retry audio' }))
+    expect(audio.ensureRunning).toHaveBeenCalledOnce()
+  })
+
+  it('shows audio activation without replacing Session controls', async () => {
+    audioSnapshot = { status: 'activating', generation: 1 }
+    render(
+      <SessionPlayer
+        routine={routineWith(createExercise({ title: 'Scales', tempoBpm: 90 }))}
+        onExit={vi.fn()}
+      />,
+    )
+
+    expect(await screen.findByRole('status')).toHaveTextContent(
+      'Starting audio… Timers and controls still work.',
+    )
+    expect(screen.getByRole('button', { name: 'Pause session' })).toBeInTheDocument()
   })
 })

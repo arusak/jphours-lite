@@ -108,6 +108,25 @@
   font-size: 12px;
 }
 
+.sessionBanner:has(button) {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  text-align: left;
+}
+
+.sessionBanner button {
+  flex: none;
+  padding: 4px 8px;
+  border: 1px solid currentColor;
+  border-radius: var(--radius-lg);
+  color: inherit;
+  background: transparent;
+  font: inherit;
+  font-weight: 600;
+}
+
 @media (max-width: 359px) {
   .sessionPlayer {
     padding-inline: 16px;
