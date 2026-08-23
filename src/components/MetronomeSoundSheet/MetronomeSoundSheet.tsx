@@ -25,36 +25,38 @@ export function MetronomeSoundSheet({
 }: MetronomeSoundSheetProps) {
   return (
     <BottomSheet open={open} title="Metronome sound" onClose={onClose}>
-      <div className={styles.soundList} role="radiogroup" aria-label="Metronome sound">
-        {(Object.keys(practiceConfig.metronome.sounds) as MetronomeSound[]).map((option) => (
+      <div className={styles.content}>
+        <div className={styles.soundList} role="radiogroup" aria-label="Metronome sound">
+          {(Object.keys(practiceConfig.metronome.sounds) as MetronomeSound[]).map((option) => (
+            <button
+              key={option}
+              className={option === sound ? styles.selectedSound : undefined}
+              role="radio"
+              aria-checked={option === sound}
+              onClick={() => onChange(option)}
+            >
+              <span>{soundLabel(option)}</span>
+              <span className={styles.selectionMark} aria-hidden="true">
+                {option === sound ? '✓' : ''}
+              </span>
+            </button>
+          ))}
+        </div>
+        <div className={styles.alternateBeatTone}>
+          <span>
+            <strong>Alternate beat tone</strong>
+            <small>Even beats use a lower tone.</small>
+          </span>
           <button
-            key={option}
-            className={option === sound ? styles.selectedSound : undefined}
-            role="radio"
-            aria-checked={option === sound}
-            onClick={() => onChange(option)}
+            type="button"
+            role="switch"
+            aria-checked={alternateBeatTone}
+            aria-label="Alternate beat tone"
+            onClick={() => onAlternateBeatToneChange(!alternateBeatTone)}
           >
-            <span>{soundLabel(option)}</span>
-            <span className={styles.selectionMark} aria-hidden="true">
-              {option === sound ? '✓' : ''}
-            </span>
+            <span aria-hidden="true" />
           </button>
-        ))}
-      </div>
-      <div className={styles.alternateBeatTone}>
-        <span>
-          <strong>Alternate beat tone</strong>
-          <small>Even beats use a lower tone.</small>
-        </span>
-        <button
-          type="button"
-          role="switch"
-          aria-checked={alternateBeatTone}
-          aria-label="Alternate beat tone"
-          onClick={() => onAlternateBeatToneChange(!alternateBeatTone)}
-        >
-          <span aria-hidden="true" />
-        </button>
+        </div>
       </div>
     </BottomSheet>
   )

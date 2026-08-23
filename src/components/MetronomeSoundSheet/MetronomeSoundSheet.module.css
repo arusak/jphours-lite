@@ -1,3 +1,8 @@
+.content {
+  display: grid;
+  gap: 10px;
+}
+
 .soundList {
   display: grid;
   gap: 10px;
@@ -54,7 +59,9 @@
 }
 
 .alternateBeatTone > span {
-  display: grid;
+  display: flex;
+  align-items: flex-start;
+  flex-direction: column;
   gap: 2px;
 }
 

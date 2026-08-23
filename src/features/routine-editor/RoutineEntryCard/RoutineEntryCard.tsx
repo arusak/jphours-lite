@@ -44,15 +44,14 @@ export function RoutineEntryCard({
       )}
       <div className={styles.exerciseCardContent}>
         <div className={styles.exerciseTitleRow}>
-          <span>{index + 1}</span>
           <h3>{name}</h3>
         </div>
         <div className={styles.exerciseMeta}>
           {entry.kind === 'exercise' && entry.tempoBpm !== null && (
-            <span className={`${styles.badge} ${styles.badgeTempo}`}>♪ {entry.tempoBpm} BPM</span>
+            <span className={`${styles.badge} ${styles.badgeTempo}`}>{entry.tempoBpm} BPM</span>
           )}
           <span className={styles.badge}>
-            ◷ {entry.durationSec === null ? 'Open-ended' : `${entry.durationSec / 60} min`}
+            {entry.durationSec === null ? 'Open-ended' : `${entry.durationSec / 60} min`}
           </span>
         </div>
       </div>

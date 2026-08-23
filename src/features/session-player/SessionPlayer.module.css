@@ -7,6 +7,7 @@
   margin: 0 auto;
   padding: calc(24px + env(safe-area-inset-top)) 24px max(32px, env(safe-area-inset-bottom));
   text-align: center;
+  gap: 1.5rem;
 }
 
 .sessionHeader {
@@ -39,7 +40,11 @@
 }
 
 .sessionHeading {
-  margin-top: 32px;
+  margin-top: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  align-items: center;
 }
 
 .sessionHeading h1 {
@@ -50,10 +55,31 @@
   text-wrap: balance;
 }
 
-.nextStep {
-  margin-top: 12px;
+.duration {
+  display: inlune-block;
+  justify-self: center;
+  padding: 2px 6px;
+  font-size: 13px;
+  border: 0 solid var(--color-muted-foreground);
+  border-radius: var(--radius-xl);
   color: var(--color-muted-foreground);
-  font-size: 14px;
+}
+
+.bottomControls {
+  margin-top: auto;
+}
+
+.nextStep {
+  color: var(--color-secondary-foreground);
+  font-size: 16px;
+  padding: 12px 0 14px;
+  background: var(--color-secondary);
+  border-radius: 12px;
+}
+
+.timer {
+  position: relative;
+  margin: 16px 0 0;
 }
 
 .metronomeSoundTrigger {
@@ -61,13 +87,13 @@
   top: 0;
   right: 0;
   display: grid;
-  width: 36px;
-  height: 36px;
-  padding: 8px;
+  width: 42px;
+  height: 42px;
   place-items: center;
   border-radius: 50%;
   color: var(--color-muted-foreground);
   background: transparent;
+  opacity: 0.7;
 }
 
 .metronomeSoundTrigger:hover {
@@ -76,15 +102,20 @@
 }
 
 .metronomeSoundTrigger svg {
-  width: 20px;
-  height: 20px;
+  width: 24px;
+  height: 24px;
+}
+
+.beats {
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .beatIndicator {
   display: flex;
   justify-content: center;
   gap: 12px;
-  margin-top: 28px;
 }
 
 .beatIndicator span {

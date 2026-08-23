@@ -9,6 +9,7 @@
   --color-secondary-foreground: oklch(0.93 0.012 80);
   --color-muted: oklch(0.26 0.018 52);
   --color-muted-foreground: oklch(0.7 0.025 72);
+  --color-border: oklch(0.4 0.025 72);
   --color-accent: oklch(0.63 0.16 42);
   --color-destructive: oklch(0.58 0.19 27);
   --color-border: oklch(0.98 0.01 80 / 10%);

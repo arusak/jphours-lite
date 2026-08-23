@@ -1,7 +1,6 @@
 .exerciseList {
   display: grid;
   gap: 0;
-  margin-top: 12px;
 }
 
 .dragOverlay {

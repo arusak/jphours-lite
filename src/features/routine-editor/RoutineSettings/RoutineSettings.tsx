@@ -34,11 +34,8 @@ export function RoutineSettings({
             onClick={() => setExpanded((current) => !current)}
           >
             <span>
-              <strong>Session settings</strong>
-              <small>
-                Quick Rest {routine.quickRestDurationSec}s · Warning cue {warningLabel} · Click:{' '}
-                {soundLabel}
-              </small>
+              Quick Rest {routine.quickRestDurationSec}s · Warning cue {warningLabel} · {soundLabel}{' '}
+              Click
             </span>
             <ChevronRightIcon aria-hidden="true" />
           </button>

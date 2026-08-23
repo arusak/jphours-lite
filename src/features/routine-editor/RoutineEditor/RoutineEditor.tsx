@@ -18,7 +18,7 @@ export function RoutineEditor({ repository, onStartSession }: RoutineEditorProps
   return (
     <section className={styles.routineEditor} aria-labelledby="routine-editor-title">
       <AppUpdateBanner onBeforeUpdate={editor.flush} />
-      <header className={`${styles.routineHeader} ${styles.compact}`}>
+      <header className={styles.routineHeader}>
         <h1 id="routine-editor-title">{editor.routine.name.trim() || 'Practice routine'}</h1>
         <button
           className={styles.routineEdit}
@@ -27,6 +27,8 @@ export function RoutineEditor({ repository, onStartSession }: RoutineEditorProps
         >
           ✎
         </button>
+      </header>
+      <div className={styles.subMenu}>
         <span
           className={styles.routineTotal}
           aria-label={`${editor.total.approximate ? 'approximately ' : ''}${editor.total.minutes} minutes`}
@@ -40,7 +42,7 @@ export function RoutineEditor({ repository, onStartSession }: RoutineEditorProps
           exportErrorId={validationErrorId}
           onImport={editor.replaceRoutine}
         />
-      </header>
+      </div>
       <RoutineSettings
         routine={editor.routine}
         onUpdateSetting={editor.updateSetting}

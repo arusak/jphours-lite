@@ -16,6 +16,7 @@ import { StopSlider } from '../StopSlider/StopSlider'
 import { stepMetadata } from '../stepMetadata'
 import { useSessionPlayer } from '../hooks/useSessionPlayer'
 import styles from '../SessionPlayer.module.css'
+import { formatTime } from '../formatTime'
 
 export interface SessionPlayerProps {
   routine: Routine
@@ -190,6 +191,38 @@ export function SessionPlayer({
           <span className={styles.eyebrow}>NOW PLAYING</span>
           <span>{routine.name}</span>
         </button>
+      </header>
+      <ProgressSegments
+        count={state.steps.length}
+        current={index}
+        tone={tone}
+        label="Session progress"
+      />
+      <section className={styles.sessionHeading}>
+        <h1>{title}</h1>
+        {step.durationSec !== null && elapsedSec !== null && (
+          <div className={styles.duration}>
+            <strong>{formatTime(elapsedSec)}</strong> of{' '}
+            <strong>{formatTime(step.durationSec)}</strong>
+          </div>
+        )}
+      </section>
+      <div className={styles.timer}>
+        <SessionTimer
+          tempo={currentTempo}
+          savedTempo={savedTempo}
+          isBreak={isBreak}
+          isQuickRest={isQuickRest}
+          displaySeconds={displaySeconds}
+          elapsedSeconds={elapsedSec}
+          progress={progress}
+          discreteProgress={pacedRing}
+          tone={tone}
+          onChangeTempo={(delta) =>
+            currentTempo !== null && player.changeTempo(step, currentTempo, delta)
+          }
+          onSaveTempo={() => currentTempo !== null && player.saveTempo(step, currentTempo)}
+        />
         {isExercise && currentTempo !== null && (
           <button
             className={styles.metronomeSoundTrigger}
@@ -200,34 +233,10 @@ export function SessionPlayer({
             <MetronomeIcon />
           </button>
         )}
-      </header>
-      <ProgressSegments
-        count={state.steps.length}
-        current={index}
-        tone={tone}
-        label="Session progress"
-      />
-      <section className={styles.sessionHeading}>
-        <h1>{title}</h1>
-        {nextStep && <p className={styles.nextStep}>Up next: {stepMetadata(nextStep)}</p>}
-      </section>
-      <SessionTimer
-        tempo={currentTempo}
-        savedTempo={savedTempo}
-        isBreak={isBreak}
-        isQuickRest={isQuickRest}
-        displaySeconds={displaySeconds}
-        elapsedSeconds={elapsedSec}
-        progress={progress}
-        discreteProgress={pacedRing}
-        tone={tone}
-        onChangeTempo={(delta) =>
-          currentTempo !== null && player.changeTempo(step, currentTempo, delta)
-        }
-        onSaveTempo={() => currentTempo !== null && player.saveTempo(step, currentTempo)}
-      />
+      </div>
+
       {isExercise && currentTempo !== null && (
-        <>
+        <div className={styles.beats}>
           <div className={styles.beatIndicator} aria-label="Metronome beat">
             {[0, 1, 2, 3].map((dot) => (
               <span
@@ -242,7 +251,7 @@ export function SessionPlayer({
               />
             ))}
           </div>
-        </>
+        </div>
       )}
       {player.audioState.status === 'activating' && (
         <p role="status" className={styles.sessionBanner}>
@@ -262,14 +271,20 @@ export function SessionPlayer({
           Session paused while the app was in the background.
         </p>
       )}
-      <SessionControls
-        paused={paused}
-        quickRest={isQuickRest}
-        onRewind={player.rewind}
-        onPauseResume={() => player.togglePause(paused)}
-        onStop={() => setStopOpen(true)}
-        onFinishOrSkip={() => player.finishOrSkip(paused)}
-      />
+
+      <div className={styles.bottomControls}>
+        {nextStep && <p className={styles.nextStep}>Up next: {stepMetadata(nextStep)}</p>}
+
+        <SessionControls
+          paused={paused}
+          quickRest={isQuickRest}
+          onRewind={player.rewind}
+          onPauseResume={() => player.togglePause(paused)}
+          onStop={() => setStopOpen(true)}
+          onFinishOrSkip={() => player.finishOrSkip(paused)}
+        />
+      </div>
+
       <NowPlayingSheet
         open={nowPlayingOpen}
         steps={state.steps}
