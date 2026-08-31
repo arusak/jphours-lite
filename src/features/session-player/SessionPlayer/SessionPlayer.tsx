@@ -61,22 +61,20 @@ export function SessionPlayer({
     state.phase === 'quick-rest' ? (quickRest?.durationSec ?? null) : (step?.durationSec ?? null)
   const pacedRing = state.phase === 'step' && step?.kind === 'exercise' && step.tempoBpm !== null
   const beatProgress = useMemo(() => {
-    if (
-      !pacedRing ||
-      durationForRing === null ||
-      state.currentStepStartedAt === null ||
-      state.status === 'paused' ||
-      state.status === 'interrupted'
-    )
-      return null
-    return Math.min(
-      1,
-      Math.max(0, (performance.now() - state.currentStepStartedAt) / 1000 / durationForRing),
-    )
+    if (!pacedRing || durationForRing === null) return null
+    const elapsedSec =
+      state.status === 'paused' || state.status === 'interrupted'
+        ? state.pausedElapsedSec
+        : state.currentStepStartedAt === null
+          ? null
+          : (performance.now() - state.currentStepStartedAt) / 1000
+    if (elapsedSec === null) return null
+    return Math.min(1, Math.max(0, elapsedSec / durationForRing))
   }, [
     pacedRing,
     durationForRing,
     state.currentStepStartedAt,
+    state.pausedElapsedSec,
     state.status,
     player.beatSnapshot.generation,
     player.beatSnapshot.beatIndex,
@@ -301,7 +299,7 @@ export function SessionPlayer({
           onRewind={player.rewind}
           onPauseResume={() => player.togglePause(paused)}
           onStop={() => setStopOpen(true)}
-          onFinishOrSkip={() => player.finishOrSkip(paused)}
+          onFinishOrSkip={player.finishOrSkip}
         />
       </div>
 

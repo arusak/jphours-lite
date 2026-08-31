@@ -19,12 +19,7 @@ export function SessionControls({
 }: SessionControlsProps) {
   return (
     <div className={styles.playerControls} aria-label="Session controls">
-      <button
-        className={styles.rewindButton}
-        aria-label="Rewind step"
-        title="Rewind step"
-        onClick={onRewind}
-      >
+      <button className={styles.rewindButton} aria-label="Rewind" title="Rewind" onClick={onRewind}>
         <RewindIcon />
       </button>
       <button

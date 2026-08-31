@@ -3,7 +3,10 @@ import { isTimedStep } from '../../domain/session'
 import type { Routine } from '../../domain/routine'
 import { buildSessionPlan } from './buildSessionSteps'
 
+const REWIND_PREVIOUS_STEP_THRESHOLD_MS = 3_000
+
 export type SessionStatus = 'idle' | 'running' | 'paused' | 'completed' | 'stopped' | 'interrupted'
+type NavigableSessionStatus = Extract<SessionStatus, 'running' | 'paused' | 'interrupted'>
 export type SessionPhase = 'step' | 'quick-rest'
 
 export interface SessionState {
@@ -53,7 +56,7 @@ export function sessionReducer(state: SessionState, command: SessionCommand): Se
     case 'RESUME':
       return resume(state, command.now)
     case 'SKIP_STEP':
-      return state.status === 'running' ? advance(state, command.now) : state
+      return canNavigate(state) ? advanceToNextStep(state, command.now, state.status) : state
     case 'REWIND':
       return rewind(state, command.now)
     case 'STEP_WARNING':
@@ -94,11 +97,17 @@ export function activeSegmentKey(state: SessionState): string | null {
 }
 
 function rewind(state: SessionState, now: number): SessionState {
-  if (state.status !== 'running' || state.currentStepIndex === null) return state
+  if (!canNavigate(state) || state.currentStepIndex === null) return state
+  const targetIndex =
+    state.phase === 'quick-rest' ||
+    (state.currentStepIndex > 0 && activeElapsedMs(state, now) < REWIND_PREVIOUS_STEP_THRESHOLD_MS)
+      ? Math.max(0, state.currentStepIndex - 1)
+      : state.currentStepIndex
   return enterStep(
     { steps: state.steps, quickRests: state.quickRests },
-    state.currentStepIndex,
+    targetIndex,
     now,
+    state.status,
   )
 }
 
@@ -151,10 +160,14 @@ function advance(state: SessionState, now: number): SessionState {
   return rest ? enterQuickRest(state, rest, now) : advanceToNextStep(state, now)
 }
 
-function advanceToNextStep(state: SessionState, now: number): SessionState {
+function advanceToNextStep(
+  state: SessionState,
+  now: number,
+  status: NavigableSessionStatus = 'running',
+): SessionState {
   const nextIndex = (state.currentStepIndex ?? -1) + 1
   return nextIndex < state.steps.length
-    ? enterStep({ steps: state.steps, quickRests: state.quickRests }, nextIndex, now)
+    ? enterStep({ steps: state.steps, quickRests: state.quickRests }, nextIndex, now, status)
     : {
         ...initialSessionState,
         steps: state.steps,
@@ -163,21 +176,39 @@ function advanceToNextStep(state: SessionState, now: number): SessionState {
       }
 }
 
-function enterStep(plan: SessionPlan, index: number, now: number): SessionState {
+function enterStep(
+  plan: SessionPlan,
+  index: number,
+  now: number,
+  status: NavigableSessionStatus = 'running',
+): SessionState {
   const step = plan.steps[index]
   const durationSec = stepDuration(step)
+  const running = status === 'running'
   return {
-    status: 'running',
+    status,
     steps: plan.steps,
     quickRests: plan.quickRests,
     currentStepIndex: index,
     phase: 'step',
-    currentStepStartedAt: now,
-    currentStepEndsAt: durationSec === null ? null : now + durationSec * 1000,
-    pausedRemainingSec: null,
-    pausedElapsedSec: null,
+    currentStepStartedAt: running ? now : null,
+    currentStepEndsAt: running && durationSec !== null ? now + durationSec * 1000 : null,
+    pausedRemainingSec: running || durationSec === null ? null : durationSec,
+    pausedElapsedSec: running ? null : 0,
     warningPlayedForStepId: null,
   }
+}
+
+function canNavigate(
+  state: SessionState,
+): state is SessionState & { status: NavigableSessionStatus } {
+  return state.status === 'running' || state.status === 'paused' || state.status === 'interrupted'
+}
+
+function activeElapsedMs(state: SessionState, now: number): number {
+  return state.status === 'running'
+    ? Math.max(0, now - (state.currentStepStartedAt ?? now))
+    : (state.pausedElapsedSec ?? 0) * 1000
 }
 
 function enterQuickRest(state: SessionState, rest: QuickRestTransition, now: number): SessionState {

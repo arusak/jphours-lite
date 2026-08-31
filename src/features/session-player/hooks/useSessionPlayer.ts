@@ -98,7 +98,9 @@ export function useSessionPlayer({
         if (reason === 'STEP_COMPLETED') audio.playCue('break-complete')
       },
       onWarning: () => audio.playCue('warning'),
-      onSessionComplete: () => audio.playCue('session-complete'),
+      onSessionComplete: (reason) => {
+        if (reason === 'STEP_COMPLETED') audio.playCue('session-complete')
+      },
     })
     const current = runner.current
     const unsubscribe = observeVisibility((visible) => {
@@ -179,10 +181,7 @@ export function useSessionPlayer({
         runner.current?.resume()
       } else runner.current?.pause()
     },
-    finishOrSkip: (paused: boolean) => {
-      if (paused) runner.current?.resume()
-      runner.current?.skipStep()
-    },
+    finishOrSkip: () => runner.current?.skipStep(),
     stop: () => runner.current?.stop(),
   }
 }

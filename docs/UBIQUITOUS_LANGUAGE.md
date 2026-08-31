@@ -38,17 +38,18 @@
 
 ## Session controls and state
 
-| Term                    | Definition                                                                                           | Aliases to avoid          |
-| ----------------------- | ---------------------------------------------------------------------------------------------------- | ------------------------- |
-| **Start session**       | The deliberate action that captures the Session plan and begins its first Current phase.             | Play, launch              |
-| **Pause**               | A temporary halt preserving the Current phase and its remaining or elapsed time.                     | Stop                      |
-| **Resume**              | The action that continues a paused Session from its preserved Current phase.                         | Restart                   |
-| **Finish step**         | The deliberate action that ends the current Exercise step or Break step before automatic Completion. | Skip exercise, skip break |
-| **Skip Quick Rest**     | The deliberate action that ends the current Quick Rest before its Countdown completes.               | Finish break, skip Step   |
-| **Stop session**        | The deliberate action that ends the entire Session and clears its active scheduling.                 | Pause, cancel step        |
-| **Interrupted session** | A Session suspended because the application lost foreground status and requires an explicit Resume.  | Background session        |
-| **Timed step**          | An Exercise step with a Duration or any Break step; it has a remaining-time Countdown.               | Countdown step            |
-| **Open-ended step**     | An Exercise step without a Duration; it has Elapsed time and never completes automatically.          | Untimed step              |
+| Term                    | Definition                                                                                                                                              | Aliases to avoid          |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------- |
+| **Start session**       | The deliberate action that captures the Session plan and begins its first Current phase.                                                                | Play, launch              |
+| **Pause**               | A temporary halt preserving the Current phase and its remaining or elapsed time.                                                                        | Stop                      |
+| **Resume**              | The action that continues a paused Session from its preserved Current phase.                                                                            | Restart                   |
+| **Finish step**         | The deliberate action that ends the current Exercise step or Break step before automatic Completion.                                                    | Skip exercise, skip break |
+| **Skip Quick Rest**     | The deliberate action that ends the current Quick Rest before its Countdown completes.                                                                  | Finish break, skip Step   |
+| **Rewind**              | Below three active seconds, starts the preceding Step; otherwise restarts the Current step. It bypasses Quick Rest and preserves Pause or interruption. | Previous, back, restart   |
+| **Stop session**        | The deliberate action that ends the entire Session and clears its active scheduling.                                                                    | Pause, cancel step        |
+| **Interrupted session** | A Session suspended because the application lost foreground status and requires an explicit Resume.                                                     | Background session        |
+| **Timed step**          | An Exercise step with a Duration or any Break step; it has a remaining-time Countdown.                                                                  | Countdown step            |
+| **Open-ended step**     | An Exercise step without a Duration; it has Elapsed time and never completes automatically.                                                             | Untimed step              |
 
 ## Runtime signals
 
@@ -101,4 +102,5 @@
 - Older documents may use “break” for an automatically inserted rest. In the canonical language, an explicit saved Routine entry is a **Break** and the automatic transition is a **Quick Rest**.
 - Use **Exercise** and **Break** for saved Routine entries, **Exercise step** and **Break step** for their captured Session execution, and **Quick Rest** only for the non-Step transition.
 - Use **Finish step** for manually ending an Exercise step or Break step, **Skip Quick Rest** for ending a Quick Rest, and **Stop session** only for ending the entire Session.
+- **Rewind** uses active time only: below three seconds it selects the preceding meaningful Step, and at or beyond three seconds it restarts the Current step. It never selects a Quick Rest and does not resume a paused or interrupted Session.
 - Use **Countdown**, **Elapsed time**, and **Stale event** instead of the overloaded word “timer.”

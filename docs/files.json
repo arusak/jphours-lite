@@ -47,6 +47,7 @@
     "docs/2026-08-12-dead-session-code-cleanup-report.md": "Implementation report for removing obsolete Routine and Session model, command, wrapper, and styling code.",
     "docs/2026-08-12-h02-h03-web-audio-lifecycle-implementation-report.md": "Implementation report for H-02/H-03 Web Audio startup, recovery, and teardown remediation.",
     "docs/2026-08-12-routine-file-refactor-report.md": "Implementation report for the Routine file transfer, validation, migration, and editor refactor.",
+    "docs/2026-08-31-session-navigation-implementation-report.md": "Implementation report for Session Rewind, Forward, paused navigation, and paced-progress behavior.",
     "docs/icon-creation-publishing-guide.md": "Source artwork, generated assets, platform declarations, validation, and publishing guidance for application icons.",
     "docs/": "Project plans, implementation reports, ubiquitous language, and this inventory."
   }

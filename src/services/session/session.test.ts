@@ -167,7 +167,7 @@ describe('SessionRunner', () => {
     expect((time.now() - runner.getState().currentStepStartedAt!) / 1000).toBe(6)
   })
 
-  it('rewinds an explicit Break and resumes with a fresh full timer', () => {
+  it('rewinds to the previous meaningful Step before three active seconds and restarts at the threshold', () => {
     const time = new FakeTime()
     const stopped = vi.fn()
     const runner = new SessionRunner(time, time, { onStepStop: stopped })
@@ -177,19 +177,73 @@ describe('SessionRunner', () => {
     time.advance(10_000)
     expect(runner.getState().currentStepIndex).toBe(1)
 
-    time.advance(2_000)
+    time.advance(2_999)
     runner.rewind()
-    expect(runner.getState()).toMatchObject({ currentStepIndex: 1, currentStepEndsAt: 17_000 })
+    expect(runner.getState()).toMatchObject({ currentStepIndex: 0, currentStepEndsAt: 22_999 })
     expect(stopped).toHaveBeenLastCalledWith(expect.objectContaining({ kind: 'break' }), 'REWIND')
 
-    time.advance(3_000)
+    runner.start(
+      routine([exercise('one', 120, 10), breakEntry('rest', 5), exercise('two', null, 10)], 0),
+    )
+    time.advance(13_000)
+    runner.rewind()
+    expect(runner.getState()).toMatchObject({ currentStepIndex: 1, currentStepEndsAt: 30_999 })
+  })
+
+  it('bypasses Quick Rest for manual Forward but retains it for automatic Completion', () => {
+    const time = new FakeTime()
+    const runner = new SessionRunner(time, time)
+    const planned = routine([exercise('one', null, 2), exercise('two', null, 10)], 5)
+
+    runner.start(planned)
+    runner.skipStep()
+    expect(runner.getState()).toMatchObject({ phase: 'step', currentStepIndex: 1 })
+
+    runner.start(planned)
+    time.advance(2_000)
+    expect(runner.getState()).toMatchObject({ phase: 'quick-rest', currentStepIndex: 0 })
+  })
+
+  it('preserves paused or interrupted status when navigating and only schedules after Resume', () => {
+    const time = new FakeTime()
+    const started = vi.fn()
+    const runner = new SessionRunner(time, time, { onStepStart: started })
+    runner.start(routine([exercise('one', 120, 10), breakEntry('rest', 5)], 0))
     runner.pause()
-    time.advance(20_000)
+    runner.skipStep()
+    expect(runner.getState()).toMatchObject({
+      status: 'paused',
+      currentStepIndex: 1,
+      currentStepStartedAt: null,
+      currentStepEndsAt: null,
+      pausedElapsedSec: 0,
+      pausedRemainingSec: 5,
+    })
+    expect(started).toHaveBeenCalledTimes(1)
     runner.resume()
-    time.advance(7_000)
-    expect(runner.getState().currentStepIndex).toBe(2)
-    time.advance(10_000)
-    expect(runner.getState().status).toBe('completed')
+    expect(started).toHaveBeenCalledTimes(2)
+
+    runner.appHidden()
+    runner.rewind()
+    expect(runner.getState()).toMatchObject({
+      status: 'interrupted',
+      currentStepIndex: 0,
+      pausedElapsedSec: 0,
+      pausedRemainingSec: 10,
+    })
+  })
+
+  it('reports automatic and manual Session Completion separately', () => {
+    const time = new FakeTime()
+    const complete = vi.fn()
+    const runner = new SessionRunner(time, time, { onSessionComplete: complete })
+    runner.start(routine([exercise('automatic', null, 1)], 0))
+    time.advance(1_000)
+    expect(complete).toHaveBeenLastCalledWith('STEP_COMPLETED')
+
+    runner.start(routine([exercise('manual', null, 1)], 0))
+    runner.skipStep()
+    expect(complete).toHaveBeenLastCalledWith('SKIP_STEP')
   })
 
   it('cancels the stale Break timer when rewinding', () => {

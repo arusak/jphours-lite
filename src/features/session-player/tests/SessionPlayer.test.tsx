@@ -150,7 +150,7 @@ describe('SessionPlayer', () => {
     expect(screen.getByText('96 BPM · 1:30')).toBeInTheDocument()
   })
 
-  it('opens a read-only Now Playing list of meaningful steps and marks the next exercise during Quick Rest', async () => {
+  it('opens a read-only Now Playing list of meaningful steps and bypasses Quick Rest on Finish step', async () => {
     const one = createExercise({ id: 'one', title: 'One', durationSec: 30 })
     const two = createExercise({ id: 'two', title: 'Two', durationSec: 30 })
     render(<SessionPlayer routine={routineWith(one, two)} onExit={vi.fn()} />)
@@ -161,13 +161,10 @@ describe('SessionPlayer', () => {
     expect(screen.queryByText(/Quick Rest/)).not.toBeInTheDocument()
     fireEvent.keyDown(document, { key: 'Escape' })
     fireEvent.click(screen.getByRole('button', { name: 'Finish step' }))
-    expect(await screen.findByRole('heading', { name: 'Quick Rest' })).toBeInTheDocument()
-    expect(screen.queryByTestId('exercise-icon')).not.toBeInTheDocument()
-    expect(screen.queryByTestId('break-icon')).not.toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Skip Quick Rest' })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: 'Two' })).toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: /now playing/i }))
     const nowPlaying = await screen.findByRole('dialog', { name: 'Now Playing' })
-    expect(within(nowPlaying).getByText('Up next')).toBeInTheDocument()
+    expect(within(nowPlaying).getByText('Current')).toBeInTheDocument()
   })
 
   it('presents the four media controls and only stops after slide confirmation', async () => {
@@ -176,7 +173,7 @@ describe('SessionPlayer', () => {
       <SessionPlayer routine={routineWith(createExercise({ title: 'One' }))} onExit={onExit} />,
     )
     await screen.findByRole('heading', { name: 'One' })
-    const rewindButton = screen.getByRole('button', { name: 'Rewind step' })
+    const rewindButton = screen.getByRole('button', { name: 'Rewind' })
     expect(rewindButton).toBeInTheDocument()
     expect(rewindButton.querySelector('svg')).toHaveAttribute('viewBox', '0 0 24 24')
     const pauseButton = screen.getByRole('button', { name: 'Pause session' })
@@ -208,6 +205,47 @@ describe('SessionPlayer', () => {
     expect(await screen.findByRole('heading', { name: 'Break' })).toBeInTheDocument()
     expect(screen.getByTestId('timer-ring')).toHaveAttribute('data-tone', 'break')
     expect(screen.getByTestId('break-icon')).toBeInTheDocument()
+  })
+
+  it('keeps paced timed progress visible and frozen while paused', async () => {
+    vi.useFakeTimers()
+    render(
+      <SessionPlayer
+        routine={routineWith(createExercise({ title: 'Scales', tempoBpm: 90, durationSec: 10 }))}
+        onExit={vi.fn()}
+      />,
+    )
+    await act(async () => Promise.resolve())
+    act(() => vi.advanceTimersByTime(3_000))
+    fireEvent.click(screen.getByRole('button', { name: 'Pause session' }))
+
+    const ring = screen.getByTestId('timer-ring')
+    const progress = ring.querySelectorAll('circle')[1]
+    expect(ring).toHaveAttribute('data-open-ended', 'false')
+    expect(progress).toBeDefined()
+    const offset = progress.getAttribute('stroke-dashoffset')
+    act(() => vi.advanceTimersByTime(3_000))
+    expect(progress).toHaveAttribute('stroke-dashoffset', offset!)
+  })
+
+  it('navigates while paused without resuming or restarting the Metronome', async () => {
+    const one = createExercise({ id: 'one', title: 'One', tempoBpm: 90, durationSec: 10 })
+    const two = createExercise({ id: 'two', title: 'Two', tempoBpm: 90, durationSec: 10 })
+    render(<SessionPlayer routine={routineWith(one, two)} onExit={vi.fn()} />)
+    await screen.findByRole('heading', { name: 'One' })
+    audio.startMetronome.mockClear()
+    fireEvent.click(screen.getByRole('button', { name: 'Pause session' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Finish step' }))
+    expect(await screen.findByRole('heading', { name: 'Two' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Resume session' })).toBeInTheDocument()
+    expect(audio.startMetronome).not.toHaveBeenCalled()
+    expect(screen.getByTestId('timer-ring').querySelectorAll('circle')[1]).toHaveAttribute(
+      'stroke-dashoffset',
+      expect.stringMatching(/^804\.2477/),
+    )
+    fireEvent.click(screen.getByRole('button', { name: 'Rewind' }))
+    expect(await screen.findByRole('heading', { name: 'One' })).toBeInTheDocument()
+    expect(audio.playCue).not.toHaveBeenCalledWith('session-complete')
   })
 
   it('shows a paced TimerRing at Completion before presenting the Completion screen', async () => {

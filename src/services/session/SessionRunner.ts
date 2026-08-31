@@ -29,7 +29,7 @@ export interface SessionRunnerHooks {
   usesBeatClockForWarning?(step: SessionStep): boolean
   onQuickRestStart?(rest: QuickRestTransition, state: SessionState): void
   onQuickRestStop?(rest: QuickRestTransition, reason: SessionCommand['type'] | 'DISPOSE'): void
-  onSessionComplete?(): void
+  onSessionComplete?(reason: 'STEP_COMPLETED' | 'SKIP_STEP'): void
 }
 
 /**
@@ -125,7 +125,8 @@ export class SessionRunner {
     }
 
     if (previous.status !== 'completed' && this.state.status === 'completed') {
-      this.hooks.onSessionComplete?.()
+      if (command.type === 'STEP_COMPLETED' || command.type === 'SKIP_STEP')
+        this.hooks.onSessionComplete?.(command.type)
     }
     if (previous !== this.state) this.hooks.onStateChange?.(this.state)
   }
