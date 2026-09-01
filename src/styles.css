@@ -75,6 +75,7 @@ button:disabled {
 
 .small-caps {
   font-variant-caps: all-small-caps;
+  letter-spacing: 0.05rem;
 }
 
 button:focus-visible,
