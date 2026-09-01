@@ -118,6 +118,20 @@ describe('SessionPlayer', () => {
     expect(audio.updateMetronomeTempo).toHaveBeenLastCalledWith(90)
   })
 
+  it.each([
+    ['Increase tempo', 'Enter', 91],
+    ['Decrease tempo', ' ', 89],
+  ])('changes Tempo on the first %s keydown', async (label, key, expectedTempo) => {
+    renderPacedExercise()
+    const button = await screen.findByRole('button', { name: label })
+
+    fireEvent.keyDown(button, { key })
+    expect(screen.getByText(String(expectedTempo), { selector: 'strong' })).toBeInTheDocument()
+    fireEvent.keyDown(button, { key, repeat: true })
+    fireEvent.keyUp(button, { key })
+    expect(audio.updateMetronomeTempo).toHaveBeenCalledTimes(1)
+  })
+
   it('changes Tempo first at one second and repeats every 250ms for a held pointer', async () => {
     vi.useFakeTimers()
     renderPacedExercise()

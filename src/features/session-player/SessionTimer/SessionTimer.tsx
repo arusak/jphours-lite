@@ -115,6 +115,13 @@ export function SessionTimer({
     onChangeTempo(delta)
   }
 
+  const onTempoKeyDown = (event: React.KeyboardEvent<HTMLButtonElement>, delta: number) => {
+    if (event.key !== ' ' && event.key !== 'Enter') return
+    event.preventDefault()
+    if (event.repeat) return
+    onChangeTempo(delta)
+  }
+
   const time = formatTime(displaySeconds ?? elapsedSeconds)
   const timerDescription = displaySeconds === null ? 'Elapsed time' : 'Remaining time'
   return (
@@ -134,6 +141,7 @@ export function SessionTimer({
             onLostPointerCapture={onTempoLostPointerCapture}
             onClick={(event) => onTempoClick(event, -1)}
             onContextMenu={(event) => event.preventDefault()}
+            onKeyDown={(event) => onTempoKeyDown(event, -1)}
           >
             −
           </button>
@@ -149,6 +157,7 @@ export function SessionTimer({
             onLostPointerCapture={onTempoLostPointerCapture}
             onClick={(event) => onTempoClick(event, 1)}
             onContextMenu={(event) => event.preventDefault()}
+            onKeyDown={(event) => onTempoKeyDown(event, 1)}
           >
             +
           </button>
