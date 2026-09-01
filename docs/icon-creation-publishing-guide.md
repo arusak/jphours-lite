@@ -42,14 +42,14 @@ sh scripts/convert-icons.sh
 
 The script produces:
 
-| File | Purpose |
-| --- | --- |
-| `public/favicon-32.png` | 32×32 fallback browser-tab icon |
-| `public/assets/manifest-icon-192.png` | Standard 192×192 PWA icon |
-| `public/assets/manifest-icon-192.maskable.png` | Opaque 192×192 adaptive Android icon |
-| `public/assets/manifest-icon-512.png` | Standard 512×512 PWA icon |
-| `public/assets/manifest-icon-512.maskable.png` | Opaque 512×512 adaptive Android icon |
-| `public/apple-touch-icon.png` | Opaque 180×180 iOS/iPadOS Home Screen icon |
+| File                                           | Purpose                                    |
+| ---------------------------------------------- | ------------------------------------------ |
+| `public/favicon-32.png`                        | 32×32 fallback browser-tab icon            |
+| `public/assets/manifest-icon-192.png`          | Standard 192×192 PWA icon                  |
+| `public/assets/manifest-icon-192.maskable.png` | Opaque 192×192 adaptive Android icon       |
+| `public/assets/manifest-icon-512.png`          | Standard 512×512 PWA icon                  |
+| `public/assets/manifest-icon-512.maskable.png` | Opaque 512×512 adaptive Android icon       |
+| `public/apple-touch-icon.png`                  | Opaque 180×180 iOS/iPadOS Home Screen icon |
 
 The standard icons preserve the SVG's transparency. The maskable and Apple
 exports are composited over `#140B0A` so their canvases are opaque.
