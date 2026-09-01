@@ -103,6 +103,12 @@
   padding: 40px 0 max(32px, env(safe-area-inset-bottom));
   display: grid;
   gap: 1rem;
+  pointer-events: none;
+}
+
+.entryActions,
+.primaryAction {
+  pointer-events: auto;
 }
 
 .primaryAction {
