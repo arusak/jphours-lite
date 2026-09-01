@@ -38,7 +38,7 @@ describe('RoutineEditor', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Edit Scales' }))
     fireEvent.change(screen.getAllByRole('spinbutton')[1], { target: { value: '6' } })
     fireEvent.click(screen.getByRole('button', { name: /^save$/i }))
-    expect(screen.getByText('6 min')).toBeInTheDocument()
+    expect(screen.getByLabelText('6 minutes')).toBeInTheDocument()
   })
 
   it('calculates eligible Quick Rests and marks open-ended totals approximate', () => {
@@ -71,7 +71,7 @@ describe('RoutineEditor', () => {
   it('edits Metronome sound in the shared sheet without a save action', () => {
     render(<RoutineEditor repository={repository(createRoutine())} />)
 
-    fireEvent.click(screen.getByRole('button', { name: /session settings/i }))
+    fireEvent.click(screen.getByRole('button', { name: /quick rest.*warning cue/i }))
     fireEvent.click(screen.getByRole('button', { name: /metronome sound/i }))
     expect(screen.getByRole('dialog', { name: 'Metronome sound' })).toBeInTheDocument()
 
@@ -95,10 +95,10 @@ describe('RoutineEditor', () => {
         )}
       />,
     )
-    const disclosure = screen.getByRole('button', { name: /session settings/i })
+    const disclosure = screen.getByRole('button', { name: /quick rest.*warning cue/i })
     const panel = document.getElementById('routine-settings-panel')
     expect(disclosure).toHaveAttribute('aria-expanded', 'false')
-    expect(disclosure).toHaveTextContent('Quick Rest 30s · Warning cue Off · Click: Wood')
+    expect(disclosure).toHaveTextContent('Quick Rest 30s · Warning cue Off · Wood Click')
     expect(panel).toHaveAttribute('aria-hidden', 'true')
     expect(panel).toHaveAttribute('inert')
 
@@ -113,7 +113,7 @@ describe('RoutineEditor', () => {
   it('auto-commits Alternate beat tone changes from the shared sound sheet', () => {
     render(<RoutineEditor repository={repository(createRoutine())} />)
 
-    fireEvent.click(screen.getByRole('button', { name: /session settings/i }))
+    fireEvent.click(screen.getByRole('button', { name: /quick rest.*warning cue/i }))
     fireEvent.click(screen.getByRole('button', { name: /metronome sound/i }))
     const alternateBeatTone = screen.getByRole('switch', { name: 'Alternate beat tone' })
     expect(alternateBeatTone).toHaveAttribute('aria-checked', 'true')
