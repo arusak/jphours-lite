@@ -1,0 +1,2 @@
+export const TEMPO_LONG_PRESS_DELAY_MS = 1_000
+export const TEMPO_REPEAT_RATE_PER_SECOND = 4

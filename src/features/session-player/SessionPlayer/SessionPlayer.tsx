@@ -111,7 +111,7 @@ export function SessionPlayer({
           isQuickRest={false}
           progress={1}
           discreteProgress
-          onChangeTempo={() => undefined}
+          onChangeTempo={() => false}
           onSaveTempo={() => undefined}
         />
       </main>
@@ -205,6 +205,7 @@ export function SessionPlayer({
         </section>
         <div className={styles.timer}>
           <SessionTimer
+            key={step.id}
             tempo={currentTempo}
             savedTempo={savedTempo}
             isBreak={isBreak}
@@ -214,9 +215,7 @@ export function SessionPlayer({
             progress={progress}
             discreteProgress={pacedRing}
             tone={tone}
-            onChangeTempo={(delta) =>
-              currentTempo !== null && player.changeTempo(step, currentTempo, delta)
-            }
+            onChangeTempo={(delta) => player.changeTempo(step, delta)}
             onSaveTempo={() => currentTempo !== null && player.saveTempo(step, currentTempo)}
           />
           {isExercise && currentTempo !== null && (

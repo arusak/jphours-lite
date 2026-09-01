@@ -31,7 +31,7 @@
     "src/features/session-player/SessionControls/": "Playback, rewind, stop, and finish/skip controls.",
     "src/features/session-player/SessionIllustration/": "Illustrations for exercise, break, and Quick Rest timer states.",
     "src/features/session-player/SessionPlayer/": "Session-player feature composition and public props.",
-    "src/features/session-player/SessionTimer/": "Timer Ring content, tempo controls, and session illustration selection.",
+    "src/features/session-player/SessionTimer/": "Timer Ring content, tempo controls, long-press Tempo timing constants, and session illustration selection.",
     "src/features/session-player/SessionTitle/": "Fixed-height Current phase title with responsive font fitting and overflow clamping.",
     "src/features/session-player/StopSlider/": "Accessible slide-to-confirm stop control.",
     "src/services/audio/": "Web Audio scheduling, playback cues, interfaces, and tests.",
@@ -49,6 +49,7 @@
     "docs/2026-08-12-routine-file-refactor-report.md": "Implementation report for the Routine file transfer, validation, migration, and editor refactor.",
     "docs/2026-08-31-session-navigation-implementation-report.md": "Implementation report for Session Rewind, Forward, paused navigation, and paced-progress behavior.",
     "docs/2026-09-01-small-caps-bpm-implementation-report.md": "Implementation report for the global small-caps BPM presentation utility.",
+    "docs/reports/": "Implementation reports and manual verification guides for completed feature work.",
     "docs/icon-creation-publishing-guide.md": "Source artwork, generated assets, platform declarations, validation, and publishing guidance for application icons.",
     "docs/": "Project plans, implementation reports, ubiquitous language, and this inventory."
   }

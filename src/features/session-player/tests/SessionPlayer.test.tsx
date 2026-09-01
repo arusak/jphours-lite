@@ -53,6 +53,23 @@ vi.mock('../../../services/platform/visibilityLifecycle', () => ({
 
 const routineWith = (...entries: ReturnType<typeof createExercise>[]) => createRoutine({ entries })
 
+function renderPacedExercise(tempoBpm = 90) {
+  return render(
+    <SessionPlayer
+      routine={routineWith(createExercise({ id: 'scales', title: 'Scales', tempoBpm }))}
+      onExit={vi.fn()}
+    />,
+  )
+}
+
+function holdTempo(button: HTMLElement, pointerId = 1, pointerType = 'mouse') {
+  fireEvent.pointerDown(button, { pointerId, pointerType })
+}
+
+function advanceTime(milliseconds: number) {
+  act(() => vi.advanceTimersByTime(milliseconds))
+}
+
 describe('SessionPlayer', () => {
   beforeEach(() => {
     vi.clearAllMocks()
@@ -78,6 +95,159 @@ describe('SessionPlayer', () => {
     expect(audio.updateMetronomeTempo).toHaveBeenCalledWith(91)
     fireEvent.click(screen.getByRole('button', { name: 'Save tempo' }))
     expect(onSaveTempo).toHaveBeenCalledWith('scales', 91)
+  })
+
+  it('keeps a short pointer press to one BPM change in either direction', async () => {
+    vi.useFakeTimers()
+    renderPacedExercise()
+    await act(async () => Promise.resolve())
+    const increase = screen.getByRole('button', { name: 'Increase tempo' })
+    const decrease = screen.getByRole('button', { name: 'Decrease tempo' })
+
+    holdTempo(increase)
+    advanceTime(999)
+    fireEvent.pointerUp(increase, { pointerId: 1, pointerType: 'mouse' })
+    fireEvent.click(increase)
+    expect(screen.getByText('91', { selector: 'strong' })).toBeInTheDocument()
+
+    holdTempo(decrease, 2, 'touch')
+    advanceTime(999)
+    fireEvent.pointerUp(decrease, { pointerId: 2, pointerType: 'touch' })
+    fireEvent.click(decrease)
+    expect(screen.getByText('90', { selector: 'strong' })).toBeInTheDocument()
+    expect(audio.updateMetronomeTempo).toHaveBeenLastCalledWith(90)
+  })
+
+  it('changes Tempo first at one second and repeats every 250ms for a held pointer', async () => {
+    vi.useFakeTimers()
+    renderPacedExercise()
+    await act(async () => Promise.resolve())
+    const increase = screen.getByRole('button', { name: 'Increase tempo' })
+
+    holdTempo(increase)
+    advanceTime(999)
+    expect(screen.getByText('90', { selector: 'strong' })).toBeInTheDocument()
+    advanceTime(1)
+    expect(screen.getByText('91', { selector: 'strong' })).toBeInTheDocument()
+    advanceTime(249)
+    expect(screen.getByText('91', { selector: 'strong' })).toBeInTheDocument()
+    advanceTime(1)
+    expect(screen.getByText('92', { selector: 'strong' })).toBeInTheDocument()
+    advanceTime(250)
+    expect(screen.getByText('93', { selector: 'strong' })).toBeInTheDocument()
+    expect(audio.updateMetronomeTempo).toHaveBeenLastCalledWith(93)
+  })
+
+  it('stops a held Tempo change on pointer-up and suppresses its generated click', async () => {
+    vi.useFakeTimers()
+    renderPacedExercise()
+    await act(async () => Promise.resolve())
+    const decrease = screen.getByRole('button', { name: 'Decrease tempo' })
+
+    holdTempo(decrease, 7, 'pen')
+    advanceTime(1_250)
+    expect(screen.getByText('88', { selector: 'strong' })).toBeInTheDocument()
+    fireEvent.pointerUp(decrease, { pointerId: 7, pointerType: 'pen' })
+    fireEvent.click(decrease)
+    advanceTime(1_000)
+    expect(screen.getByText('88', { selector: 'strong' })).toBeInTheDocument()
+  })
+
+  it.each([
+    ['pointer cancellation', 'pointerCancel'],
+    ['lost pointer capture', 'lostPointerCapture'],
+  ] as const)('stops pending and repeating Tempo work on %s', async (_label, eventName) => {
+    vi.useFakeTimers()
+    renderPacedExercise()
+    await act(async () => Promise.resolve())
+    const increase = screen.getByRole('button', { name: 'Increase tempo' })
+
+    holdTempo(increase)
+    advanceTime(1_000)
+    expect(screen.getByText('91', { selector: 'strong' })).toBeInTheDocument()
+    fireEvent[eventName](increase, { pointerId: 1, pointerType: 'mouse' })
+    advanceTime(1_000)
+    expect(screen.getByText('91', { selector: 'strong' })).toBeInTheDocument()
+  })
+
+  it('disposes a pending Tempo hold when the paced Exercise unmounts', async () => {
+    vi.useFakeTimers()
+    const { unmount } = renderPacedExercise()
+    await act(async () => Promise.resolve())
+    holdTempo(screen.getByRole('button', { name: 'Increase tempo' }))
+
+    advanceTime(1_000)
+    expect(screen.getByText('91', { selector: 'strong' })).toBeInTheDocument()
+    unmount()
+    advanceTime(2_000)
+    expect(audio.updateMetronomeTempo).toHaveBeenCalledTimes(1)
+  })
+
+  it('does not let a second pointer duplicate an active Tempo hold', async () => {
+    vi.useFakeTimers()
+    renderPacedExercise()
+    await act(async () => Promise.resolve())
+    const increase = screen.getByRole('button', { name: 'Increase tempo' })
+
+    holdTempo(increase, 1, 'touch')
+    holdTempo(increase, 2, 'touch')
+    fireEvent.pointerUp(increase, { pointerId: 2, pointerType: 'touch' })
+    fireEvent(increase, new PointerEvent('click', { bubbles: true, pointerId: 2 }))
+    fireEvent.pointerUp(increase, { pointerId: 1, pointerType: 'touch' })
+    fireEvent.click(increase)
+    expect(screen.getByText('91', { selector: 'strong' })).toBeInTheDocument()
+    expect(audio.updateMetronomeTempo).toHaveBeenCalledTimes(1)
+  })
+
+  it('disposes a pending Tempo hold when the Current phase becomes Quick Rest', async () => {
+    vi.useFakeTimers()
+    const one = createExercise({ id: 'one', title: 'One', tempoBpm: 90, durationSec: 1 })
+    const two = createExercise({ id: 'two', title: 'Two', tempoBpm: 90, durationSec: 1 })
+    render(
+      <SessionPlayer
+        routine={createRoutine({ entries: [one, two], quickRestDurationSec: 5 })}
+        onExit={vi.fn()}
+      />,
+    )
+    await act(async () => Promise.resolve())
+    advanceTime(500)
+    holdTempo(screen.getByRole('button', { name: 'Increase tempo' }))
+    advanceTime(500)
+    expect(screen.getByRole('heading', { name: 'Quick Rest' })).toBeInTheDocument()
+    advanceTime(2_000)
+    expect(audio.updateMetronomeTempo).not.toHaveBeenCalled()
+  })
+
+  it.each([
+    ['Decrease tempo', 21, 20],
+    ['Increase tempo', 299, 300],
+  ])(
+    'stops repeating at the supported Tempo boundary',
+    async (label, initialTempo, expectedTempo) => {
+      vi.useFakeTimers()
+      renderPacedExercise(initialTempo)
+      await act(async () => Promise.resolve())
+      holdTempo(screen.getByRole('button', { name: label }))
+
+      advanceTime(2_000)
+      expect(screen.getByText(String(expectedTempo), { selector: 'strong' })).toBeInTheDocument()
+      expect(audio.updateMetronomeTempo).toHaveBeenCalledTimes(1)
+    },
+  )
+
+  it('allows a held Tempo override while paused without resuming the Session', async () => {
+    vi.useFakeTimers()
+    renderPacedExercise()
+    await act(async () => Promise.resolve())
+    fireEvent.click(screen.getByRole('button', { name: 'Pause session' }))
+    audio.startMetronome.mockClear()
+    const increase = screen.getByRole('button', { name: 'Increase tempo' })
+
+    holdTempo(increase)
+    advanceTime(1_000)
+    expect(screen.getByText('91', { selector: 'strong' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Resume session' })).toBeInTheDocument()
+    expect(audio.startMetronome).not.toHaveBeenCalled()
   })
 
   it('auto-commits a live Metronome sound change from the sound sheet', async () => {

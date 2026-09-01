@@ -133,15 +133,19 @@ export function useSessionPlayer({
       if (running) reconcileAudio()
     })
   }
-  const changeTempo = (step: SessionStep, currentTempo: number, delta: number) => {
-    if (step.kind !== 'exercise') return
+  const changeTempo = (step: SessionStep, delta: number) => {
+    if (step.kind !== 'exercise') return false
+    const currentTempo = tempoOverridesRef.current[step.sourceExerciseId] ?? step.tempoBpm
+    if (currentTempo === null) return false
     const value = Math.min(
       practiceConfig.tempo.max,
       Math.max(practiceConfig.tempo.min, currentTempo + delta),
     )
+    if (value === currentTempo) return false
     tempoOverridesRef.current[step.sourceExerciseId] = value
     setTempoOverrides((values) => ({ ...values, [step.sourceExerciseId]: value }))
     audio.updateMetronomeTempo(value)
+    return true
   }
   const saveTempo = (step: SessionStep, tempo: number) => {
     if (step.kind !== 'exercise') return

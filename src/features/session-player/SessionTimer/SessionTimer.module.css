@@ -35,6 +35,11 @@
   padding: 4px 12px;
 }
 
+.ringTempoControl > button:not(.ringSave) {
+  touch-action: manipulation;
+  user-select: none;
+}
+
 .ringTempoControl > strong {
   display: grid;
   color: var(--color-primary);
