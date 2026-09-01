@@ -44,7 +44,7 @@ export function SessionTitle({ title }: SessionTitleProps) {
     const fit = () => fitSessionTitle(element)
     fit()
     const observer = new ResizeObserver(fit)
-    observer.observe(element)
+    observer.observe(element.parentElement ?? element)
     return () => observer.disconnect()
   }, [title])
 

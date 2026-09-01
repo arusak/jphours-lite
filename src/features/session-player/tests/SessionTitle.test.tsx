@@ -1,5 +1,6 @@
-import { describe, expect, it } from 'vitest'
-import { fitSessionTitle } from '../SessionTitle/SessionTitle'
+import { render } from '@testing-library/react'
+import { afterEach, describe, expect, it, vi } from 'vitest'
+import { fitSessionTitle, SessionTitle } from '../SessionTitle/SessionTitle'
 
 function titleThatFitsAt(limit: number) {
   const title = document.createElement('h1')
@@ -36,4 +37,22 @@ describe('SessionTitle', () => {
     expect(title.style.fontSize).toBe('16px')
     expect(title.style.webkitLineClamp).toBe('3')
   })
+
+  it('watches its stable layout container instead of the fitted heading', () => {
+    const observe = vi.fn()
+    class ResizeObserverMock {
+      disconnect = vi.fn()
+      observe = observe
+
+      constructor(_callback: ResizeObserverCallback) {}
+    }
+    vi.stubGlobal('ResizeObserver', ResizeObserverMock)
+
+    const { container } = render(<SessionTitle title="A very long exercise title" />)
+    const heading = container.querySelector('h1')
+
+    expect(observe).toHaveBeenCalledWith(heading?.parentElement)
+  })
 })
+
+afterEach(() => vi.unstubAllGlobals())

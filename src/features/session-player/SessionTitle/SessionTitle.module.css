@@ -1,5 +1,6 @@
 .title {
   display: -webkit-box;
+  width: 100%;
   height: 56px;
   overflow: hidden;
   overflow-wrap: anywhere;
