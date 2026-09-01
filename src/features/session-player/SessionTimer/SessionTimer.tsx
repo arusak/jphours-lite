@@ -133,6 +133,7 @@ export function SessionTimer({
             onPointerCancel={onTempoPointerCancel}
             onLostPointerCapture={onTempoLostPointerCapture}
             onClick={(event) => onTempoClick(event, -1)}
+            onContextMenu={(event) => event.preventDefault()}
           >
             −
           </button>
@@ -147,6 +148,7 @@ export function SessionTimer({
             onPointerCancel={onTempoPointerCancel}
             onLostPointerCapture={onTempoLostPointerCapture}
             onClick={(event) => onTempoClick(event, 1)}
+            onContextMenu={(event) => event.preventDefault()}
           >
             +
           </button>

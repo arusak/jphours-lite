@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen, within } from '@testing-library/react'
+import { act, createEvent, fireEvent, render, screen, within } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { createBreak, createExercise, createRoutine } from '../../../domain/routine'
 import { SessionPlayer } from '../SessionPlayer/SessionPlayer'
@@ -152,6 +152,18 @@ describe('SessionPlayer', () => {
     advanceTime(1_000)
     expect(screen.getByText('88', { selector: 'strong' })).toBeInTheDocument()
   })
+
+  it.each(['Increase tempo', 'Decrease tempo'])(
+    'prevents the native context menu on %s',
+    async (label) => {
+      renderPacedExercise()
+      const button = await screen.findByRole('button', { name: label })
+      const contextMenu = createEvent.contextMenu(button)
+
+      fireEvent(button, contextMenu)
+      expect(contextMenu.defaultPrevented).toBe(true)
+    },
+  )
 
   it.each([
     ['pointer cancellation', 'pointerCancel'],

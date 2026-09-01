@@ -38,6 +38,7 @@
 .ringTempoControl > button:not(.ringSave) {
   touch-action: manipulation;
   user-select: none;
+  -webkit-user-select: none;
 }
 
 .ringTempoControl > strong {
