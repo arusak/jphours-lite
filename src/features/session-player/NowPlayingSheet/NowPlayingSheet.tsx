@@ -20,17 +20,29 @@ export function NowPlayingSheet({
   return (
     <BottomSheet open={open} title="Now Playing" onClose={onClose}>
       <ol className={styles.nowPlayingList}>
-        {steps.map((item, itemIndex) => (
-          <li
-            key={item.id}
-            data-current={(itemIndex === currentIndex && !quickRest) || undefined}
-            data-up-next={(itemIndex === currentIndex + 1 && quickRest) || undefined}
-          >
-            <strong>{stepMetadata(item)}</strong>
-            {itemIndex === currentIndex && !quickRest && <span>Current</span>}
-            {itemIndex === currentIndex + 1 && quickRest && <span>Up next</span>}
-          </li>
-        ))}
+        {steps.map((item, itemIndex) => {
+          const metadata = stepMetadata(item)
+          return (
+            <li
+              key={item.id}
+              data-current={(itemIndex === currentIndex && !quickRest) || undefined}
+              data-up-next={(itemIndex === currentIndex + 1 && quickRest) || undefined}
+            >
+              <strong>
+                {metadata.title}
+                {metadata.tempoBpm !== null && (
+                  <>
+                    {' · '}
+                    {metadata.tempoBpm} <span className="small-caps">BPM</span>
+                  </>
+                )}
+                {metadata.duration !== null && ` · ${metadata.duration}`}
+              </strong>
+              {itemIndex === currentIndex && !quickRest && <span>Current</span>}
+              {itemIndex === currentIndex + 1 && quickRest && <span>Up next</span>}
+            </li>
+          )
+        })}
       </ol>
     </BottomSheet>
   )

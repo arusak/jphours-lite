@@ -80,17 +80,8 @@ export function SessionPlayer({
     player.beatSnapshot.beatIndex,
   ])
   const nextStep = state.steps[index + 1] ?? null
-  const nextStepMetadata =
-    nextStep?.kind === 'exercise'
-      ? [
-          nextStep.tempoBpm === null ? null : `${nextStep.tempoBpm} BPM`,
-          nextStep.durationSec === null ? null : formatTime(nextStep.durationSec),
-        ]
-          .filter(Boolean)
-          .join(' · ')
-      : nextStep
-        ? formatTime(nextStep.durationSec)
-        : ''
+  const nextTempo = nextStep?.kind === 'exercise' ? nextStep.tempoBpm : null
+  const nextDuration = nextStep?.durationSec ?? null
   const remainingSec =
     state.currentStepEndsAt === null
       ? null
@@ -286,8 +277,16 @@ export function SessionPlayer({
               <strong className={styles.nextStepTitle} title={nextStep.title}>
                 {nextStep.title}
               </strong>
-              {nextStepMetadata && (
-                <span className={styles.nextStepMetadata}>{nextStepMetadata}</span>
+              {nextStep && (nextTempo !== null || nextDuration !== null) && (
+                <span className={styles.nextStepMetadata}>
+                  {nextTempo !== null && (
+                    <>
+                      {nextTempo} <span className="small-caps">BPM</span>
+                    </>
+                  )}
+                  {nextTempo !== null && nextDuration !== null && ' · '}
+                  {nextDuration !== null && formatTime(nextDuration)}
+                </span>
               )}
             </div>
           </div>

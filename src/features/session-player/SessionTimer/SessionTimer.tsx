@@ -45,7 +45,7 @@ export function SessionTimer({
           </button>
           <strong>
             {tempo}
-            <small>BPM</small>
+            <small className="small-caps">BPM</small>
           </strong>
           <button aria-label="Increase tempo" onClick={() => onChangeTempo(1)}>
             +

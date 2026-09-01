@@ -79,7 +79,7 @@ export function EditorSheet({ sheet, submitted, onChange, onSave, onCancel }: Ed
           <>
             {entry!.kind === 'exercise' && (
               <label className={styles.editorStepper}>
-                Tempo (BPM)
+                Tempo (<span className="small-caps">BPM</span>)
                 <span>
                   <button
                     aria-label="Decrease tempo"

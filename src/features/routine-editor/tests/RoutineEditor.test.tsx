@@ -24,6 +24,7 @@ describe('RoutineEditor', () => {
     fireEvent.click(screen.getByRole('button', { name: /add break/i }))
     fireEvent.click(screen.getByRole('button', { name: /^save$/i }))
     expect(screen.getByText('Break')).toBeInTheDocument()
+    expect(screen.getByText('BPM')).toHaveClass('small-caps')
     fireEvent.click(screen.getByRole('button', { name: 'Delete Scales' }))
     fireEvent.click(screen.getByRole('button', { name: 'Delete Break' }))
     expect(screen.getByRole('heading', { name: 'Exercise' })).toBeInTheDocument()
@@ -36,6 +37,10 @@ describe('RoutineEditor', () => {
     })
     render(<RoutineEditor repository={{ load: () => initial, save: saved }} />)
     fireEvent.click(screen.getByRole('button', { name: 'Edit Scales' }))
+    const tempoUnit = screen
+      .getAllByText('BPM')
+      .find((element) => element.closest('[role="dialog"]'))
+    expect(tempoUnit).toHaveClass('small-caps')
     fireEvent.change(screen.getAllByRole('spinbutton')[1], { target: { value: '6' } })
     fireEvent.click(screen.getByRole('button', { name: /^save$/i }))
     expect(screen.getByLabelText('6 minutes')).toBeInTheDocument()

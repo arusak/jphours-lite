@@ -6,7 +6,7 @@ import { formatTime } from '../formatTime'
 import { stepMetadata } from '../stepMetadata'
 
 describe('session player parts', () => {
-  it('formats meaningful step metadata without a duration for open-ended exercises', () => {
+  it('separates meaningful step metadata without a duration for open-ended exercises', () => {
     expect(formatTime(65)).toBe('1:05')
     expect(
       stepMetadata({
@@ -17,7 +17,7 @@ describe('session player parts', () => {
         durationSec: null,
         sourceExerciseId: 'source',
       }),
-    ).toBe('Improv · 80 BPM')
+    ).toEqual({ title: 'Improv', tempoBpm: 80, duration: null })
   })
 
   it('only stops when the slider reaches its configured threshold', () => {

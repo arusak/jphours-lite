@@ -73,6 +73,10 @@ button:disabled {
   cursor: not-allowed;
 }
 
+.small-caps {
+  font-variant-caps: all-small-caps;
+}
+
 button:focus-visible,
 input:focus-visible,
 [role="slider"]:focus-visible {

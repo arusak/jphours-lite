@@ -147,7 +147,13 @@ describe('SessionPlayer', () => {
 
     expect(await screen.findByText('Up next')).toBeInTheDocument()
     expect(screen.getByText(longTitle)).toHaveAttribute('title', longTitle)
-    expect(screen.getByText('96 BPM · 1:30')).toBeInTheDocument()
+    expect(within(screen.getByTestId('timer-ring')).getByText('BPM')).toHaveClass('small-caps')
+    const nextTempo = screen
+      .getAllByText('BPM')
+      .find((element) => element.parentElement?.textContent === '96 BPM · 1:30')
+    expect(nextTempo).toBeDefined()
+    expect(nextTempo).toHaveClass('small-caps')
+    expect(nextTempo?.parentElement).toHaveTextContent('96 BPM · 1:30')
   })
 
   it('opens a read-only Now Playing list of meaningful steps and bypasses Quick Rest on Finish step', async () => {
@@ -156,15 +162,20 @@ describe('SessionPlayer', () => {
     render(<SessionPlayer routine={routineWith(one, two)} onExit={vi.fn()} />)
     await screen.findByRole('heading', { name: 'One' })
     fireEvent.click(screen.getByRole('button', { name: /now playing/i }))
-    expect(await screen.findByRole('dialog', { name: 'Now Playing' })).toBeInTheDocument()
-    expect(screen.getByText('One · 80 BPM · 0:30')).toBeInTheDocument()
+    const nowPlaying = await screen.findByRole('dialog', { name: 'Now Playing' })
+    const currentStep = within(nowPlaying).getByText(
+      (_, element) =>
+        element?.tagName === 'STRONG' && element.textContent === 'One · 80 BPM · 0:30',
+    )
+    expect(currentStep).toBeInTheDocument()
+    expect(within(currentStep).getByText('BPM')).toHaveClass('small-caps')
     expect(screen.queryByText(/Quick Rest/)).not.toBeInTheDocument()
     fireEvent.keyDown(document, { key: 'Escape' })
     fireEvent.click(screen.getByRole('button', { name: 'Finish step' }))
     expect(await screen.findByRole('heading', { name: 'Two' })).toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: /now playing/i }))
-    const nowPlaying = await screen.findByRole('dialog', { name: 'Now Playing' })
-    expect(within(nowPlaying).getByText('Current')).toBeInTheDocument()
+    const reopenedNowPlaying = await screen.findByRole('dialog', { name: 'Now Playing' })
+    expect(within(reopenedNowPlaying).getByText('Current')).toBeInTheDocument()
   })
 
   it('presents the four media controls and only stops after slide confirmation', async () => {
