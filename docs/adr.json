@@ -1,0 +1,12 @@
+{
+  "description": "Index of accepted architecture decision records. Paths are relative to the repository root.",
+  "entries": {
+    "docs/adr/0001-captured-session-plan.md": "Capture the Session plan and derive Exercise modes",
+    "docs/adr/0002-web-audio-beat-grid.md": "Use Web Audio and BeatClock for rhythmic alignment",
+    "docs/adr/0003-session-progress-independent-of-audio.md": "Keep Session progression independent of audio readiness",
+    "docs/adr/0004-reducer-owned-session-navigation.md": "Keep manual navigation policy in the Session reducer",
+    "docs/adr/0005-routine-storage-and-file-compatibility.md": "Separate Routine storage compatibility from file transfer",
+    "docs/adr/0006-controlled-pwa-updates.md": "Accept PWA updates from the editor after saving",
+    "docs/adr/0007-yaml-practice-policy.md": "Define practice policy in validated YAML"
+  }
+}

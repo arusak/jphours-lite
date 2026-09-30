@@ -7,6 +7,7 @@ Consult [the repository inventory](docs/files.json) when you need help locating 
 ## Working conventions
 
 - Preserve the domain vocabulary in `docs/UBIQUITOUS_LANGUAGE.md`.
+- Store memory about made decisions in ADR. Index is in `docs/adr.json`.
 - Keep React hooks and components in their dedicated feature files.
 - Keep reusable UI icons in `src/components/Icons/Icons.tsx`; SVG icon paths must use `currentColor`.
 - Add or update focused Vitest coverage for behaviour changes.

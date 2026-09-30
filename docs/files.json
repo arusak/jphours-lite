@@ -52,10 +52,13 @@
     "tsconfig.app.json": "TypeScript configuration for browser application code.",
     "tsconfig.node.json": "TypeScript configuration for Vite and Node-side configuration.",
     "vite.config.ts": "Vite, React, PWA, and test-runner configuration.",
+    "docs/adr.json": "Machine-readable index of accepted architecture decision records.",
+    "docs/adr/": "Accepted architecture and domain decisions, their sources, and a decision index.",
+    "docs/todo/": "Verified outstanding work, deferred proposals, and release checks.",
     "docs/plans/": "Feature plans, architecture proposals, and bug-fix plans.",
     "docs/reports/": "Implementation reports, bug audits, and manual verification guides.",
     "docs/UBIQUITOUS_LANGUAGE.md": "Canonical Routine and Session domain vocabulary, relationships, and ambiguities.",
     "docs/icon-creation-publishing-guide.md": "Source artwork, generated assets, platform declarations, validation, and publishing guidance for application icons.",
-    "docs/": "Project plans, implementation reports, ubiquitous language, and this inventory."
+    "docs/": "Architecture decisions, outstanding work, plans, reports, ubiquitous language, and this inventory."
   }
 }
