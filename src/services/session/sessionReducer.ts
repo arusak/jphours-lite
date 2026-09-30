@@ -99,8 +99,9 @@ export function activeSegmentKey(state: SessionState): string | null {
 function rewind(state: SessionState, now: number): SessionState {
   if (!canNavigate(state) || state.currentStepIndex === null) return state
   const targetIndex =
-    state.phase === 'quick-rest' ||
-    (state.currentStepIndex > 0 && activeElapsedMs(state, now) < REWIND_PREVIOUS_STEP_THRESHOLD_MS)
+    state.phase === 'step' &&
+    state.currentStepIndex > 0 &&
+    activeElapsedMs(state, now) < REWIND_PREVIOUS_STEP_THRESHOLD_MS
       ? Math.max(0, state.currentStepIndex - 1)
       : state.currentStepIndex
   return enterStep(

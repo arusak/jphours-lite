@@ -287,6 +287,34 @@ describe('SessionRunner', () => {
     expect(runner.getState()).toMatchObject({ phase: 'step', currentStepIndex: 1 })
   })
 
+  it.each(['running', 'paused', 'interrupted'] as const)(
+    'rewinds Quick Rest after the second Exercise to that Exercise while %s',
+    (status) => {
+      const time = new FakeTime()
+      const runner = new SessionRunner(time, time)
+      runner.start(
+        routine(
+          [exercise('one', null, 2), exercise('two', null, 2), exercise('three', null, 2)],
+          5,
+        ),
+      )
+      time.advance(13_000)
+      expect(runner.getState()).toMatchObject({ phase: 'quick-rest', currentStepIndex: 1 })
+      if (status === 'paused') runner.pause()
+      if (status === 'interrupted') runner.appHidden()
+
+      runner.rewind()
+
+      expect(runner.getState()).toMatchObject({
+        phase: 'step',
+        currentStepIndex: 1,
+        status,
+        currentStepEndsAt: status === 'running' ? 15_000 : null,
+        pausedRemainingSec: status === 'running' ? null : 2,
+      })
+    },
+  )
+
   it('ignores a stale Quick Rest completion after it is skipped', () => {
     const time = new FakeTime()
     const runner = new SessionRunner(time, time)
