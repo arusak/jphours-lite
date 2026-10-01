@@ -5,7 +5,9 @@
   overflow: hidden;
   overflow-wrap: anywhere;
   -webkit-box-orient: vertical;
-  font-size: 48px;
+  -webkit-line-clamp: 3;
+  font-size: clamp(16px, calc(100vw / var(--title-width-factor)), 48px);
+  font-size: clamp(16px, calc(100cqi / var(--title-width-factor)), 48px);
   line-height: 1.05;
   letter-spacing: -0.04em;
   text-wrap: balance;
