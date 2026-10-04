@@ -7,7 +7,9 @@ interface RoutineFileActionsProps {
   routine: Routine
   exportDisabled: boolean
   exportErrorId?: string
-  onImport(routine: Routine): void
+  importDisabled?: boolean
+  importErrorId?: string
+  onImport(routine: Routine): boolean
 }
 
 export function RoutineFileActions({
@@ -15,13 +17,20 @@ export function RoutineFileActions({
   exportDisabled,
   exportErrorId,
   onImport,
+  importDisabled,
+  importErrorId,
 }: RoutineFileActionsProps) {
   const actions = useRoutineFileActions({ routine, onImport })
 
   return (
     <>
       <span className={styles.actions}>
-        <button className={styles.action} onClick={actions.chooseImportFile}>
+        <button
+          className={styles.action}
+          disabled={importDisabled}
+          aria-describedby={importDisabled ? importErrorId : undefined}
+          onClick={actions.chooseImportFile}
+        >
           Import
         </button>
         <button
@@ -54,6 +63,7 @@ export function RoutineFileActions({
         {actions.preview && actions.previewDetails && (
           <div className={styles.preview}>
             <h3>{actions.preview.name}</h3>
+            {actions.status && <p role="alert">{actions.status}</p>}
             <p>
               {actions.previewDetails.total.approximate ? 'Approximately ' : ''}
               {actions.previewDetails.total.minutes} min
@@ -67,7 +77,7 @@ export function RoutineFileActions({
               <p>and {actions.previewDetails.hiddenExerciseCount} more</p>
             )}
             <button className={styles.replace} onClick={actions.confirmImport}>
-              Replace Routine
+              Add routine
             </button>
             <button className={styles.cancel} onClick={actions.cancelImport}>
               Cancel

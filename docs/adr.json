@@ -8,6 +8,7 @@
     "docs/adr/0005-routine-storage-and-file-compatibility.md": "Separate Routine storage compatibility from file transfer",
     "docs/adr/0006-controlled-pwa-updates.md": "Accept PWA updates from the editor after saving",
     "docs/adr/0007-yaml-practice-policy.md": "Define practice policy in validated YAML",
-    "docs/adr/0008-container-estimated-session-title.md": "Estimate the Current phase title from container width"
+    "docs/adr/0008-container-estimated-session-title.md": "Estimate the Current phase title from container width",
+    "docs/adr/0009-multiple-local-routines.md": "Own multiple local Routines in one persisted collection"
   }
 }

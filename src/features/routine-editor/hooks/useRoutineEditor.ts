@@ -1,10 +1,19 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { practiceConfig } from '../../../config/practice-config'
-import { ROUTINE_ENTRY_MAX_COUNT, createExercise, type Routine } from '../../../domain/routine'
+import {
+  ROUTINE_ENTRY_MAX_COUNT,
+  createExercise,
+  createRoutine,
+  type Routine,
+} from '../../../domain/routine'
 import { normalizeExerciseName, normalizeRoutineName } from '../../../domain/name-normalization'
 import { validateEntry, validateRoutine } from '../../../domain/validation'
 import { DebouncedRoutineSaver } from '../../../services/persistence/debounced-routine-saver'
-import type { RoutineRepository } from '../../../services/persistence/routine-repository'
+import {
+  ROUTINE_MAX_COUNT,
+  type RoutineCollection,
+  type RoutineRepository,
+} from '../../../services/persistence/routine-repository'
 import { routineTotal } from '../routineTotal'
 import { moveRoutineEntry } from '../moveRoutineEntry'
 import type { EditorSheet } from '../types'
@@ -12,9 +21,15 @@ import type { EditorSheet } from '../types'
 const touch = (routine: Routine): Routine => ({ ...routine, updatedAt: new Date().toISOString() })
 export function useRoutineEditor(repository: RoutineRepository) {
   const [routine, setRoutine] = useState<Routine>(() => repository.load())
+  const [collection, setCollection] = useState(() => repository.loadCollection())
+  const [error, setError] = useState<string | null>(null)
+  const reportError = (cause: unknown) =>
+    setError(
+      `Could not save routines. Check browser storage and retry. ${cause instanceof Error ? cause.message : ''}`,
+    )
   const [sheet, setSheet] = useState<EditorSheet | null>(null)
   const [submitted, setSubmitted] = useState(false)
-  const saver = useRef(new DebouncedRoutineSaver(repository))
+  const saver = useRef(new DebouncedRoutineSaver(repository, 300, reportError))
   const persistedReplacement = useRef<Routine | null>(null)
   const validation = useMemo(() => validateRoutine(routine), [routine])
   const total = useMemo(() => routineTotal(routine), [routine])
@@ -26,7 +41,16 @@ export function useRoutineEditor(repository: RoutineRepository) {
     persistedReplacement.current = null
     saver.current.schedule(routine)
   }, [routine])
-  useEffect(() => () => saver.current.dispose(), [])
+  useEffect(
+    () => () => {
+      try {
+        saver.current.dispose()
+      } catch {
+        /* Pending writes were already reported before leaving. */
+      }
+    },
+    [],
+  )
   const update = (change: (current: Routine) => Routine) =>
     setRoutine((current) => touch(change(current)))
   const close = () => {
@@ -83,12 +107,72 @@ export function useRoutineEditor(repository: RoutineRepository) {
       ...current,
       entries: moveRoutineEntry(current.entries, activeEntryId, targetEntryId),
     }))
-  const replaceRoutine = (replacement: Routine) => {
-    repository.save(replacement)
+  const flush = () => {
+    try {
+      saver.current.flush()
+      setError(null)
+    } catch (cause) {
+      reportError(cause)
+      throw cause
+    }
+  }
+  const adopt = (next: RoutineCollection) => {
+    const selected = next.routines.find(
+      (item) => item.routine.id === next.selectedRoutineId,
+    )!.routine
     saver.current.cancel()
-    persistedReplacement.current = replacement
-    setRoutine(replacement)
+    persistedReplacement.current = selected
+    setRoutine(selected)
+    setCollection(next)
     close()
+  }
+  const transition = (mutate: () => RoutineCollection): boolean => {
+    try {
+      flush()
+      adopt(mutate())
+      return true
+    } catch (cause) {
+      reportError(cause)
+      return false
+    }
+  }
+  const selectRoutine = (id: string) =>
+    id === routine.id ||
+    transition(() => {
+      const next = repository.loadCollection()
+      const selected = repository.select(id)
+      try {
+        return repository.loadCollection()
+      } catch (cause) {
+        reportError(cause)
+        return {
+          ...next,
+          selectedRoutineId: id,
+          routines: next.routines.map((item) =>
+            item.routine.id === id
+              ? { routine: selected, lastAccessedAt: new Date().toISOString() }
+              : item,
+          ),
+        }
+      }
+    })
+  const createNewRoutine = () =>
+    transition(() => {
+      const names = new Set(
+        repository.loadCollection().routines.map((item) => normalizeRoutineName(item.routine.name)),
+      )
+      let name = 'New routine'
+      for (let number = 2; names.has(name); number++) name = `New routine ${number}`
+      return repository.add(createRoutine({ name }))
+    })
+  const importRoutine = (imported: Routine) => transition(() => repository.add(imported))
+  const deleteRoutine = (id: string) => transition(() => repository.remove(id))
+  const refreshCollection = () => {
+    try {
+      setCollection(repository.loadCollection())
+    } catch (cause) {
+      reportError(cause)
+    }
   }
   return {
     routine,
@@ -105,7 +189,16 @@ export function useRoutineEditor(repository: RoutineRepository) {
     close,
     remove,
     reorder,
-    replaceRoutine,
-    flush: () => saver.current.flush(),
+    error,
+    routines: collection.routines.map((item) =>
+      item.routine.id === routine.id ? { ...item, routine } : item,
+    ),
+    atRoutineLimit: collection.routines.length >= ROUTINE_MAX_COUNT,
+    selectRoutine,
+    createNewRoutine,
+    importRoutine,
+    deleteRoutine,
+    refreshCollection,
+    flush,
   }
 }

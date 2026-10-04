@@ -1,0 +1,108 @@
+.trigger {
+  padding: 3px 5px;
+  border-radius: 6px;
+  color: var(--color-muted-foreground);
+  background: transparent;
+  font-size: 10px;
+  font-weight: 500;
+  opacity: 0.58;
+}
+
+.trigger:hover,
+.trigger:focus-visible {
+  opacity: 1;
+}
+
+.list {
+  display: grid;
+  max-height: 55dvh;
+  margin: 16px 0;
+  padding: 0;
+  overflow-y: auto;
+  list-style: none;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.select {
+  display: grid;
+  flex: 1;
+  min-width: 0;
+  min-height: 48px;
+  gap: 4px;
+  padding: 8px;
+  border-radius: var(--radius-xl);
+  background: transparent;
+  text-align: left;
+}
+
+.select[aria-current="true"] {
+  background: var(--color-secondary);
+}
+
+.name {
+  overflow-wrap: anywhere;
+}
+
+.details,
+.limit {
+  color: var(--color-muted-foreground);
+  font-size: 12px;
+}
+
+.delete {
+  display: grid;
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  place-items: center;
+  border-radius: var(--radius-xl);
+  color: var(--color-destructive);
+  background: transparent;
+}
+
+.delete svg {
+  width: 20px;
+  height: 20px;
+}
+
+.confirmation {
+  display: grid;
+  width: 100%;
+  min-width: 0;
+  gap: 10px;
+}
+
+.create,
+.cancel {
+  width: 100%;
+  min-height: 48px;
+  padding: 12px 18px;
+  border-radius: var(--radius-2xl);
+  font-weight: 600;
+}
+
+.create {
+  margin-top: 10px;
+  color: var(--color-primary-foreground);
+  background: var(--color-primary);
+}
+
+.create:disabled {
+  opacity: 0.4;
+}
+
+.cancel {
+  border: 1px solid var(--color-border);
+  background: var(--color-secondary);
+}
+
+.error {
+  color: var(--color-destructive);
+}

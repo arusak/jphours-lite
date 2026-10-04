@@ -1,6 +1,7 @@
 import { createBreak, createExercise } from '../../../domain/routine'
 import { AppUpdateBanner, PlayIcon } from '../../../components'
 import { EditorSheet } from '../EditorSheet/EditorSheet'
+import { RoutinePicker } from '../RoutinePicker/RoutinePicker'
 import { RoutineFileActions } from '../RoutineFileActions/RoutineFileActions'
 import { RoutineEntryList } from '../RoutineEntryList/RoutineEntryList'
 import { RoutineSettings } from '../RoutineSettings/RoutineSettings'
@@ -37,15 +38,48 @@ export function RoutineEditor({ repository, onStartSession }: RoutineEditorProps
             {editor.total.approximate ? '≈' : ''}
             {editor.total.minutes} min
           </span>
+          <RoutinePicker
+            routines={editor.routines}
+            selectedRoutineId={editor.routine.id}
+            error={editor.error}
+            onSelect={editor.selectRoutine}
+            onCreate={editor.createNewRoutine}
+            onDelete={editor.deleteRoutine}
+            onRefresh={editor.refreshCollection}
+          />
           <RoutineFileActions
             routine={editor.routine}
             exportDisabled={!editor.valid}
             exportErrorId={validationErrorId}
-            onImport={editor.replaceRoutine}
+            onImport={editor.importRoutine}
+            importDisabled={editor.atRoutineLimit}
+            importErrorId="routine-count-limit"
           />
         </div>
       </div>
       <div className={styles.contentWrapper}>
+        {editor.atRoutineLimit && (
+          <p id="routine-count-limit">
+            You can save up to 100 routines. Delete a routine to add another.
+          </p>
+        )}
+        {editor.error && (
+          <div role="alert">
+            <p>{editor.error}</p>
+            <button
+              onClick={() => {
+                try {
+                  editor.flush()
+                  editor.refreshCollection()
+                } catch {
+                  /* Keep error visible for retry. */
+                }
+              }}
+            >
+              Retry saving
+            </button>
+          </div>
+        )}
         <RoutineSettings
           routine={editor.routine}
           onUpdateSetting={editor.updateSetting}
@@ -106,7 +140,11 @@ export function RoutineEditor({ repository, onStartSession }: RoutineEditorProps
           disabled={!editor.valid}
           aria-describedby={!editor.valid ? validationErrorId : undefined}
           onClick={() => {
-            editor.flush()
+            try {
+              editor.flush()
+            } catch {
+              return
+            }
             onStartSession?.(editor.routine)
           }}
         >

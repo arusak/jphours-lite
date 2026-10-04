@@ -63,6 +63,7 @@
 
 ## Relationships
 
+- A practitioner can save multiple **Routines** and select one for editing or starting a **Session**. Opening a Routine records access; editing and saving Session settings do not.
 - A **Routine** contains one or more ordered **Routine entries** and shared **Quick Rest Duration**, **Warning lead time**, and **Metronome sound** settings.
 - A **Routine entry** is exactly one **Exercise** or **Break**.
 - A **Break** may appear anywhere in a Routine, including beside another Break; a Routine containing only Breaks is valid.
@@ -76,7 +77,7 @@
 - Every **Timed step** and Quick Rest has a **Countdown**; every **Open-ended step** has **Elapsed time**.
 - An eligible timed Exercise step or Break step receives at most one **Warning cue**; a Quick Rest never receives one.
 - A paced timed Exercise's Warning cue aligns with the nearest **Beat** to its configured Warning lead point.
-- A practitioner may override Tempo or Metronome sound during a Session without mutating its immutable Session plan; saving writes the choice to the Routine for later Sessions.
+- A practitioner may override Tempo or Metronome sound during a Session without mutating its immutable Session plan; saving writes the choice only to the **Routine** that started that Session, for later Sessions.
 
 ## Example dialogue
 

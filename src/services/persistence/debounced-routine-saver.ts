@@ -6,14 +6,22 @@ export class DebouncedRoutineSaver {
   private pending: Routine | undefined
 
   constructor(
-    private readonly repository: RoutineRepository,
+    private readonly repository: Pick<RoutineRepository, 'save'>,
     private readonly delayMs = 300,
+    private readonly onError?: (error: unknown) => void,
   ) {}
 
   schedule(routine: Routine): void {
     this.pending = routine
     if (this.timeoutId !== undefined) clearTimeout(this.timeoutId)
-    this.timeoutId = setTimeout(() => this.flush(), this.delayMs)
+    this.timeoutId = setTimeout(() => {
+      try {
+        this.flush()
+      } catch (error) {
+        if (this.onError) this.onError(error)
+        else throw error
+      }
+    }, this.delayMs)
   }
 
   flush(): void {

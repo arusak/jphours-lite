@@ -1,6 +1,13 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { BottomSheet, NoteIcon, MetronomeSoundSheet, ProgressSegments } from '../../../components'
-import { type MetronomeSound } from '../../../config/practice-config'
+import {
+  BottomSheet,
+  NoteIcon,
+  MetronomeSoundSheet,
+  ProgressSegments,
+  SlideToConfirm,
+  StopIcon,
+} from '../../../components'
+import { practiceConfig, type MetronomeSound } from '../../../config/practice-config'
 import type { Routine } from '../../../domain/routine'
 import type { AudioController } from '../../../services/audio'
 import { EndScreen } from '../EndScreen/EndScreen'
@@ -8,7 +15,6 @@ import { NowPlayingSheet } from '../NowPlayingSheet/NowPlayingSheet'
 import { SessionControls } from '../SessionControls/SessionControls'
 import { SessionTimer } from '../SessionTimer/SessionTimer'
 import { SessionTitle } from '../SessionTitle/SessionTitle'
-import { StopSlider } from '../StopSlider/StopSlider'
 import { useSessionPlayer } from '../hooks/useSessionPlayer'
 import styles from '../SessionPlayer.module.css'
 import { formatTime } from '../formatTime'
@@ -135,8 +141,12 @@ export function SessionPlayer({
           onClose={() => setStopOpen(false)}
           onAfterClose={() => stopPendingExit && onExit()}
         >
-          <StopSlider
-            onStop={() => {
+          <SlideToConfirm
+            label="Slide to stop"
+            accessibleName="Slide to stop"
+            icon={<StopIcon />}
+            threshold={practiceConfig.interaction.slideToStopThreshold}
+            onConfirm={() => {
               setStopOpen(false)
               setStopPendingExit(true)
               player.stop()
@@ -323,8 +333,12 @@ export function SessionPlayer({
         onClose={() => setStopOpen(false)}
         onAfterClose={() => stopPendingExit && onExit()}
       >
-        <StopSlider
-          onStop={() => {
+        <SlideToConfirm
+          label="Slide to stop"
+          accessibleName="Slide to stop"
+          icon={<StopIcon />}
+          threshold={practiceConfig.interaction.slideToStopThreshold}
+          onConfirm={() => {
             setStopOpen(false)
             player.stop()
             setStopPendingExit(true)

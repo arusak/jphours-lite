@@ -10,7 +10,7 @@ import { routineTotal } from '../routineTotal'
 
 interface UseRoutineFileActionsOptions {
   routine: Routine
-  onImport(routine: Routine): void
+  onImport(routine: Routine): boolean
 }
 
 export function useRoutineFileActions({ routine, onImport }: UseRoutineFileActionsOptions) {
@@ -89,7 +89,12 @@ export function useRoutineFileActions({ routine, onImport }: UseRoutineFileActio
   const confirmImport = () => {
     if (!preview) return
     try {
-      onImport(preview)
+      if (!onImport(preview)) {
+        setStatus(
+          'The Routine could not be saved. Your current Routine was kept. Retry Add routine after checking browser storage or deleting a routine.',
+        )
+        return
+      }
       setPreview(null)
       setStatus('Routine imported.')
     } catch (error) {
@@ -109,6 +114,9 @@ export function useRoutineFileActions({ routine, onImport }: UseRoutineFileActio
     importFile,
     exportRoutine,
     confirmImport,
-    cancelImport: () => setPreview(null),
+    cancelImport: () => {
+      importRequest.current++
+      setPreview(null)
+    },
   }
 }

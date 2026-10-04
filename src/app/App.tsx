@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import type { MetronomeSound } from '../config/practice-config'
 import type { Routine } from '../domain/routine'
 import { RoutineEditor } from '../features/routine-editor/RoutineEditor/RoutineEditor'
@@ -11,6 +11,24 @@ export function App() {
   const repository = useMemo(() => new LocalStorageRoutineRepository(), [])
   const audio = useMemo(() => new AudioController(), [])
   const [activeRoutine, setActiveRoutine] = useState<Routine | null>(null)
+  const [initializationAttempt, setInitializationAttempt] = useState(0)
+  const attemptedInitialization = useRef<number | null>(null)
+  const [initialized, setInitialized] = useState(false)
+  const [initializationError, setInitializationError] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (attemptedInitialization.current === initializationAttempt) return
+    attemptedInitialization.current = initializationAttempt
+    try {
+      repository.select(repository.load().id)
+      setInitializationError(null)
+      setInitialized(true)
+    } catch (error) {
+      setInitializationError(
+        error instanceof Error ? error.message : 'Your routines could not be opened.',
+      )
+    }
+  }, [repository, initializationAttempt])
 
   useEffect(() => () => audio.dispose(), [audio])
 
@@ -26,7 +44,7 @@ export function App() {
 
   const saveSessionTempo = (sourceExerciseId: string, tempoBpm: number) => {
     if (!activeRoutine) return
-    const persisted = repository.load()
+    const persisted = repository.load(activeRoutine.id)
     const updated = {
       ...persisted,
       entries: persisted.entries.map((entry) =>
@@ -38,17 +56,28 @@ export function App() {
   }
   const saveSessionMetronomeSound = (metronomeSound: MetronomeSound) => {
     if (!activeRoutine) return
-    const persisted = repository.load()
+    const persisted = repository.load(activeRoutine.id)
     repository.save({ ...persisted, metronomeSound, updatedAt: new Date().toISOString() })
   }
   const saveSessionAlternateBeatTone = (alternateBeatTone: boolean) => {
     if (!activeRoutine) return
-    const persisted = repository.load()
+    const persisted = repository.load(activeRoutine.id)
     repository.save({ ...persisted, alternateBeatTone, updatedAt: new Date().toISOString() })
   }
   return (
     <div className={styles.appShell}>
-      {activeRoutine ? (
+      {!initialized ? (
+        initializationError ? (
+          <main>
+            <p role="alert">Unable to open your routines. {initializationError}</p>
+            <button onClick={() => setInitializationAttempt((attempt) => attempt + 1)}>
+              Retry
+            </button>
+          </main>
+        ) : (
+          <p role="status">Opening your routines…</p>
+        )
+      ) : activeRoutine ? (
         <SessionPlayer
           routine={activeRoutine}
           audio={audio}

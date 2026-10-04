@@ -1,6 +1,5 @@
-import { fireEvent, render, screen } from '@testing-library/react'
-import { describe, expect, it, vi } from 'vitest'
-import { StopSlider } from '../StopSlider/StopSlider'
+import { render, screen } from '@testing-library/react'
+import { describe, expect, it } from 'vitest'
 import { TimerRing } from '../../../components'
 import { formatTime } from '../formatTime'
 import { stepMetadata } from '../stepMetadata'
@@ -18,16 +17,6 @@ describe('session player parts', () => {
         sourceExerciseId: 'source',
       }),
     ).toEqual({ title: 'Improv', tempoBpm: 80, duration: null })
-  })
-
-  it('only stops when the slider reaches its configured threshold', () => {
-    const onStop = vi.fn()
-    render(<StopSlider onStop={onStop} />)
-    const slider = screen.getByRole('slider', { name: /slide to stop/i })
-    fireEvent.keyDown(slider, { key: 'ArrowRight' })
-    expect(onStop).not.toHaveBeenCalled()
-    fireEvent.keyDown(slider, { key: 'End' })
-    expect(onStop).toHaveBeenCalledOnce()
   })
 
   it('renders supplied timer-ring content as children', () => {
