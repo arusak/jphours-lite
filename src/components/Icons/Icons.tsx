@@ -7,6 +7,23 @@ const iconProps = {
   viewBox: '0 0 24 24',
 }
 
+export function CloseIcon(props: IconProps) {
+  return (
+    <svg {...iconProps} {...props} fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="m6 6 12 12M18 6 6 18" />
+    </svg>
+  )
+}
+
+export function CircleCheckIcon(props: IconProps) {
+  return (
+    <svg {...iconProps} {...props} fill="none" stroke="currentColor" strokeWidth="2">
+      <circle cx="12" cy="12" r="9" />
+      <path d="m8 12 3 3 5-6" />
+    </svg>
+  )
+}
+
 export function RewindIcon(props: IconProps) {
   return (
     <svg {...iconProps} {...props} fill="none" stroke="currentColor" strokeWidth="2">

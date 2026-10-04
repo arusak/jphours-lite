@@ -1,5 +1,11 @@
 import { useEffect, useId, useRef, useState } from 'react'
-import { BottomSheet, DeleteIcon, SlideToConfirm } from '../../../components'
+import {
+  BottomSheet,
+  CircleCheckIcon,
+  CloseIcon,
+  DeleteIcon,
+  SlideToConfirm,
+} from '../../../components'
 import { practiceConfig } from '../../../config/practice-config'
 import type { RoutineCollection } from '../../../services/persistence/routine-repository'
 import { ROUTINE_MAX_COUNT } from '../../../services/persistence/routine-repository'
@@ -77,12 +83,25 @@ export function RoutinePicker({
           {ordered.map(({ routine }) => {
             const total = routineTotal(routine)
             return (
-              <li key={routine.id} className={styles.row}>
+              <li
+                key={routine.id}
+                className={styles.row}
+                data-selected={routine.id === selectedRoutineId}
+              >
                 {deletingId === routine.id ? (
                   <div ref={confirmation} className={styles.confirmation}>
-                    <strong className={styles.name}>{routine.name}</strong>
+                    <button
+                      className={styles.cancel}
+                      aria-label="Cancel"
+                      onClick={() => {
+                        restoreFocus.current = routine.id
+                        setDeletingId(null)
+                      }}
+                    >
+                      <CloseIcon />
+                    </button>
                     <SlideToConfirm
-                      label="Slide to delete"
+                      label={`Slide to delete "${routine.name}"`}
                       accessibleName={`Slide to delete routine ${routine.name}`}
                       icon={<DeleteIcon />}
                       threshold={practiceConfig.interaction.slideToStopThreshold}
@@ -93,15 +112,6 @@ export function RoutinePicker({
                         return true
                       }}
                     />
-                    <button
-                      className={styles.cancel}
-                      onClick={() => {
-                        restoreFocus.current = routine.id
-                        setDeletingId(null)
-                      }}
-                    >
-                      Cancel
-                    </button>
                   </div>
                 ) : (
                   <>
@@ -113,10 +123,15 @@ export function RoutinePicker({
                         if (routine.id === selectedRoutineId || onSelect(routine.id)) close()
                       }}
                     >
-                      <span className={styles.name}>{routine.name}</span>
-                      <span className={styles.details}>
-                        {total.approximate ? 'Approximately ' : ''}
-                        {total.minutes} min{routine.id === selectedRoutineId && ' · Selected'}
+                      <span className={styles.indicator}>
+                        {routine.id === selectedRoutineId && <CircleCheckIcon />}
+                      </span>
+                      <span className={styles.summary}>
+                        <span className={styles.name}>{routine.name}</span>
+                        <span className={styles.details}>
+                          {total.approximate ? 'Approximately ' : ''}
+                          {total.minutes} min
+                        </span>
                       </span>
                     </button>
                     <button
