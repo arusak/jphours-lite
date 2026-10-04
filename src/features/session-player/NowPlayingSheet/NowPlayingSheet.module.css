@@ -1,7 +1,7 @@
 .nowPlayingList {
   display: grid;
-  gap: 8px;
-  margin: 12px 0 0;
+  gap: 0.5rem;
+  margin: 0.75rem 0 0;
   padding: 0;
   list-style: none;
   text-align: left;
@@ -11,13 +11,13 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
-  padding: 12px;
-  border: 1px solid var(--color-border);
+  gap: 0.75rem;
+  padding: 0.75rem;
+  border: 0.0625rem solid var(--color-border);
   border-radius: var(--radius-xl);
   color: var(--color-muted-foreground);
   background: oklch(0.215 0.018 52 / 40%);
-  font-size: 13px;
+  font-size: 0.8125rem;
 }
 
 .nowPlayingList li[data-current="true"],
@@ -28,6 +28,6 @@
 
 .nowPlayingList li span {
   color: var(--color-primary);
-  font-size: 11px;
+  font-size: 0.6875rem;
   white-space: nowrap;
 }

@@ -2,49 +2,49 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
-  min-height: 76px;
-  padding: 12px 14px 12px 16px;
+  gap: 1rem;
+  min-height: 4.75rem;
+  padding: 0.75rem 0.875rem 0.75rem 1rem;
 }
 
 .settingCopy {
   display: grid;
   min-width: 0;
-  gap: 2px;
+  gap: 0.125rem;
 }
 
 .settingCopy strong {
   font-family: var(--font-display);
-  font-size: 14px;
+  font-size: 0.875rem;
   font-weight: 600;
 }
 
 .settingCopy small {
   color: var(--color-muted-foreground);
-  font-size: 12px;
+  font-size: 0.75rem;
   line-height: 1.35;
 }
 
 .stepperControls {
   display: grid;
   flex: 0 0 auto;
-  grid-template-columns: 34px 44px 34px;
+  grid-template-columns: 2.125rem 2.75rem 2.125rem;
   align-items: center;
   overflow: hidden;
-  border: 1px solid var(--color-border);
+  border: 0.0625rem solid var(--color-border);
   border-radius: var(--radius-md);
   background: oklch(0.19 0.016 52 / 55%);
 }
 
 .stepperControls button {
   display: grid;
-  width: 34px;
-  height: 36px;
+  width: 2.125rem;
+  height: 2.25rem;
   padding: 0;
   place-items: center;
   color: var(--color-muted-foreground);
   background: var(--color-secondary);
-  font-size: 18px;
+  font-size: 1.125rem;
 }
 
 .stepperControls button:hover:not(:disabled) {
@@ -59,7 +59,7 @@
 .stepperControls output {
   text-align: center;
   color: var(--color-foreground);
-  font-size: 13px;
+  font-size: 0.8125rem;
   font-weight: 650;
   font-variant-numeric: tabular-nums;
 }

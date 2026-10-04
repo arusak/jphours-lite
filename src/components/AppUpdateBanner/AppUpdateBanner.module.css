@@ -2,19 +2,19 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
-  margin: calc(-32px - env(safe-area-inset-top)) -24px 24px;
-  padding: max(12px, env(safe-area-inset-top)) 24px 12px;
+  gap: 1rem;
+  margin: calc(-2rem - env(safe-area-inset-top)) -1.5rem 1.5rem;
+  padding: max(0.75rem, env(safe-area-inset-top)) 1.5rem 0.75rem;
   background: var(--color-primary);
   color: var(--color-primary-foreground);
-  font-size: 14px;
+  font-size: 0.875rem;
   font-weight: 600;
 }
 
 .action {
   flex: none;
-  min-height: 36px;
-  padding: 8px 14px;
+  min-height: 2.25rem;
+  padding: 0.5rem 0.875rem;
   border-radius: var(--radius-xl);
   background: oklch(0.2 0.03 55 / 16%);
   font-weight: 700;
@@ -24,9 +24,9 @@
   background: oklch(0.2 0.03 55 / 25%);
 }
 
-@media (max-width: 359px) {
+@media (max-width: 22.4375rem) {
   .banner {
-    margin-inline: -16px;
-    padding-inline: 16px;
+    margin-inline: -1rem;
+    padding-inline: 1rem;
   }
 }

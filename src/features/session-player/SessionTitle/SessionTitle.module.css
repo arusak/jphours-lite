@@ -1,13 +1,13 @@
 .title {
   display: -webkit-box;
   width: 100%;
-  height: 56px;
+  height: 3.5rem;
   overflow: hidden;
   overflow-wrap: anywhere;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 3;
-  font-size: clamp(16px, calc(100vw / var(--title-width-factor)), 48px);
-  font-size: clamp(16px, calc(100cqi / var(--title-width-factor)), 48px);
+  font-size: clamp(1rem, calc(100vw / var(--title-width-factor)), 3rem);
+  font-size: clamp(1rem, calc(100cqi / var(--title-width-factor)), 3rem);
   line-height: 1.05;
   letter-spacing: -0.04em;
   text-wrap: balance;

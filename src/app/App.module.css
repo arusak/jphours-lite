@@ -12,22 +12,22 @@
   position: fixed;
   z-index: -2;
   pointer-events: none;
-  filter: blur(64px);
+  filter: blur(4rem);
   border-radius: 50%;
 }
 
 .appShell::before {
-  width: 520px;
-  height: 520px;
-  top: -128px;
+  width: 32.5rem;
+  height: 32.5rem;
+  top: -8rem;
   left: 50%;
   translate: -50%;
   background: radial-gradient(circle, oklch(0.63 0.16 45 / 22%), transparent 68%);
 }
 
 .appShell::after {
-  width: 420px;
-  height: 420px;
+  width: 26.25rem;
+  height: 26.25rem;
   right: -10%;
   bottom: -10%;
   background: radial-gradient(circle, oklch(0.81 0.145 74 / 14%), transparent 70%);

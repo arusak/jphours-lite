@@ -1,9 +1,9 @@
 .slideToConfirm {
   position: relative;
-  height: 56px;
+  height: 3.5rem;
   touch-action: none;
   user-select: none;
-  border: 1px solid oklch(0.58 0.19 27 / 30%);
+  border: 0.0625rem solid oklch(0.58 0.19 27 / 30%);
   border-radius: var(--radius-2xl);
   color: var(--color-destructive);
   background: oklch(0.58 0.19 27 / 12%);
@@ -11,23 +11,23 @@
 
 .slideToConfirm > span {
   position: absolute;
-  top: 3px;
-  left: max(3px, calc((100% - 54px) * var(--slider-value, 0)));
+  top: 0.1875rem;
+  left: max(0.1875rem, calc((100% - 3.375rem) * var(--slider-value, 0)));
   display: grid;
-  width: 48px;
-  height: 48px;
+  width: 3rem;
+  height: 3rem;
   place-items: center;
   border-radius: 50%;
   color: oklch(0.98 0.01 80);
   background: var(--color-destructive);
-  box-shadow: 0 4px 12px rgb(0 0 0 / 25%);
-  font-size: 12px;
+  box-shadow: 0 0.25rem 0.75rem rgb(0 0 0 / 25%);
+  font-size: 0.75rem;
   transition: left 180ms ease-out;
 }
 
 .slideToConfirm > span svg {
-  width: 20px;
-  height: 20px;
+  width: 1.25rem;
+  height: 1.25rem;
 }
 
 .slideToConfirm > strong {
@@ -35,7 +35,7 @@
   inset: 0;
   display: grid;
   place-items: center;
-  font-size: 14px;
+  font-size: 0.875rem;
   pointer-events: none;
 }
 

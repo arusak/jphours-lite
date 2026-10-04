@@ -1,11 +1,11 @@
 .content {
   display: grid;
-  gap: 10px;
+  gap: 0.625rem;
 }
 
 .soundList {
   display: grid;
-  gap: 10px;
+  gap: 0.625rem;
 }
 
 .soundList button {
@@ -13,9 +13,9 @@
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  min-height: 56px;
-  padding: 0 16px;
-  border: 1px solid var(--color-border);
+  min-height: 3.5rem;
+  padding: 0 1rem;
+  border: 0.0625rem solid var(--color-border);
   border-radius: var(--radius-xl);
   color: var(--color-secondary-foreground);
   background: var(--color-secondary);
@@ -26,18 +26,18 @@
   border-color: var(--color-primary);
   color: var(--color-foreground);
   background: oklch(0.81 0.145 74 / 14%);
-  box-shadow: inset 0 0 0 1px oklch(0.81 0.145 74 / 25%);
+  box-shadow: inset 0 0 0 0.0625rem oklch(0.81 0.145 74 / 25%);
 }
 
 .selectionMark {
   display: grid;
-  width: 22px;
-  height: 22px;
+  width: 1.375rem;
+  height: 1.375rem;
   place-items: center;
-  border: 1px solid var(--color-border);
+  border: 0.0625rem solid var(--color-border);
   border-radius: 50%;
   color: var(--color-primary-foreground);
-  font-size: 14px;
+  font-size: 0.875rem;
   font-weight: 800;
 }
 
@@ -50,9 +50,9 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
-  padding: 16px;
-  border: 1px solid var(--color-border);
+  gap: 1rem;
+  padding: 1rem;
+  border: 0.0625rem solid var(--color-border);
   border-radius: var(--radius-xl);
   color: var(--color-foreground);
   background: var(--color-secondary);
@@ -62,34 +62,34 @@
   display: flex;
   align-items: flex-start;
   flex-direction: column;
-  gap: 2px;
+  gap: 0.125rem;
 }
 
 .alternateBeatTone strong {
-  font-size: 14px;
+  font-size: 0.875rem;
   font-weight: 600;
 }
 
 .alternateBeatTone small {
   color: var(--color-muted-foreground);
-  font-size: 12px;
+  font-size: 0.75rem;
 }
 
 .alternateBeatTone button {
   display: flex;
   flex: 0 0 auto;
   align-items: center;
-  width: 44px;
-  height: 26px;
-  padding: 3px;
-  border-radius: 999px;
+  width: 2.75rem;
+  height: 1.625rem;
+  padding: 0.1875rem;
+  border-radius: 62.4375rem;
   background: var(--color-muted);
   transition: background-color 180ms ease-out;
 }
 
 .alternateBeatTone button span {
-  width: 20px;
-  height: 20px;
+  width: 1.25rem;
+  height: 1.25rem;
   border-radius: 50%;
   background: var(--color-muted-foreground);
   transition:
@@ -102,7 +102,7 @@
 }
 
 .alternateBeatTone button[aria-checked="true"] span {
-  transform: translateX(18px);
+  transform: translateX(1.125rem);
   background: var(--color-primary-foreground);
 }
 

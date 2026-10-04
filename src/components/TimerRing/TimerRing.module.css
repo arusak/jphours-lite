@@ -1,21 +1,21 @@
 .timerRing {
   position: relative;
-  width: min(268px, calc(100vw - 48px));
+  width: min(16.75rem, calc(100vw - 3rem));
   aspect-ratio: 1;
   margin: 0 auto;
 }
 
 .break {
-  margin-top: 40px;
+  margin-top: 2.5rem;
 }
 
 .timerRing::before {
   content: "";
   position: absolute;
-  inset: 24px;
+  inset: 1.5rem;
   border-radius: 50%;
   background: radial-gradient(circle, oklch(0.81 0.145 74 / 20%), transparent 68%);
-  filter: blur(32px);
+  filter: blur(2rem);
 }
 
 .break::before {
@@ -62,11 +62,11 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 12px;
+  gap: 0.75rem;
 }
 
-@media (max-width: 359px) {
+@media (max-width: 22.4375rem) {
   .timerRing {
-    width: min(268px, calc(100vw - 32px));
+    width: min(16.75rem, calc(100vw - 2rem));
   }
 }

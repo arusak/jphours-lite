@@ -2,10 +2,10 @@
   display: flex;
   flex-direction: column;
   width: 100%;
-  max-width: 460px;
+  max-width: 28.75rem;
   min-height: 100dvh;
   margin: 0 auto;
-  padding: calc(16px + env(safe-area-inset-top)) 24px max(32px, env(safe-area-inset-bottom));
+  padding: calc(1rem + env(safe-area-inset-top)) 1.5rem max(2rem, env(safe-area-inset-bottom));
   text-align: center;
   gap: 1rem;
   user-select: none;
@@ -19,7 +19,7 @@
 
 .eyebrow {
   color: var(--color-muted-foreground);
-  font-size: 12px;
+  font-size: 0.75rem;
   font-weight: 600;
   letter-spacing: 0.22em;
   text-transform: uppercase;
@@ -27,8 +27,8 @@
 
 .nowPlayingTrigger {
   display: grid;
-  gap: 3px;
-  padding: 2px 24px;
+  gap: 0.1875rem;
+  padding: 0.125rem 1.5rem;
   border: 0;
   border-radius: var(--radius-xl);
   color: var(--color-foreground);
@@ -36,7 +36,7 @@
 }
 
 .nowPlayingTrigger > span:last-child {
-  font-size: 14px;
+  font-size: 0.875rem;
   font-weight: 600;
 }
 
@@ -52,8 +52,8 @@
 .duration {
   display: inlune-block;
   justify-self: center;
-  padding: 2px 6px;
-  font-size: 13px;
+  padding: 0.125rem 0.375rem;
+  font-size: 0.8125rem;
   border: 0 solid var(--color-muted-foreground);
   border-radius: var(--radius-xl);
   color: var(--color-muted-foreground);
@@ -68,8 +68,8 @@
 
 .nextStep {
   display: grid;
-  gap: 3px;
-  padding: 8px 12px 9px;
+  gap: 0.1875rem;
+  padding: 0.5rem 0.75rem 0.5625rem;
   text-align: left;
   background: var(--color-card);
   border-radius: var(--radius-lg);
@@ -77,7 +77,7 @@
 
 .nextStepLabel {
   color: var(--color-muted-foreground);
-  font-size: 9px;
+  font-size: 0.5625rem;
   font-weight: 650;
   letter-spacing: 0.13em;
   line-height: 1;
@@ -90,14 +90,14 @@
   min-width: 0;
   align-items: baseline;
   justify-content: space-between;
-  gap: 16px;
+  gap: 1rem;
 }
 
 .nextStepTitle {
   min-width: 0;
   overflow: hidden;
   color: var(--color-muted-foreground);
-  font-size: 14px;
+  font-size: 0.875rem;
   font-weight: 550;
   line-height: 1.25;
   text-overflow: ellipsis;
@@ -107,7 +107,7 @@
 .nextStepMetadata {
   flex: none;
   color: var(--color-muted-foreground);
-  font-size: 11px;
+  font-size: 0.6875rem;
   font-variant-numeric: tabular-nums;
   font-weight: 550;
   opacity: 0.8;
@@ -125,7 +125,7 @@
 
 .timer {
   position: relative;
-  margin: 16px 0 0;
+  margin: 1rem 0 0;
 }
 
 .metronomeSoundTrigger {
@@ -133,8 +133,8 @@
   top: 0;
   right: 0;
   display: grid;
-  width: 42px;
-  height: 42px;
+  width: 2.625rem;
+  height: 2.625rem;
   place-items: center;
   border-radius: 50%;
   color: var(--color-muted-foreground);
@@ -148,8 +148,8 @@
 }
 
 .metronomeSoundTrigger svg {
-  width: 24px;
-  height: 24px;
+  width: 1.5rem;
+  height: 1.5rem;
 }
 
 .beats {
@@ -162,12 +162,12 @@
 .beatIndicator {
   display: flex;
   justify-content: center;
-  gap: 12px;
+  gap: 0.75rem;
 }
 
 .beatIndicator span {
-  width: 14px;
-  height: 14px;
+  width: 0.875rem;
+  height: 0.875rem;
   border-radius: 50%;
   background: oklch(0.95 0.012 80 / 15%);
 }
@@ -177,27 +177,27 @@
 }
 
 .sessionBanner {
-  margin-top: 16px;
-  padding: 10px 12px;
-  border: 1px solid oklch(0.63 0.16 42 / 25%);
+  margin-top: 1rem;
+  padding: 0.625rem 0.75rem;
+  border: 0.0625rem solid oklch(0.63 0.16 42 / 25%);
   border-radius: var(--radius-xl);
   color: var(--color-accent);
   background: oklch(0.63 0.16 42 / 15%);
-  font-size: 12px;
+  font-size: 0.75rem;
 }
 
 .sessionBanner:has(button) {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  gap: 0.75rem;
   text-align: left;
 }
 
 .sessionBanner button {
   flex: none;
-  padding: 4px 8px;
-  border: 1px solid currentColor;
+  padding: 0.25rem 0.5rem;
+  border: 0.0625rem solid currentColor;
   border-radius: var(--radius-lg);
   color: inherit;
   background: transparent;
@@ -205,8 +205,8 @@
   font-weight: 600;
 }
 
-@media (max-width: 359px) {
+@media (max-width: 22.4375rem) {
   .sessionPlayer {
-    padding-inline: 16px;
+    padding-inline: 1rem;
   }
 }

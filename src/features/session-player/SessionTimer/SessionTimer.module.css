@@ -1,13 +1,13 @@
 .ringTime {
   color: var(--color-foreground);
-  font: 700 42px/1 var(--font-display);
+  font: 700 2.625rem/1 var(--font-display);
   font-variant-numeric: tabular-nums;
 }
 
 .sessionIcon {
-  width: 62px;
-  height: 62px;
-  margin-bottom: 2px;
+  width: 3.875rem;
+  height: 3.875rem;
+  margin-bottom: 0.125rem;
   color: var(--color-muted-foreground);
 }
 
@@ -21,8 +21,8 @@
   align-items: center;
   justify-content: center;
   justify-items: center;
-  gap: 4px;
-  margin: 14px 0 0;
+  gap: 0.25rem;
+  margin: 0.875rem 0 0;
 }
 
 .ringTempoControl > button {
@@ -30,9 +30,9 @@
   border: none;
   border-radius: 50%;
   background: transparent;
-  font-size: 36px;
+  font-size: 2.25rem;
   font-weight: 800;
-  padding: 4px 12px;
+  padding: 0.25rem 0.75rem;
 }
 
 .ringTempoControl > button:not(.ringSave) {
@@ -44,25 +44,25 @@
 .ringTempoControl > strong {
   display: grid;
   color: var(--color-primary);
-  font: 700 60px/0.8 var(--font-display);
+  font: 700 3.75rem/0.8 var(--font-display);
   font-variant-numeric: tabular-nums;
-  padding: 20px 0 0;
+  padding: 1.25rem 0 0;
 }
 
 .ringTempoControl small {
-  margin-top: 10px;
+  margin-top: 0.625rem;
   color: var(--color-muted-foreground);
-  font: 600 10px/1 var(--font-body);
+  font: 600 0.625rem/1 var(--font-body);
   letter-spacing: 0.12em;
 }
 
 .ringTempoControl > .ringSave {
   grid-column: 2;
   justify-self: center;
-  padding: 4px 8px;
-  border-radius: 999px;
+  padding: 0.25rem 0.5rem;
+  border-radius: 62.4375rem;
   color: var(--color-primary);
-  font-size: 11px;
+  font-size: 0.6875rem;
 }
 
 .ringSave.hidden {
