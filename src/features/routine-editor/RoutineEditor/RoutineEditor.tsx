@@ -7,7 +7,8 @@ import { RoutineEntryList } from '../RoutineEntryList/RoutineEntryList'
 import { RoutineSettings } from '../RoutineSettings/RoutineSettings'
 import { useRoutineEditor } from '../hooks/useRoutineEditor'
 import type { RoutineEditorProps } from '../types'
-import styles from '../RoutineEditor.module.css'
+import sharedStyles from '../shared.module.css'
+import styles from './RoutineEditor.module.css'
 
 export type { RoutineEditorProps } from '../types'
 export { routineTotal } from '../routineTotal'
@@ -47,6 +48,7 @@ export function RoutineEditor({ repository, onStartSession }: RoutineEditorProps
             onDelete={editor.deleteRoutine}
             onRefresh={editor.refreshCollection}
           />
+          |
           <RoutineFileActions
             routine={editor.routine}
             exportDisabled={!editor.valid}
@@ -136,7 +138,7 @@ export function RoutineEditor({ repository, onStartSession }: RoutineEditorProps
           </button>
         </div>
         <button
-          className={styles.primaryAction}
+          className={sharedStyles.primaryAction}
           disabled={!editor.valid}
           aria-describedby={!editor.valid ? validationErrorId : undefined}
           onClick={() => {

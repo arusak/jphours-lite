@@ -12,7 +12,7 @@ import {
 } from '../../../domain/name-normalization'
 import { validateEntry } from '../../../domain/validation'
 import type { EditorSheet as Sheet } from '../types'
-import sharedStyles from '../RoutineEditor.module.css'
+import sharedStyles from '../shared.module.css'
 import styles from './EditorSheet.module.css'
 
 interface EditorSheetProps {
