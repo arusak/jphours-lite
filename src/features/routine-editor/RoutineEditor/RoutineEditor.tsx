@@ -47,7 +47,6 @@ export function RoutineEditor({ repository, onStartSession }: RoutineEditorProps
             importDisabled={editor.atRoutineLimit}
             importErrorId="routine-count-limit"
           />
-          <span aria-hidden="true">|</span>
           <RoutinePicker
             routines={editor.routines}
             selectedRoutineId={editor.routine.id}
