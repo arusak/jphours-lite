@@ -6,7 +6,6 @@ import styles from './RoutineEntryCard.module.css'
 
 interface RoutineEntryCardProps {
   entry: RoutineEntry
-  index: number
   onEdit(): void
   onDelete(): void
   cardRef?: RefCallback<HTMLElement>
@@ -17,7 +16,6 @@ interface RoutineEntryCardProps {
 
 export function RoutineEntryCard({
   entry,
-  index,
   onEdit,
   onDelete,
   cardRef,
@@ -77,7 +75,7 @@ export function SortableRoutineEntryCard({
   onEdit,
   onDelete,
   dragging = false,
-}: Omit<RoutineEntryCardProps, 'cardRef' | 'dragHandleRef' | 'sortable'>) {
+}: { index: number } & Omit<RoutineEntryCardProps, 'cardRef' | 'dragHandleRef' | 'sortable'>) {
   const { handleRef, isDragSource, ref } = useSortable({
     id: entry.id,
     index,
@@ -85,7 +83,6 @@ export function SortableRoutineEntryCard({
   return (
     <RoutineEntryCard
       entry={entry}
-      index={index}
       onEdit={onEdit}
       onDelete={onDelete}
       cardRef={ref}
