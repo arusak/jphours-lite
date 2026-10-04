@@ -27,19 +27,19 @@ export function RoutineFileActions({
       <span className={styles.actions}>
         <button
           className={styles.action}
-          disabled={importDisabled}
-          aria-describedby={importDisabled ? importErrorId : undefined}
-          onClick={actions.chooseImportFile}
-        >
-          Import
-        </button>
-        <button
-          className={styles.action}
           disabled={exportDisabled}
           aria-describedby={exportDisabled ? exportErrorId : undefined}
           onClick={actions.exportRoutine}
         >
           Export
+        </button>
+        <button
+          className={styles.action}
+          disabled={importDisabled}
+          aria-describedby={importDisabled ? importErrorId : undefined}
+          onClick={actions.chooseImportFile}
+        >
+          Import
         </button>
       </span>
       <input

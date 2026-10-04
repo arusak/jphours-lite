@@ -39,6 +39,15 @@ export function RoutineEditor({ repository, onStartSession }: RoutineEditorProps
             {editor.total.approximate ? '≈' : ''}
             {editor.total.minutes} min
           </span>
+          <RoutineFileActions
+            routine={editor.routine}
+            exportDisabled={!editor.valid}
+            exportErrorId={validationErrorId}
+            onImport={editor.importRoutine}
+            importDisabled={editor.atRoutineLimit}
+            importErrorId="routine-count-limit"
+          />
+          <span aria-hidden="true">|</span>
           <RoutinePicker
             routines={editor.routines}
             selectedRoutineId={editor.routine.id}
@@ -47,15 +56,6 @@ export function RoutineEditor({ repository, onStartSession }: RoutineEditorProps
             onCreate={editor.createNewRoutine}
             onDelete={editor.deleteRoutine}
             onRefresh={editor.refreshCollection}
-          />
-          |
-          <RoutineFileActions
-            routine={editor.routine}
-            exportDisabled={!editor.valid}
-            exportErrorId={validationErrorId}
-            onImport={editor.importRoutine}
-            importDisabled={editor.atRoutineLimit}
-            importErrorId="routine-count-limit"
           />
         </div>
       </div>
