@@ -4,7 +4,6 @@
 }
 
 .dragOverlay {
-  width: min(calc(100vw - 2rem), 35rem);
   border-radius: 0;
   box-shadow: 0 0.75rem 1.875rem oklch(0 0 0 / 35%);
 }

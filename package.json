@@ -13,6 +13,7 @@
     "test:watch": "vitest"
   },
   "dependencies": {
+    "@dnd-kit/dom": "0.5.0",
     "@dnd-kit/react": "latest",
     "@vitejs/plugin-react": "latest",
     "clsx": "latest",

@@ -343,6 +343,7 @@ describe('RoutineEditor', () => {
     await waitFor(() => expect(handle).toHaveAttribute('aria-roledescription', 'draggable'))
     fireEvent.keyDown(handle, { code: 'Space' })
     await waitFor(() => expect(handle).toHaveAttribute('aria-grabbed', 'true'))
+    expect(screen.getAllByRole('button', { name: 'Reorder Scales' })).toHaveLength(2)
     fireEvent.keyDown(document, { code: 'Escape' })
     await waitFor(() => expect(handle).toHaveAttribute('aria-grabbed', 'false'))
 
