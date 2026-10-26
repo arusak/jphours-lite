@@ -47,7 +47,9 @@ export function RoutineEntryCard({
         <div className={styles.exerciseMeta}>
           {entry.kind === 'exercise' && entry.tempoBpm !== null && (
             <span className={`${styles.badge} ${styles.badgeTempo}`}>
-              {entry.tempoBpm} <span className="small-caps">BPM</span>
+              <span className={styles.tempoLabel}>
+                {entry.tempoBpm} <span className="small-caps">BPM</span>
+              </span>
             </span>
           )}
           <span className={styles.badge}>

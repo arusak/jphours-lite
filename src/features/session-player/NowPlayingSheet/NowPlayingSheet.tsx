@@ -38,8 +38,12 @@ export function NowPlayingSheet({
                 )}
                 {metadata.duration !== null && ` · ${metadata.duration}`}
               </strong>
-              {itemIndex === currentIndex && !quickRest && <span>Current</span>}
-              {itemIndex === currentIndex + 1 && quickRest && <span>Up next</span>}
+              {itemIndex === currentIndex && !quickRest && (
+                <span className={styles.status}>Current</span>
+              )}
+              {itemIndex === currentIndex + 1 && quickRest && (
+                <span className={styles.status}>Up next</span>
+              )}
             </li>
           )
         })}

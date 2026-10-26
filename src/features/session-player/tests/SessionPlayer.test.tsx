@@ -1,6 +1,7 @@
 import { act, createEvent, fireEvent, render, screen, within } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { createBreak, createExercise, createRoutine } from '../../../domain/routine'
+import nowPlayingStyles from '../NowPlayingSheet/NowPlayingSheet.module.css'
 import { SessionPlayer } from '../SessionPlayer/SessionPlayer'
 
 const silentBeatSnapshot = {
@@ -364,7 +365,10 @@ describe('SessionPlayer', () => {
         element?.tagName === 'STRONG' && element.textContent === 'One · 80 BPM · 0:30',
     )
     expect(currentStep).toBeInTheDocument()
-    expect(within(currentStep).getByText('BPM')).toHaveClass('small-caps')
+    const tempoUnit = within(currentStep).getByText('BPM')
+    expect(tempoUnit).toHaveClass('small-caps')
+    expect(tempoUnit).not.toHaveClass(nowPlayingStyles.status)
+    expect(within(nowPlaying).getByText('Current')).toHaveClass(nowPlayingStyles.status)
     expect(screen.queryByText(/Quick Rest/)).not.toBeInTheDocument()
     fireEvent.keyDown(document, { key: 'Escape' })
     fireEvent.click(screen.getByRole('button', { name: 'Finish step' }))

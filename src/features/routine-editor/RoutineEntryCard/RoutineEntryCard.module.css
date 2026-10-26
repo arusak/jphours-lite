@@ -65,6 +65,10 @@
   background: oklch(0.81 0.145 74 / 10%);
 }
 
+.tempoLabel {
+  white-space: nowrap;
+}
+
 .cardAction {
   width: 1.75rem;
   height: 100%;
