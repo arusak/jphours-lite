@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react'
 import { createBreak, createExercise } from '../../../domain/routine'
 import { AppUpdateBanner, PlayIcon } from '../../../components'
 import { EditorSheet } from '../EditorSheet/EditorSheet'
@@ -6,6 +7,7 @@ import { RoutineFileActions } from '../RoutineFileActions/RoutineFileActions'
 import { RoutineEntryList } from '../RoutineEntryList/RoutineEntryList'
 import { RoutineSettings } from '../RoutineSettings/RoutineSettings'
 import { useRoutineEditor } from '../hooks/useRoutineEditor'
+import { WelcomeScreen } from '../WelcomeScreen/WelcomeScreen'
 import type { RoutineEditorProps } from '../types'
 import sharedStyles from '../shared.module.css'
 import styles from './RoutineEditor.module.css'
@@ -17,16 +19,43 @@ const validationErrorId = 'routine-validation-error'
 
 export function RoutineEditor({ repository, onStartSession }: RoutineEditorProps) {
   const editor = useRoutineEditor(repository)
+  const editorHeading = useRef<HTMLHeadingElement>(null)
+  const wasWelcome = useRef(editor.routine === null)
+  useEffect(() => {
+    if (wasWelcome.current && editor.routine) editorHeading.current?.focus()
+    wasWelcome.current = editor.routine === null
+  }, [editor.routine])
+
+  if (!editor.routine) {
+    return (
+      <section className={styles.routineEditor}>
+        <AppUpdateBanner onBeforeUpdate={editor.flush} />
+        <WelcomeScreen
+          error={editor.error}
+          importDisabled={editor.atRoutineLimit}
+          onCreateEmpty={editor.createNewRoutine}
+          onCreateRandom={editor.createRandomRoutine}
+          onImport={editor.importRoutine}
+        />
+      </section>
+    )
+  }
+
+  const routine = editor.routine
+  const total = editor.total!
+  const validation = editor.validation!
   return (
     <section className={styles.routineEditor} aria-labelledby="routine-editor-title">
       <AppUpdateBanner onBeforeUpdate={editor.flush} />
       <div className={styles.headerWrapper}>
         <header className={styles.routineHeader}>
-          <h1 id="routine-editor-title">{editor.routine.name.trim() || 'Practice routine'}</h1>
+          <h1 ref={editorHeading} id="routine-editor-title" tabIndex={-1}>
+            {routine.name.trim() || 'Practice routine'}
+          </h1>
           <button
             className={styles.routineEdit}
             aria-label="Edit routine name"
-            onClick={() => editor.setSheet({ kind: 'routine', name: editor.routine.name })}
+            onClick={() => editor.setSheet({ kind: 'routine', name: routine.name })}
           >
             ✎
           </button>
@@ -34,13 +63,13 @@ export function RoutineEditor({ repository, onStartSession }: RoutineEditorProps
         <div className={styles.subMenu}>
           <span
             className={styles.routineTotal}
-            aria-label={`${editor.total.approximate ? 'approximately ' : ''}${editor.total.minutes} minutes`}
+            aria-label={`${total.approximate ? 'approximately ' : ''}${total.minutes} minutes`}
           >
-            {editor.total.approximate ? '≈' : ''}
-            {editor.total.minutes} min
+            {total.approximate ? '≈' : ''}
+            {total.minutes} min
           </span>
           <RoutineFileActions
-            routine={editor.routine}
+            routine={routine}
             exportDisabled={!editor.valid}
             exportErrorId={validationErrorId}
             onImport={editor.importRoutine}
@@ -49,7 +78,7 @@ export function RoutineEditor({ repository, onStartSession }: RoutineEditorProps
           />
           <RoutinePicker
             routines={editor.routines}
-            selectedRoutineId={editor.routine.id}
+            selectedRoutineId={routine.id}
             error={editor.error}
             onSelect={editor.selectRoutine}
             onCreate={editor.createNewRoutine}
@@ -82,7 +111,7 @@ export function RoutineEditor({ repository, onStartSession }: RoutineEditorProps
           </div>
         )}
         <RoutineSettings
-          routine={editor.routine}
+          routine={routine}
           onUpdateSetting={editor.updateSetting}
           onSoundChange={(sound) =>
             editor.update((routine) => ({ ...routine, metronomeSound: sound }))
@@ -92,9 +121,9 @@ export function RoutineEditor({ repository, onStartSession }: RoutineEditorProps
           }
         />
         <RoutineEntryList
-          routine={editor.routine}
+          routine={routine}
           onEdit={(index) =>
-            editor.setSheet({ kind: 'entry', entry: { ...editor.routine.entries[index]! }, index })
+            editor.setSheet({ kind: 'entry', entry: { ...routine.entries[index]! }, index })
           }
           onDelete={editor.remove}
           onReorder={editor.reorder}
@@ -107,12 +136,12 @@ export function RoutineEditor({ repository, onStartSession }: RoutineEditorProps
         )}
         {!editor.valid && (
           <p id={validationErrorId} className={styles.editorError} role="alert">
-            {editor.validation.form ||
-              editor.validation.entries ||
-              editor.validation.quickRestDurationSec ||
-              editor.validation.warningLeadTimeSec ||
-              editor.validation.metronomeSound ||
-              editor.validation.alternateBeatTone ||
+            {validation.form ||
+              validation.entries ||
+              validation.quickRestDurationSec ||
+              validation.warningLeadTimeSec ||
+              validation.metronomeSound ||
+              validation.alternateBeatTone ||
               'Complete each routine entry.'}
           </p>
         )}
@@ -146,7 +175,7 @@ export function RoutineEditor({ repository, onStartSession }: RoutineEditorProps
             } catch {
               return
             }
-            onStartSession?.(editor.routine)
+            onStartSession?.(routine)
           }}
         >
           <PlayIcon className={styles.buttonIcon} />

@@ -114,6 +114,50 @@ function savedCollection(): RoutineCollection {
 }
 
 describe('Routine collection storage', () => {
+  it('initializes and reloads the canonical empty collection when no storage exists', () => {
+    const { repository, values } = collectionStorage()
+
+    expect(repository.loadCollection()).toEqual({
+      storageVersion: 1,
+      selectedRoutineId: null,
+      routines: [],
+    })
+    expect(JSON.parse(values.get(ROUTINES_STORAGE_KEY)!)).toEqual({
+      storageVersion: 1,
+      selectedRoutineId: null,
+      routines: [],
+    })
+    expect(repository.loadCollection()).toEqual({
+      storageVersion: 1,
+      selectedRoutineId: null,
+      routines: [],
+    })
+    expect(() => repository.load()).toThrow('No routine is selected')
+  })
+
+  it('treats an empty collection as authoritative over a legacy backup', () => {
+    const empty: RoutineCollection = { storageVersion: 1, selectedRoutineId: null, routines: [] }
+    const { repository, values } = collectionStorage(empty)
+    const legacy = createRoutine({ name: 'Legacy backup' })
+    values.set(ROUTINE_STORAGE_KEY, JSON.stringify(legacy))
+
+    expect(repository.loadCollection()).toEqual(empty)
+    expect(() => repository.load()).toThrow('No routine is selected')
+    expect(values.get(ROUTINE_STORAGE_KEY)).toBe(JSON.stringify(legacy))
+  })
+
+  it('adds into an empty collection, selects the Routine, and persists it', () => {
+    const empty: RoutineCollection = { storageVersion: 1, selectedRoutineId: null, routines: [] }
+    const { repository } = collectionStorage(empty)
+    const routine = createRoutine({ name: 'New' })
+
+    expect(repository.add(routine)).toMatchObject({
+      selectedRoutineId: routine.id,
+      routines: [{ routine }],
+    })
+    expect(repository.load()).toEqual(routine)
+  })
+
   it('preserves the legacy backup and valid identities on migration', () => {
     const { values, repository } = collectionStorage()
     const routine = createRoutine({ name: 'Legacy' })
@@ -133,6 +177,14 @@ describe('Routine collection storage', () => {
     expect(repository.load().name).toBe('Second')
     collection.routines[1].lastAccessedAt = collection.routines[0].lastAccessedAt
     expect(collectionStorage(collection).repository.load().name).toBe('First')
+  })
+
+  it('repairs a missing persisted selection for a nonempty collection', () => {
+    const collection = savedCollection()
+    const value = { ...collection }
+    delete (value as Partial<RoutineCollection>).selectedRoutineId
+
+    expect(collectionStorage(value as RoutineCollection).repository.load().name).toBe('Second')
   })
 
   it('records explicit access without changing content or array order; edits leave access and selection alone', () => {
@@ -168,16 +220,15 @@ describe('Routine collection storage', () => {
     expect(values.get(ROUTINES_STORAGE_KEY)).toBe(raw)
   })
 
-  it('keeps selection when deleting another Routine and creates a default after deleting the last', () => {
+  it('keeps selection when deleting another Routine and persists empty state after the final deletion', () => {
     const collection = savedCollection()
     const { repository } = collectionStorage(collection)
     const result = repository.remove(collection.routines[1].routine.id)
     expect(result.selectedRoutineId).toBe(collection.selectedRoutineId)
-    const last = repository.remove(collection.selectedRoutineId)
-    expect(last.routines).toHaveLength(1)
-    expect(last.routines[0].routine.name).toBe('Practice routine')
-    expect(last.routines[0].routine.entries).toHaveLength(1)
-    expect(last.selectedRoutineId).toBe(last.routines[0].routine.id)
+    const last = repository.remove(collection.selectedRoutineId!)
+    expect(last).toEqual({ storageVersion: 1, selectedRoutineId: null, routines: [] })
+    expect(repository.loadCollection()).toEqual(last)
+    expect(() => repository.load()).toThrow('No routine is selected')
   })
 
   it('opens the most recently accessed remaining Routine when deleting the selection', () => {
@@ -185,7 +236,7 @@ describe('Routine collection storage', () => {
     vi.setSystemTime(new Date('2026-10-04T12:00:00.000Z'))
     const collection = savedCollection()
     const { repository } = collectionStorage(collection)
-    const result = repository.remove(collection.selectedRoutineId)
+    const result = repository.remove(collection.selectedRoutineId!)
     expect(result.selectedRoutineId).toBe(collection.routines[1].routine.id)
     expect(result.routines[0].lastAccessedAt).toBe('2026-10-04T12:00:00.000Z')
   })
@@ -210,7 +261,7 @@ describe('Routine collection storage', () => {
   it.each([
     'malformed',
     'unsupported',
-    'empty',
+    'inconsistent-empty-selection',
     'over-cap',
     'duplicate',
     'invalid-routine',
@@ -219,7 +270,7 @@ describe('Routine collection storage', () => {
     const collection = savedCollection()
     let value: unknown = collection
     if (kind === 'unsupported') value = { ...collection, storageVersion: 2 }
-    if (kind === 'empty') collection.routines = []
+    if (kind === 'inconsistent-empty-selection') collection.routines = []
     if (kind === 'over-cap') {
       collection.routines = Array.from({ length: 101 }, () => ({
         routine: createRoutine(),
@@ -252,7 +303,7 @@ describe('Routine collection storage', () => {
     }
     expect(() => repository.select(collection.routines[1].routine.id)).toThrow('Storage full')
     expect(() => repository.add(createRoutine())).toThrow('Storage full')
-    expect(() => repository.remove(collection.selectedRoutineId)).toThrow('Storage full')
+    expect(() => repository.remove(collection.selectedRoutineId!)).toThrow('Storage full')
     expect(() => repository.save({ ...collection.routines[0].routine, name: 'Unsaved' })).toThrow(
       'Storage full',
     )
@@ -260,6 +311,33 @@ describe('Routine collection storage', () => {
     expect(values.get(ROUTINES_STORAGE_KEY)).toBe(raw)
     storage.setItem = write
     expect(repository.select(collection.routines[1].routine.id).name).toBe('Second')
+  })
+
+  it('does not publish a failed final deletion or failed add into empty storage', () => {
+    const routine = createRoutine()
+    const collection: RoutineCollection = {
+      storageVersion: 1,
+      selectedRoutineId: routine.id,
+      routines: [{ routine, lastAccessedAt: '2026-01-01T00:00:00.000Z' }],
+    }
+    const { repository, storage, values } = collectionStorage(collection)
+    const raw = values.get(ROUTINES_STORAGE_KEY)
+    const write = storage.setItem
+    storage.setItem = () => {
+      throw new Error('Storage full')
+    }
+
+    expect(() => repository.remove(routine.id)).toThrow('Storage full')
+    expect(values.get(ROUTINES_STORAGE_KEY)).toBe(raw)
+
+    storage.setItem = write
+    repository.remove(routine.id)
+    const emptyRaw = values.get(ROUTINES_STORAGE_KEY)
+    storage.setItem = () => {
+      throw new Error('Storage full')
+    }
+    expect(() => repository.add(createRoutine())).toThrow('Storage full')
+    expect(values.get(ROUTINES_STORAGE_KEY)).toBe(emptyRaw)
   })
 
   it('retains legacy bytes if initialization fails and can retry migration', () => {

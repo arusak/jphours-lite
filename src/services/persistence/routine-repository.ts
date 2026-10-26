@@ -24,7 +24,7 @@ export const ROUTINE_MAX_COUNT = 100
 
 export interface RoutineCollection {
   storageVersion: 1
-  selectedRoutineId: string
+  selectedRoutineId: string | null
   routines: { routine: Routine; lastAccessedAt: string }[]
 }
 
@@ -138,9 +138,13 @@ export class LocalStorageRoutineRepository implements RoutineRepository {
     if (saved !== null) return parseCollection(JSON.parse(saved))
 
     const legacy = this.storage.getItem(ROUTINE_STORAGE_KEY)
+    if (legacy === null) {
+      return this.write({ storageVersion: 1, selectedRoutineId: null, routines: [] })
+    }
+
     let routine: Routine
     try {
-      routine = legacy === null ? createRoutine() : migrateRoutine(JSON.parse(legacy))
+      routine = migrateRoutine(JSON.parse(legacy))
     } catch {
       routine = createRoutine()
     }
@@ -153,7 +157,10 @@ export class LocalStorageRoutineRepository implements RoutineRepository {
 
   load(id?: string): Routine {
     const collection = this.loadCollection()
-    return this.find(collection, id ?? collection.selectedRoutineId).routine
+    if (id === undefined && collection.selectedRoutineId === null) {
+      throw new Error('No routine is selected. Create or import a routine first.')
+    }
+    return this.find(collection, id ?? collection.selectedRoutineId!).routine
   }
 
   save(routine: Routine): void {
@@ -192,9 +199,7 @@ export class LocalStorageRoutineRepository implements RoutineRepository {
     this.find(collection, id)
     collection.routines = collection.routines.filter((record) => record.routine.id !== id)
     if (collection.routines.length === 0) {
-      const routine = createRoutine()
-      collection.routines.push({ routine, lastAccessedAt: new Date().toISOString() })
-      collection.selectedRoutineId = routine.id
+      collection.selectedRoutineId = null
     } else if (collection.selectedRoutineId === id) {
       const record = mostRecent(collection.routines)
       collection.selectedRoutineId = record.routine.id
@@ -221,7 +226,7 @@ function validIdOrFresh(id: string): string {
 
 const collectionIngressSchema = z.object({
   storageVersion: z.literal(1),
-  selectedRoutineId: z.string(),
+  selectedRoutineId: z.optional(z.nullable(z.string())),
   routines: z
     .array(
       z.object({
@@ -229,7 +234,7 @@ const collectionIngressSchema = z.object({
         lastAccessedAt: z.iso.datetime({ precision: 3 }).check(z.length(24)),
       }),
     )
-    .check(z.minLength(1), z.maxLength(ROUTINE_MAX_COUNT)),
+    .check(z.maxLength(ROUTINE_MAX_COUNT)),
 })
 
 function parseCollection(value: unknown): RoutineCollection {
@@ -247,11 +252,19 @@ function parseCollection(value: unknown): RoutineCollection {
     ids.add(routine.id)
     return { routine, lastAccessedAt: record.lastAccessedAt }
   })
+  if (routines.length === 0) {
+    if (parsed.data.selectedRoutineId !== null) {
+      throw new Error('Saved routines contain an inconsistent selection. Repair storage and retry.')
+    }
+    return { storageVersion: 1, selectedRoutineId: null, routines }
+  }
+  const selectedRoutineId = parsed.data.selectedRoutineId
   return {
     storageVersion: 1,
-    selectedRoutineId: ids.has(parsed.data.selectedRoutineId)
-      ? parsed.data.selectedRoutineId
-      : mostRecent(routines).routine.id,
+    selectedRoutineId:
+      typeof selectedRoutineId === 'string' && ids.has(selectedRoutineId)
+        ? selectedRoutineId
+        : mostRecent(routines).routine.id,
     routines,
   }
 }

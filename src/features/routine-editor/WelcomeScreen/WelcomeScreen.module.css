@@ -1,0 +1,55 @@
+.welcome {
+  width: 100%;
+  max-width: 28.75rem;
+  min-height: 100dvh;
+  margin: 0 auto;
+  padding: calc(2rem + env(safe-area-inset-top)) 1.5rem;
+  display: grid;
+  place-items: center;
+}
+
+.content {
+  display: grid;
+  gap: 1rem;
+  width: 100%;
+}
+
+.content h1 {
+  margin: 0;
+  font-size: 2rem;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+}
+
+.content p {
+  margin: 0;
+}
+
+.actions {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.primary,
+.secondary {
+  width: 100%;
+  min-height: 3.25rem;
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-2xl);
+  font-weight: 600;
+}
+
+.primary {
+  color: var(--color-primary-foreground);
+  background: var(--color-primary);
+}
+
+.secondary {
+  border: thin solid var(--color-border);
+  background: transparent;
+}
+
+.helper {
+  color: var(--color-muted-foreground);
+  font-size: 0.875rem;
+}

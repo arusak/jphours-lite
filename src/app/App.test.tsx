@@ -14,6 +14,14 @@ let sessionCallbacks: {
   onSaveAlternateBeatTone(enabled: boolean): void
 }
 const repository = {
+  loadCollection: vi.fn(() => ({
+    storageVersion: 1 as const,
+    selectedRoutineId: selectedId,
+    routines: storedRoutines.map((routine) => ({
+      routine,
+      lastAccessedAt: routine.updatedAt,
+    })),
+  })),
   load: vi.fn((id = selectedId) => {
     const routine = storedRoutines.find((routine) => routine.id === id)
     if (!routine) throw new Error('Routine no longer exists.')

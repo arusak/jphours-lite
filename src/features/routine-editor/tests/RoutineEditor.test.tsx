@@ -76,6 +76,59 @@ describe('RoutineEditor', () => {
     return repo
   }
 
+  it('shows welcome for an empty collection and creates the minimal Routine without starting a Session', () => {
+    const repo = stored()
+    const start = vi.fn()
+    render(<RoutineEditor repository={repo} onStartSession={start} />)
+
+    expect(
+      screen.getByRole('heading', { name: 'Welcome! Make time for your practice.' }),
+    ).toHaveFocus()
+    expect(
+      screen.getByText('20 minutes of exercises + 20 seconds of Quick Rest.'),
+    ).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Create empty routine' }))
+
+    expect(screen.getByRole('heading', { name: 'New routine', level: 1 })).toHaveFocus()
+    expect(repo.load().entries[0]).toMatchObject({
+      title: 'Practice',
+      durationSec: 300,
+      tempoBpm: 100,
+    })
+    expect(start).not.toHaveBeenCalled()
+  })
+
+  it('creates a random Routine from welcome', () => {
+    const repo = stored()
+    render(<RoutineEditor repository={repo} />)
+
+    fireEvent.click(screen.getByRole('button', { name: 'Create random routine' }))
+
+    expect(repo.load().entries).toHaveLength(5)
+    expect(repo.load().quickRestDurationSec).toBe(5)
+  })
+
+  it('imports a Routine from welcome after previewing it', async () => {
+    const repo = stored()
+    render(<RoutineEditor repository={repo} />)
+    const imported = createRoutine({ name: 'Imported' })
+
+    fireEvent.change(screen.getByLabelText('Choose Routine file'), {
+      target: {
+        files: [
+          {
+            size: 1_000,
+            text: () => Promise.resolve(serializeRoutineFile(imported)),
+          },
+        ],
+      },
+    })
+
+    expect(await screen.findByRole('heading', { name: 'Imported', level: 3 })).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Add routine' }))
+    expect(screen.getByRole('heading', { name: 'Imported', level: 1 })).toBeInTheDocument()
+  })
+
   it('creates immediately, reuses numbering gaps, and preserves edits before opening another Routine', () => {
     const first = createRoutine({ name: 'New routine' })
     const third = createRoutine({ name: 'New routine 3' })
@@ -88,7 +141,7 @@ describe('RoutineEditor', () => {
     fireEvent.click(screen.getByRole('button', { name: 'New routine' }))
     expect(screen.getByRole('heading', { name: 'New routine 2', level: 1 })).toBeInTheDocument()
     expect(repo.load(third.id).name).toBe('Edited')
-    expect(repo.loadCollection().routines).toHaveLength(4)
+    expect(repo.loadCollection().routines).toHaveLength(3)
     expect(repo.load().entries).toHaveLength(1)
   })
 
@@ -111,13 +164,15 @@ describe('RoutineEditor', () => {
     expect(repo.loadCollection().routines.some((item) => item.routine.id === initial.id)).toBe(
       false,
     )
-    expect(screen.getByRole('dialog', { name: 'Routines' })).toBeInTheDocument()
+    expect(
+      screen.getByRole('heading', { name: 'Welcome! Make time for your practice.' }),
+    ).toHaveFocus()
     vi.useRealTimers()
   })
 
   it('disables creation and Import at capacity and restores them after deletion', () => {
     const repo = stored(
-      ...Array.from({ length: 99 }, (_, index) => createRoutine({ name: `Routine ${index}` })),
+      ...Array.from({ length: 100 }, (_, index) => createRoutine({ name: `Routine ${index}` })),
     )
     render(<RoutineEditor repository={repo} />)
     expect(screen.getByRole('button', { name: 'Import' })).toBeDisabled()
@@ -148,7 +203,7 @@ describe('RoutineEditor', () => {
   })
 
   it('rechecks capacity when confirming an already open import preview', async () => {
-    const repo = stored()
+    const repo = stored(createRoutine())
     render(<RoutineEditor repository={repo} />)
     fireEvent.change(screen.getByLabelText('Choose Routine file'), {
       target: {

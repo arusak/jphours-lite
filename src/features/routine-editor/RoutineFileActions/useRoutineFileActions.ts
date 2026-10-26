@@ -9,7 +9,7 @@ import {
 import { routineTotal } from '../routineTotal'
 
 interface UseRoutineFileActionsOptions {
-  routine: Routine
+  routine: Routine | null
   onImport(routine: Routine): boolean
 }
 
@@ -72,6 +72,7 @@ export function useRoutineFileActions({ routine, onImport }: UseRoutineFileActio
   }
 
   const exportRoutine = () => {
+    if (!routine) return
     const url = URL.createObjectURL(
       new Blob([serializeRoutineFile(routine)], { type: 'application/json' }),
     )
@@ -91,7 +92,9 @@ export function useRoutineFileActions({ routine, onImport }: UseRoutineFileActio
     try {
       if (!onImport(preview)) {
         setStatus(
-          'The Routine could not be saved. Your current Routine was kept. Retry Add routine after checking browser storage or deleting a routine.',
+          routine
+            ? 'The Routine could not be saved. Your current Routine was kept. Retry Add routine after checking browser storage or deleting a routine.'
+            : 'The Routine could not be saved. Check browser storage and retry Add routine.',
         )
         return
       }
@@ -101,7 +104,11 @@ export function useRoutineFileActions({ routine, onImport }: UseRoutineFileActio
       console.warn('Routine import could not be saved', {
         error: error instanceof Error ? error.name : 'unknown',
       })
-      setStatus('The Routine could not be saved. Your current Routine was kept.')
+      setStatus(
+        routine
+          ? 'The Routine could not be saved. Your current Routine was kept.'
+          : 'The Routine could not be saved. Check browser storage and retry Add routine.',
+      )
     }
   }
 

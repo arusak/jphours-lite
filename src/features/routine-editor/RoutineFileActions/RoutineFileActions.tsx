@@ -4,11 +4,12 @@ import styles from './RoutineFileActions.module.css'
 import { useRoutineFileActions } from './useRoutineFileActions'
 
 interface RoutineFileActionsProps {
-  routine: Routine
+  routine: Routine | null
   exportDisabled: boolean
   exportErrorId?: string
   importDisabled?: boolean
   importErrorId?: string
+  importLabel?: string
   onImport(routine: Routine): boolean
 }
 
@@ -19,27 +20,30 @@ export function RoutineFileActions({
   onImport,
   importDisabled,
   importErrorId,
+  importLabel = 'Import',
 }: RoutineFileActionsProps) {
   const actions = useRoutineFileActions({ routine, onImport })
 
   return (
     <>
       <span className={styles.actions}>
-        <button
-          className={styles.action}
-          disabled={exportDisabled}
-          aria-describedby={exportDisabled ? exportErrorId : undefined}
-          onClick={actions.exportRoutine}
-        >
-          Export
-        </button>
+        {routine && (
+          <button
+            className={styles.action}
+            disabled={exportDisabled}
+            aria-describedby={exportDisabled ? exportErrorId : undefined}
+            onClick={actions.exportRoutine}
+          >
+            Export
+          </button>
+        )}
         <button
           className={styles.action}
           disabled={importDisabled}
           aria-describedby={importDisabled ? importErrorId : undefined}
           onClick={actions.chooseImportFile}
         >
-          Import
+          {importLabel}
         </button>
       </span>
       <input

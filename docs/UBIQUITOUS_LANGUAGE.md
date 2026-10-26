@@ -63,11 +63,12 @@
 
 ## Relationships
 
-- A practitioner can save multiple **Routines** and select one for editing or starting a **Session**. Opening a Routine records access; editing and saving Session settings do not.
+- A practitioner can save zero or more **Routines**. With zero saved Routines, the welcome flow offers creation or import and no **Session** can start. With saved Routines, one can be selected for editing or starting a **Session**. Opening a Routine records access; editing and saving Session settings do not.
 - A **Routine** contains one or more ordered **Routine entries** and shared **Quick Rest Duration**, **Warning lead time**, and **Metronome sound** settings.
 - A **Routine entry** is exactly one **Exercise** or **Break**.
 - A **Break** may appear anywhere in a Routine, including beside another Break; a Routine containing only Breaks is valid.
 - Deleting the final Routine entry creates one default **Exercise** so the Routine never remains empty.
+- Deleting the final saved **Routine** leaves an empty collection and returns the practitioner to the welcome flow.
 - An **Exercise** derives exactly one **Exercise mode** from the presence or absence of **Tempo** and **Duration**.
 - Starting a **Session** creates exactly one immutable **Session plan** from the selected Routine.
 - A **Session plan** contains one **Exercise step** for each Exercise and one **Break step** for each Break, preserving Routine order.

@@ -20,7 +20,8 @@ export function App() {
     if (attemptedInitialization.current === initializationAttempt) return
     attemptedInitialization.current = initializationAttempt
     try {
-      repository.select(repository.load().id)
+      const collection = repository.loadCollection()
+      if (collection.selectedRoutineId) repository.select(collection.selectedRoutineId)
       setInitializationError(null)
       setInitialized(true)
     } catch (error) {
