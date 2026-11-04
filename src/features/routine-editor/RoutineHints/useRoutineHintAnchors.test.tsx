@@ -88,6 +88,18 @@ it('keeps compact annotations, refreshes on resize/scroll, omits invisible targe
       ).toBe(true)
     }
   }
+  // On tall screens, use the open space rather than hugging the controls.
+  vi.stubGlobal('innerHeight', 1200)
+  cardTop = 220
+  editTop = 250
+  addTop = 1000
+  act(() => window.dispatchEvent(new Event('resize')))
+  const centered = result.current
+  expect(centered.map(({ top }) => top)).toEqual([590, 638, 710])
+  for (const label of centered) {
+    expect(label.left + label.width / 2).toBeGreaterThanOrEqual(136)
+    expect(label.left + label.width / 2).toBeLessThanOrEqual(184)
+  }
   editTop = -50
   act(() => resize([], {} as ResizeObserver))
   expect(result.current.map(({ key }) => key)).not.toContain('edit')

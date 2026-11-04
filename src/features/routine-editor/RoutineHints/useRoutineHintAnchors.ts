@@ -56,15 +56,29 @@ export function useRoutineHintAnchors(targets: RoutineHintTargets) {
         const settingsBottom = settingsRef.current?.getBoundingClientRect().bottom ?? cardTop
         // Extremely dense layouts have no room for passive copy without obscuring content.
         if (tight && cardTop - settingsBottom < 88) continue
-        const top = tight
-          ? settingsBottom + 4 + { settings: 0, edit: 1, add: 2 }[key] * 28
-          : key === 'add'
-            ? rect.top - (compact ? 32 : 48)
-            : key === 'settings'
-              ? rect.bottom + 4
-              : (cardBottom || rect.bottom) + 12
+        const roomy = !!cardBottom && addTop - cardBottom >= 240
+        const openCenter = ((cardBottom ?? rect.bottom) + addTop) / 2
+        const top = roomy
+          ? openCenter + { settings: -60, edit: -12, add: 60 }[key]
+          : tight
+            ? settingsBottom + 4 + { settings: 0, edit: 1, add: 2 }[key] * 28
+            : key === 'add'
+              ? rect.top - (compact ? 32 : 48)
+              : key === 'settings'
+                ? rect.bottom + 4
+                : (cardBottom || rect.bottom) + 12
         if (top < 8 || top + 24 > viewportHeight) continue
-        const labelLeft = key === 'add' || tight ? left : Math.max(left, right - width - 24)
+        const labelLeft = roomy
+          ? Math.max(
+              left,
+              Math.min(
+                right - width,
+                (left + right - width) / 2 + { settings: -24, edit: 24, add: 0 }[key],
+              ),
+            )
+          : key === 'add' || tight
+            ? left
+            : Math.max(left, right - width - 24)
         const labelWidth = width
         const x = key === 'edit' ? rect.left - 3 : rect.left + rect.width / 2
         const y =
