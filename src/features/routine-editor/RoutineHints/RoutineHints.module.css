@@ -3,7 +3,7 @@
   inset: 0;
   z-index: 10;
   overflow: hidden;
-  color: var(--color-foreground);
+  color: oklch(0.74 0.055 65);
 }
 .overlay,
 .overlay * {
@@ -11,7 +11,7 @@
 }
 .label {
   position: absolute;
-  font-size: 0.75rem;
+  font-size: 0.9rem;
   line-height: 24px;
   text-align: center;
   white-space: nowrap;

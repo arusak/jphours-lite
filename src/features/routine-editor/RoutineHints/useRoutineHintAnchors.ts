@@ -98,15 +98,15 @@ export function useRoutineHintAnchors(targets: RoutineHintTargets) {
         const startX = labelLeft + labelWidth / 2
         const startY = y < top ? top : top + 24
         const dy = y - startY
-        const bow = Math.min(48, Math.abs(dy) * 0.2)
+        const bow = Math.min(48, Math.abs(dy) * 0.35)
         const controlX1 = Math.max(left, Math.min(right, startX + bow))
-        const controlX2 = Math.max(left, Math.min(right, x + bow))
-        const controlY1 = startY + dy * 0.25
-        const controlY2 = startY + dy * 0.75
-        // Progress steadily toward the target while bowing gently to one side.
+        const controlX2 = Math.max(left, Math.min(right, x + bow * 0.65))
+        const controlY1 = startY + dy * 0.18
+        const controlY2 = startY + dy * 0.68
+        // Progress steadily toward the target while bowing asymmetrically for a hand-drawn curve.
         const angle = Math.atan2(y - controlY2, x - controlX2)
         const head = (offset: number) =>
-          `${x - 5 * Math.cos(angle + offset)} ${y - 5 * Math.sin(angle + offset)}`
+          `${x - 7.5 * Math.cos(angle + offset)} ${y - 7.5 * Math.sin(angle + offset)}`
         const path = `M ${startX} ${startY} C ${controlX1} ${controlY1}, ${controlX2} ${controlY2}, ${x} ${y} M ${head(-0.55)} L ${x} ${y} L ${head(0.55)}`
         next.push({ key, left: labelLeft, top, width: labelWidth, path })
       }

@@ -66,6 +66,11 @@ it('keeps compact annotations, refreshes on resize/scroll, omits invisible targe
     for (const y of [cy1!, cy2!]) expect(y).toBeGreaterThanOrEqual(Math.min(sy!, ey!))
     for (const y of [cy1!, cy2!]) expect(y).toBeLessThanOrEqual(Math.max(sy!, ey!))
   }
+  for (const { path } of result.current) {
+    const points = path.match(/-?\d+(?:\.\d+)?/g)!.map(Number)
+    expect(Math.hypot(points[8]! - points[6]!, points[9]! - points[7]!)).toBeCloseTo(7.5)
+    expect(Math.hypot(points[12]! - points[6]!, points[13]! - points[7]!)).toBeCloseTo(7.5)
+  }
   const addAnchor = result.current.find(({ key }) => key === 'add')!
   expect(Number(addAnchor.path.split(' ')[1])).toBe(addAnchor.left + addAnchor.width / 2)
   const editAnchor = result.current.find(({ key }) => key === 'edit')!
