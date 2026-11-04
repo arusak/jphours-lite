@@ -16,18 +16,18 @@
   border-radius: 50%;
 }
 
-.appShell::before {
-  width: 60vw;
-  height: 70vw;
-  top: 12%;
-  left: 20%;
-  background: radial-gradient(circle, oklch(0.63 0.16 45 / 15%), transparent 68%);
+.appShell::after {
+  width: 200vw;
+  height: 50vh;
+  right: -50vw;
+  top: 25vh;
+  background: radial-gradient(circle, oklch(0.5 0.145 74 / 20%), transparent 70%);
 }
 
-.appShell::after {
-  width: 69vw;
-  height: 72vw;
-  right: -17%;
-  bottom: 21%;
-  background: radial-gradient(circle, oklch(0.81 0.145 74 / 12%), transparent 70%);
+.appShell::before {
+  width: 100vw;
+  height: 30vh;
+  right: 0vw;
+  top: 35vh;
+  background: radial-gradient(circle, oklch(0.7 0.145 74 / 20%), transparent 70%);
 }
