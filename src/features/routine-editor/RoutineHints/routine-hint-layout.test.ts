@@ -42,7 +42,7 @@ it('applies per-hint label and arrow configuration without changing other hints'
   expect(settings).toMatchObject({ text: 'Custom settings', width: 140, height: 32, top: 200 })
   const [sx, sy, cx, , , , x, y, hx, hy] = settings.path.match(/-?\d+(?:\.\d+)?/g)!.map(Number)
   expect(sx).toBe(settings.left + 70)
-  expect(sy).toBe(settings.top)
+  expect(sy).toBe(settings.top - 4)
   expect(cx).toBeLessThan(sx!)
   expect([x, y]).toEqual([160, 198])
   expect(Math.hypot(hx! - x!, hy! - y!)).toBeCloseTo(12)
@@ -56,7 +56,7 @@ it('uses measured label height for the arrow attachment below an above-target la
     ({ key }) => key === 'add',
   )!
   const points = add.path.match(/-?\d+(?:\.\d+)?/g)!.map(Number)
-  expect(points[1]).toBe(add.top + 30)
+  expect(points[1]).toBe(add.top + 30 + 4)
 })
 
 it('omits only hidden, offscreen, or missing targets', () => {

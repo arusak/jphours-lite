@@ -79,15 +79,16 @@ export const routineHintConfig: RoutineHintConfig = {
       label: {
         ...labelDefaults,
         text: 'Edit this exercise',
+        rightInset: 0,
         placement: 'below-card',
         align: 'right',
         gap: 12,
-        roomyOffsetX: 24,
+        roomyOffsetX: 48,
         roomyOffsetY: -12,
         tightRow: 1,
       },
       target: { edge: 'bottom', gap: 3, useIcon: true },
-      arrow: { ...arrowDefaults, direction: 1 },
+      arrow: { ...arrowDefaults, direction: 1, maxBow: 96, bowRatio: 0.7 },
     },
     add: {
       label: {

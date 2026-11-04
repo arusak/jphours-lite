@@ -122,7 +122,7 @@ export function layoutRoutineHints(
         : Math.max(top, y - hint.arrow.maxVerticalReach - height)
     const path = drawArrow(
       labelLeft + width / 2,
-      y < top ? top : top + height,
+      y < top ? top - 4 : top + height + 4,
       x,
       y,
       left,
