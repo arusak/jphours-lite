@@ -63,6 +63,6 @@
     "docs/UBIQUITOUS_LANGUAGE.md": "Canonical Routine and Session domain vocabulary, relationships, and ambiguities.",
     "docs/icon-creation-publishing-guide.md": "Source artwork, generated assets, platform declarations, validation, and publishing guidance for application icons.",
     "docs/": "Architecture decisions, outstanding work, plans, reports, ubiquitous language, and this inventory.",
-    "src/features/routine-editor/RoutineHints/": "Passive empty Routine annotations, target geometry hook, styles, and focused tests."
+    "src/features/routine-editor/RoutineHints/": "Passive empty Routine annotations, centralized label and arrow configuration, text-sized labels and measured layout, browser observation hook, styles, and focused tests."
   }
 }

@@ -4,7 +4,19 @@ import { useRoutineHintAnchors } from './useRoutineHintAnchors'
 
 afterEach(() => vi.restoreAllMocks())
 
-it('keeps compact annotations, refreshes on resize/scroll, omits invisible targets and cleans up', () => {
+function measuredLabels() {
+  return {
+    current: Object.fromEntries(
+      ['settings', 'edit', 'add'].map((key) => {
+        const label = document.createElement('span')
+        vi.spyOn(label, 'getBoundingClientRect').mockReturnValue(new DOMRect(0, 0, 200, 24))
+        return [key, label]
+      }),
+    ),
+  }
+}
+
+it('keeps compact annotations, refreshes on resize/scroll, omits invisible targets and cleans up', async () => {
   vi.stubGlobal('innerHeight', 568)
   vi.stubGlobal('innerWidth', 320)
   const editor = document.createElement('section')
@@ -49,13 +61,14 @@ it('keeps compact annotations, refreshes on resize/scroll, omits invisible targe
     },
   )
   const remove = vi.spyOn(window, 'removeEventListener')
+  const labelRefs = measuredLabels()
   const targets = {
     containerRef: { current: editor },
     addExerciseRef: { current: add },
     settingsRef: { current: settings },
     editExerciseRef: { current: edit },
   }
-  const { result, unmount } = renderHook(() => useRoutineHintAnchors(targets))
+  const { result, unmount } = renderHook(() => useRoutineHintAnchors(targets, labelRefs))
   expect(result.current.map(({ key }) => key)).toEqual(['settings', 'edit', 'add'])
   expect(result.current.map(({ top }) => top)).toEqual([194, 312, 368])
   // Curves may bow sideways, but must progress toward the target without curling back.
@@ -82,6 +95,21 @@ it('keeps compact annotations, refreshes on resize/scroll, omits invisible targe
     .map(Number)
     .slice(6, 8)
   expect(editEndpoint).toEqual([270, 283])
+  for (const attribute of ['aria-hidden', 'inert']) {
+    await act(async () => edit.setAttribute(attribute, 'true'))
+    expect(result.current.map(({ key }) => key)).toEqual(['settings', 'add'])
+    await act(async () => edit.removeAttribute(attribute))
+    expect(result.current.map(({ key }) => key)).toEqual(['settings', 'edit', 'add'])
+  }
+  const addLabel = labelRefs.current.add!
+  vi.mocked(addLabel.getBoundingClientRect).mockReturnValue(new DOMRect(0, 0, 110, 25))
+  act(() => resize([], {} as ResizeObserver))
+  const resizedAdd = result.current.find(({ key }) => key === 'add')!
+  expect(resizedAdd.width).toBe(110)
+  const resizedPoints = resizedAdd.path.match(/-?\d+(?:\.\d+)?/g)!.map(Number)
+  expect(resizedPoints.slice(0, 2)).toEqual([resizedAdd.left + 55, resizedAdd.top + 25])
+  vi.mocked(addLabel.getBoundingClientRect).mockReturnValue(new DOMRect(0, 0, 200, 24))
+  act(() => resize([], {} as ResizeObserver))
   editTop = -50
   act(() => window.dispatchEvent(new Event('scroll')))
   expect(result.current.map(({ key }) => key)).not.toContain('edit')
@@ -149,4 +177,95 @@ it('keeps compact annotations, refreshes on resize/scroll, omits invisible targe
   expect(remove).toHaveBeenCalledWith('resize', expect.any(Function))
   expect(remove).toHaveBeenCalledWith('scroll', expect.any(Function), true)
   vi.unstubAllGlobals()
+})
+
+it('hides hints while settings are unfolded and restores aligned arrows after folding', async () => {
+  const editor = document.createElement('section')
+  const surface = document.createElement('div')
+  const face = document.createElement('div')
+  const header = document.createElement('header')
+  const settings = document.createElement('button')
+  header.append(settings)
+  face.append(header)
+  surface.append(face)
+  const card = document.createElement('article')
+  const edit = document.createElement('button')
+  card.append(edit)
+  const add = document.createElement('button')
+  editor.append(surface, card, add)
+  let editTop = 250
+  const rect = (top: number, height: number) => new DOMRect(16, top, 288, height)
+  vi.spyOn(editor, 'getBoundingClientRect').mockReturnValue(new DOMRect(0, 0, 320, 1000))
+  vi.spyOn(settings, 'getBoundingClientRect').mockReturnValue(rect(150, 40))
+  vi.spyOn(card, 'getBoundingClientRect').mockImplementation(() => rect(editTop - 30, 80))
+  vi.spyOn(edit, 'getBoundingClientRect').mockImplementation(() => rect(editTop, 40))
+  vi.spyOn(add, 'getBoundingClientRect').mockReturnValue(rect(800, 44))
+  vi.stubGlobal('innerWidth', 320)
+  vi.stubGlobal('innerHeight', 1000)
+  const observed = new Set<Element>()
+  let notify!: ResizeObserverCallback
+  vi.stubGlobal(
+    'ResizeObserver',
+    class {
+      constructor(callback: ResizeObserverCallback) {
+        notify = callback
+      }
+      observe(element: Element) {
+        observed.add(element)
+      }
+      disconnect() {
+        observed.clear()
+      }
+    },
+  )
+  try {
+    const labelRefs = measuredLabels()
+    const targets = {
+      containerRef: { current: editor },
+      settingsRef: { current: settings },
+      editExerciseRef: { current: edit },
+      addExerciseRef: { current: add },
+    }
+    const { result, unmount } = renderHook(() => useRoutineHintAnchors(targets, labelRefs))
+    const endpoint = () =>
+      result.current
+        .find(({ key }) => key === 'edit')!
+        .path.match(/-?\d+(?:\.\d+)?/g)!
+        .map(Number)
+        .slice(6, 8)
+    expect(endpoint()).toEqual([160, 293])
+    expect(observed.has(surface)).toBe(true)
+    const initial = result.current
+    await act(async () => settings.setAttribute('aria-expanded', 'true'))
+    expect(result.current).toEqual([])
+    // The settings surface changes size; the editor, edit button and card keep their sizes.
+    for (const top of [350, 450, 350, 250]) {
+      editTop = top
+      act(() => {
+        if (observed.has(surface))
+          notify(
+            [
+              {
+                target: surface,
+                contentRect: surface.getBoundingClientRect(),
+                borderBoxSize: [],
+                contentBoxSize: [],
+                devicePixelContentBoxSize: [],
+              },
+            ],
+            {} as ResizeObserver,
+          )
+      })
+      expect(result.current).toEqual([])
+    }
+    await act(async () => settings.setAttribute('aria-expanded', 'false'))
+    expect(result.current).toEqual(initial)
+    editTop = 350
+    act(() => notify([], {} as ResizeObserver))
+    expect(endpoint()).toEqual([160, 393])
+    unmount()
+    expect(observed.size).toBe(0)
+  } finally {
+    vi.unstubAllGlobals()
+  }
 })

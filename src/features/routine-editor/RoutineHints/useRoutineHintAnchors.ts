@@ -1,4 +1,10 @@
 import { useEffect, useState, type RefObject } from 'react'
+import {
+  layoutRoutineHints,
+  type RoutineHintAnchor,
+  type RoutineHintMeasurements,
+} from './routine-hint-layout'
+import { hintKeys, type RoutineHintKey } from './routine-hint-config'
 
 export interface RoutineHintTargets {
   containerRef: RefObject<HTMLElement | null>
@@ -7,117 +13,53 @@ export interface RoutineHintTargets {
   editExerciseRef: RefObject<HTMLButtonElement | null>
 }
 
-export interface RoutineHintAnchor {
-  key: 'add' | 'settings' | 'edit'
-  left: number
-  top: number
-  width: number
-  path: string
-}
-
-export function useRoutineHintAnchors(targets: RoutineHintTargets) {
+export function useRoutineHintAnchors(
+  targets: RoutineHintTargets,
+  labelsRef: RefObject<Partial<Record<RoutineHintKey, HTMLSpanElement>>>,
+) {
   const { containerRef, addExerciseRef, settingsRef, editExerciseRef } = targets
   const [anchors, setAnchors] = useState<RoutineHintAnchor[]>([])
   useEffect(() => {
     const measure = () => {
-      const container = containerRef.current?.getBoundingClientRect()
-      if (!container || !container.width) {
+      if (settingsRef.current?.getAttribute('aria-expanded') === 'true') {
         setAnchors([])
         return
       }
-      const viewportHeight = window.innerHeight
-      const left = Math.max(8, container.left + 16)
-      const right = Math.min(window.innerWidth - 8, container.right - 16)
-      const width = Math.min(200, right - left)
-      const cardBottom = editExerciseRef.current?.closest('article')?.getBoundingClientRect().bottom
-      const next: RoutineHintAnchor[] = []
-      for (const [key, ref] of [
-        ['settings', settingsRef],
-        ['edit', editExerciseRef],
-        ['add', addExerciseRef],
-      ] as const) {
-        const element = ref.current
-        if (!element || element.closest('[aria-hidden="true"], [inert]')) continue
-        const rect = element.getBoundingClientRect()
-        if (
-          !rect.width ||
-          !rect.height ||
-          rect.top < 0 ||
-          rect.bottom > viewportHeight ||
-          rect.left < 0 ||
-          rect.right > window.innerWidth
-        )
-          continue
-        const addTop = addExerciseRef.current?.getBoundingClientRect().top ?? viewportHeight
-        const compact = !!cardBottom && addTop - cardBottom < 160
-        const tight = !!cardBottom && addTop - cardBottom < 96
-        const cardTop =
-          editExerciseRef.current?.closest('article')?.getBoundingClientRect().top ?? 0
-        const settingsBottom = settingsRef.current?.getBoundingClientRect().bottom ?? cardTop
-        // Extremely dense layouts have no room for passive copy without obscuring content.
-        if (tight && cardTop - settingsBottom < 88) continue
-        const roomy = !!cardBottom && addTop - cardBottom >= 240
-        const openCenter = ((cardBottom ?? rect.bottom) + addTop) / 2
-        let top = roomy
-          ? openCenter + { settings: -60, edit: -12, add: 60 }[key]
-          : tight
-            ? settingsBottom + 4 + { settings: 0, edit: 1, add: 2 }[key] * 28
-            : key === 'add'
-              ? rect.top - (compact ? 32 : 48)
-              : key === 'settings'
-                ? rect.bottom + 4
-                : (cardBottom || rect.bottom) + 12
-        if (top < 8 || top + 24 > viewportHeight) continue
-        let labelLeft = roomy
-          ? Math.max(
-              left,
-              Math.min(
-                right - width,
-                (left + right - width) / 2 + { settings: -24, edit: 24, add: 0 }[key],
-              ),
-            )
-          : key === 'add' || tight
-            ? left
-            : Math.max(left, right - width - 24)
-        const labelWidth = width
-        const iconRect =
-          key === 'edit' ? element.firstElementChild?.getBoundingClientRect() : undefined
-        const targetRect = iconRect?.width ? iconRect : rect
-        const x = targetRect.left + targetRect.width / 2
-        const y = key === 'add' ? rect.top - 3 : targetRect.bottom + 3
-        // Bound the reach even when the empty space grows with viewport height.
-        if (roomy)
-          labelLeft = Math.max(
-            left,
-            Math.min(
-              right - width,
-              Math.max(x - 100 - width / 2, Math.min(x + 100 - width / 2, labelLeft)),
-            ),
-          )
-        top = y < top ? Math.min(top, y + 160) : Math.max(top, y - 160 - 24)
-        const startX = labelLeft + labelWidth / 2
-        const startY = y < top ? top : top + 24
-        const dy = y - startY
-        const bow = Math.min(48, Math.abs(dy) * 0.35) * (key === 'add' ? -1 : 1)
-        const controlX1 = Math.max(left, Math.min(right, startX + bow))
-        const controlX2 = Math.max(left, Math.min(right, x + bow * 0.65))
-        const controlY1 = startY + dy * 0.18
-        const controlY2 = startY + dy * 0.68
-        // Progress steadily toward the target while bowing asymmetrically for a hand-drawn curve.
-        const angle = Math.atan2(y - controlY2, x - controlX2)
-        const head = (offset: number) =>
-          `${x - 7.5 * Math.cos(angle + offset)} ${y - 7.5 * Math.sin(angle + offset)}`
-        const path = `M ${startX} ${startY} C ${controlX1} ${controlY1}, ${controlX2} ${controlY2}, ${x} ${y} M ${head(-0.55)} L ${x} ${y} L ${head(0.55)}`
-        next.push({ key, left: labelLeft, top, width: labelWidth, path })
+      const refs = { settings: settingsRef, edit: editExerciseRef, add: addExerciseRef }
+      const measured: RoutineHintMeasurements['targets'] = {}
+      for (const key of hintKeys) {
+        const element = refs[key].current
+        if (!element) continue
+        measured[key] = {
+          rect: element.getBoundingClientRect(),
+          iconRect: element.firstElementChild?.getBoundingClientRect(),
+          hidden: !!element.closest('[aria-hidden="true"], [inert]'),
+        }
       }
-      setAnchors(next)
+      setAnchors(
+        layoutRoutineHints({
+          container: containerRef.current?.getBoundingClientRect(),
+          card: editExerciseRef.current?.closest('article')?.getBoundingClientRect(),
+          viewport: { width: window.innerWidth, height: window.innerHeight },
+          targets: measured,
+          labels: Object.fromEntries(
+            hintKeys.map((key) => [key, labelsRef.current[key]?.getBoundingClientRect()]),
+          ),
+        }),
+      )
     }
     measure()
     const observer = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(measure)
+    for (const label of Object.values(labelsRef.current)) observer?.observe(label)
+    const observed = new Set<Element>()
     for (const ref of [containerRef, addExerciseRef, settingsRef, editExerciseRef]) {
-      if (ref.current) {
-        observer?.observe(ref.current)
-        if (ref.current.parentElement) observer?.observe(ref.current.parentElement)
+      // An expanding ancestor can move targets without resizing the targets themselves.
+      let element: HTMLElement | null = ref.current
+      while (element && !observed.has(element)) {
+        observed.add(element)
+        observer?.observe(element)
+        if (element === containerRef.current) break
+        element = element.parentElement
       }
     }
     const visibilityObserver = new MutationObserver(measure)
@@ -125,7 +67,7 @@ export function useRoutineHintAnchors(targets: RoutineHintTargets) {
       visibilityObserver.observe(containerRef.current, {
         subtree: true,
         attributes: true,
-        attributeFilter: ['aria-hidden', 'inert'],
+        attributeFilter: ['aria-hidden', 'inert', 'aria-expanded'],
       })
     window.addEventListener('resize', measure)
     window.addEventListener('scroll', measure, true)
@@ -135,6 +77,6 @@ export function useRoutineHintAnchors(targets: RoutineHintTargets) {
       window.removeEventListener('resize', measure)
       window.removeEventListener('scroll', measure, true)
     }
-  }, [containerRef, addExerciseRef, settingsRef, editExerciseRef])
+  }, [containerRef, addExerciseRef, settingsRef, editExerciseRef, labelsRef])
   return anchors
 }
