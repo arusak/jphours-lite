@@ -1,6 +1,6 @@
 import type { Ref } from 'react'
 import { useLayoutEffect, useRef, useState } from 'react'
-import { ChevronRightIcon, MetronomeSoundSheet } from '../../../components'
+import { ChevronRightIcon, MetronomeSoundSheet, SettingsIcon } from '../../../components'
 import { practiceConfig } from '../../../config/practice-config'
 import type { Routine } from '../../../domain/routine'
 import { Stepper } from '../Stepper/Stepper'
@@ -56,7 +56,8 @@ export function RoutineSettings({
                 aria-controls="routine-settings-panel"
                 onClick={toggle}
               >
-                <span>
+                <SettingsIcon aria-hidden="true" />
+                <span className={styles.summaryDetail}>
                   Quick Rest {routine.quickRestDurationSec}s · Warning cue {warningLabel} ·{' '}
                   {soundLabel} Click
                 </span>

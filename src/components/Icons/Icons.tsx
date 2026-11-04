@@ -84,6 +84,23 @@ export function NoteIcon(props: IconProps) {
   )
 }
 
+export function SettingsIcon(props: IconProps) {
+  return (
+    <svg
+      {...iconProps}
+      {...props}
+      fill="none"
+      stroke="currentColor"
+      strokeLinecap="round"
+      strokeWidth="1.5"
+    >
+      <path d="M4 7h3m4 0h9M4 17h9m4 0h3" />
+      <circle cx="9" cy="7" r="2" />
+      <circle cx="15" cy="17" r="2" />
+    </svg>
+  )
+}
+
 export function ChevronRightIcon(props: IconProps) {
   return (
     <svg

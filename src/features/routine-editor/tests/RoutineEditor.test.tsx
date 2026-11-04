@@ -353,6 +353,7 @@ describe('RoutineEditor', () => {
     const disclosure = screen.getByRole('button', { name: /quick rest.*warning cue/i })
     const panel = document.getElementById('routine-settings-panel')
     expect(disclosure).toHaveAttribute('aria-expanded', 'false')
+    expect(disclosure).not.toHaveTextContent('Routine settings')
     expect(disclosure).toHaveTextContent('Quick Rest 30s · Warning cue Off · Wood Click')
     expect(panel).toHaveAttribute('aria-hidden', 'true')
     expect(panel).toHaveAttribute('inert')
