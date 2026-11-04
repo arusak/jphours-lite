@@ -1,12 +1,33 @@
 .routineSettings {
-  margin: 0.75rem 0;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+  column-gap: 0.5rem;
+}
+.durationSummary {
+  display: flex;
+  align-items: center;
+  min-height: 2.75rem;
+}
+.surface:only-child {
+  grid-column: 1 / -1;
 }
 .surface {
-  margin: 0 -0.1875rem;
+  display: contents;
+}
+.face {
+  grid-column: 2;
+  min-width: 0;
+}
+.surface:only-child .face {
+  grid-column: 1 / -1;
+}
+.settingsDisclosure {
+  grid-column: 1 / -1;
   border-radius: var(--radius-xl);
   overflow: hidden;
 }
-.surface[data-expanded="true"] {
+.surface[data-expanded="true"] .settingsDisclosure {
   box-shadow: inset 0 0 0 0.0625rem var(--color-border);
 }
 .face,

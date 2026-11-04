@@ -1,11 +1,18 @@
 .trigger {
-  padding: 0.1875rem 0.3125rem 0.1875rem 0.75rem;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 2.75rem;
+  height: 2.75rem;
+  padding: 0.625rem;
+  border-radius: var(--radius-xl);
   color: var(--color-muted-foreground);
   background: transparent;
-  font-size: 0.625rem;
-  font-weight: 500;
-  opacity: 0.58;
-  border-left: thin solid;
+}
+
+.trigger svg {
+  width: 1.5rem;
+  height: 1.5rem;
 }
 
 .trigger:hover,
@@ -141,4 +148,35 @@
 
 .error {
   color: var(--color-destructive);
+}
+
+.fileActions {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+}
+
+.fileAction {
+  flex: 1;
+  min-width: 0;
+  min-height: 2.25rem;
+  padding: 0.375rem 0.75rem;
+  border: 0.0625rem dashed oklch(0.95 0.012 80 / 20%);
+  border-radius: var(--radius-2xl);
+  background: transparent;
+  color: var(--color-muted-foreground);
+}
+
+.fileAction:hover {
+  color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+.fileAction:focus-visible {
+  outline: 0.125rem solid var(--color-primary);
+  outline-offset: 0.125rem;
+}
+
+.fileAction:disabled {
+  opacity: 0.4;
 }

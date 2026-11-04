@@ -63,7 +63,60 @@ function repository(initial: Routine): RoutineRepository {
   return repo
 }
 
+function openRoutines() {
+  for (const dialog of screen.queryAllByRole('dialog')) {
+    if (dialog.dataset.state === 'closing') fireEvent.animationEnd(dialog)
+  }
+  if (!screen.queryByRole('dialog', { name: 'Routines' })) {
+    fireEvent.click(screen.getByRole('button', { name: 'Routines' }))
+  }
+}
+
 describe('RoutineEditor', () => {
+  it('imports a Routine from the empty-collection welcome screen', async () => {
+    const repo = stored()
+    render(<RoutineEditor repository={repo} />)
+    fireEvent.click(screen.getByRole('button', { name: 'Import routine' }))
+    fireEvent.change(screen.getByLabelText('Choose Routine file'), {
+      target: {
+        files: [
+          {
+            size: 1000,
+            text: () =>
+              Promise.resolve(serializeRoutineFile(createRoutine({ name: 'Welcome import' }))),
+          },
+        ],
+      },
+    })
+    const preview = await screen.findByRole('dialog', { name: 'Import Routine' })
+    fireEvent.click(within(preview).getByRole('button', { name: 'Add routine' }))
+    expect(screen.getByRole('heading', { name: 'Welcome import', level: 1 })).toHaveFocus()
+    expect(repo.loadCollection().routines).toHaveLength(1)
+    expect(repo.load().name).toBe('Welcome import')
+  })
+
+  it('uses the heading title to edit and keeps file controls inside Routines', () => {
+    render(<RoutineEditor repository={repository(createRoutine({ name: 'Scales' }))} />)
+    const heading = screen.getByRole('heading', { name: 'Scales', level: 1 })
+    fireEvent.click(within(heading).getByRole('button', { name: 'Edit routine name' }))
+    expect(screen.getByLabelText('Routine name')).toHaveValue('Scales')
+    fireEvent.keyDown(document, { key: 'Escape' })
+    fireEvent.animationEnd(screen.getByRole('dialog'))
+    expect(screen.queryByRole('button', { name: 'Import' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Export' })).not.toBeInTheDocument()
+    const trigger = screen.getByRole('button', { name: 'Routines' })
+    trigger.focus()
+    fireEvent.click(trigger)
+    expect(trigger).toHaveAttribute('aria-expanded', 'true')
+    const dialog = screen.getByRole('dialog', { name: 'Routines' })
+    expect(within(dialog).getByRole('button', { name: 'Import' })).toBeInTheDocument()
+    expect(within(dialog).getByRole('button', { name: 'Export' })).toBeInTheDocument()
+    fireEvent.keyDown(document, { key: 'Escape' })
+    fireEvent.animationEnd(dialog)
+    expect(trigger).toHaveFocus()
+    expect(trigger).toHaveAttribute('aria-expanded', 'false')
+  })
+
   function stored(...routines: Routine[]) {
     const bytes = new Map<string, string>()
     const repo = new LocalStorageRoutineRepository({
@@ -146,10 +199,14 @@ describe('RoutineEditor', () => {
     render(<RoutineEditor repository={repo} />)
     fireEvent.click(screen.getByRole('button', { name: 'Routines' }))
     fireEvent.click(screen.getByRole('button', { name: 'Delete routine Selected' }))
-    fireEvent.keyDown(screen.getByRole('slider', { name: /Selected/ }), { key: 'End' })
-    expect(screen.getByRole('slider', { name: /Selected/ })).toBeInTheDocument()
+    fireEvent.keyDown(screen.getByRole('slider', { name: 'Slide to delete the routine' }), {
+      key: 'End',
+    })
+    expect(screen.getByRole('slider', { name: 'Slide to delete the routine' })).toBeInTheDocument()
     expect(repo.load().id).toBe(initial.id)
-    fireEvent.keyDown(screen.getByRole('slider', { name: /Selected/ }), { key: 'End' })
+    fireEvent.keyDown(screen.getByRole('slider', { name: 'Slide to delete the routine' }), {
+      key: 'End',
+    })
     act(() => vi.advanceTimersByTime(500))
     expect(remove).toHaveBeenCalledTimes(2)
     expect(repo.loadCollection().routines.some((item) => item.routine.id === initial.id)).toBe(
@@ -166,11 +223,13 @@ describe('RoutineEditor', () => {
       ...Array.from({ length: 100 }, (_, index) => createRoutine({ name: `Routine ${index}` })),
     )
     render(<RoutineEditor repository={repo} />)
+    openRoutines()
     expect(screen.getByRole('button', { name: 'Import' })).toBeDisabled()
-    fireEvent.click(screen.getByRole('button', { name: 'Routines' }))
     expect(screen.getByRole('button', { name: 'New routine' })).toBeDisabled()
     fireEvent.click(screen.getByRole('button', { name: 'Delete routine Routine 98' }))
-    fireEvent.keyDown(screen.getByRole('slider', { name: /Routine 98/ }), { key: 'End' })
+    fireEvent.keyDown(screen.getByRole('slider', { name: 'Slide to delete the routine' }), {
+      key: 'End',
+    })
     expect(screen.getByRole('button', { name: 'New routine' })).toBeEnabled()
     expect(screen.getByRole('button', { name: 'Import' })).toBeEnabled()
   })
@@ -196,6 +255,7 @@ describe('RoutineEditor', () => {
   it('rechecks capacity when confirming an already open import preview', async () => {
     const repo = stored(createRoutine())
     render(<RoutineEditor repository={repo} />)
+    openRoutines()
     fireEvent.change(screen.getByLabelText('Choose Routine file'), {
       target: {
         files: [
@@ -316,6 +376,7 @@ describe('RoutineEditor', () => {
     render(<RoutineEditor repository={repository(createRoutine())} />)
     fireEvent.click(screen.getByRole('button', { name: /add exercise/i }))
     const name = screen.getByLabelText(/exercise name/i)
+    name.focus()
     focus.mockClear()
     fireEvent.change(name, { target: { value: 'Scales' } })
     expect(name).toHaveFocus()
@@ -453,6 +514,7 @@ describe('RoutineEditor', () => {
         repository={{ ...repository(createRoutine({ name: 'Current' })), save: saved }}
       />,
     )
+    openRoutines()
     fireEvent.click(screen.getByRole('button', { name: 'Import' }))
     const imported = createRoutine({
       name: 'Imported',
@@ -463,6 +525,7 @@ describe('RoutineEditor', () => {
       ],
       quickRestDurationSec: 0,
     })
+    openRoutines()
     fireEvent.change(screen.getByLabelText('Choose Routine file'), {
       target: {
         files: [
@@ -488,7 +551,7 @@ describe('RoutineEditor', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Add routine' }))
     expect(screen.getByRole('heading', { name: 'Imported', level: 1 })).toBeInTheDocument()
     expect(saved).toHaveBeenCalledWith(expect.objectContaining({ name: 'Current' }))
-    expect(screen.getByRole('status')).toHaveTextContent('Routine imported.')
+    expect(screen.getByRole('dialog')).toHaveAttribute('data-state', 'closing')
   })
 
   it('cancels an import preview without replacing or saving the current Routine', async () => {
@@ -503,8 +566,10 @@ describe('RoutineEditor', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Edit routine name' }))
     fireEvent.change(screen.getByLabelText('Routine name'), { target: { value: 'Pending edit' } })
     fireEvent.click(screen.getByRole('button', { name: /^confirm$/i }))
+    openRoutines()
     fireEvent.click(screen.getByRole('button', { name: 'Import' }))
 
+    openRoutines()
     fireEvent.change(screen.getByLabelText('Choose Routine file'), {
       target: {
         files: [
@@ -517,8 +582,11 @@ describe('RoutineEditor', () => {
     })
 
     const preview = await screen.findByRole('dialog', { name: 'Import Routine' })
-    expect(within(preview).queryByRole('button', { name: 'Cancel' })).not.toBeInTheDocument()
-    fireEvent.mouseDown(preview.parentElement!)
+    expect(screen.getAllByRole('dialog')).toHaveLength(1)
+    expect(preview).toContainElement(document.activeElement as HTMLElement)
+    fireEvent.click(within(preview).getByRole('button', { name: 'Cancel' }))
+    expect(screen.getByRole('dialog', { name: 'Routines' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Import' })).toHaveFocus()
 
     expect(screen.getByRole('heading', { name: 'Pending edit' })).toBeInTheDocument()
     expect(saved).not.toHaveBeenCalled()
@@ -532,6 +600,7 @@ describe('RoutineEditor', () => {
       />,
     )
 
+    openRoutines()
     fireEvent.change(screen.getByLabelText('Choose Routine file'), {
       target: {
         files: [
@@ -556,6 +625,7 @@ describe('RoutineEditor', () => {
     const olderText = new Promise<string>((resolve) => (resolveOlder = resolve))
     const newerText = new Promise<string>((resolve) => (resolveNewer = resolve))
     render(<RoutineEditor repository={repository(createRoutine({ name: 'Current' }))} />)
+    openRoutines()
     const input = screen.getByLabelText('Choose Routine file')
 
     fireEvent.change(input, {
@@ -580,6 +650,7 @@ describe('RoutineEditor', () => {
       />,
     )
 
+    openRoutines()
     fireEvent.change(screen.getByLabelText('Choose Routine file'), {
       target: {
         files: [{ size: 10, text: () => Promise.resolve('{invalid') }],
@@ -608,6 +679,7 @@ describe('RoutineEditor', () => {
     fireEvent.change(screen.getByLabelText('Routine name'), { target: { value: 'Pending edit' } })
     fireEvent.click(screen.getByRole('button', { name: /^confirm$/i }))
 
+    openRoutines()
     fireEvent.change(screen.getByLabelText('Choose Routine file'), {
       target: {
         files: [
@@ -648,6 +720,7 @@ describe('RoutineEditor', () => {
     fireEvent.click(screen.getByRole('button', { name: /^confirm$/i }))
 
     const imported = createRoutine({ name: 'Imported' })
+    openRoutines()
     fireEvent.change(screen.getByLabelText('Choose Routine file'), {
       target: {
         files: [
@@ -679,11 +752,14 @@ describe('RoutineEditor', () => {
     const click = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => undefined)
     render(<RoutineEditor repository={repository(createRoutine({ name: 'Čello 👩‍🎤 / Warm-up' }))} />)
 
+    openRoutines()
     fireEvent.click(screen.getByRole('button', { name: 'Export' }))
 
     expect(createObjectURL).toHaveBeenCalledOnce()
     expect(click).toHaveBeenCalledOnce()
-    expect(screen.getByRole('status')).toHaveTextContent('Routine exported.')
+    const drawer = screen.getByRole('dialog', { name: 'Routines' })
+    expect(drawer).not.toHaveAttribute('data-state', 'closing')
+    expect(within(drawer).getByRole('status')).toHaveTextContent('Routine exported.')
     expect(revokeObjectURL).toHaveBeenCalledWith('blob:routine')
     click.mockRestore()
     vi.unstubAllGlobals()
@@ -701,11 +777,11 @@ describe('RoutineEditor', () => {
     render(<RoutineEditor repository={repository(createRoutine({ id: 'not-a-uuid' }))} />)
 
     expect(screen.getByRole('alert')).toHaveTextContent('This Routine contains invalid data.')
+    openRoutines()
     expect(screen.getByRole('button', { name: 'Export' })).toBeDisabled()
     expect(screen.getByRole('button', { name: 'Start session' })).toBeDisabled()
-    expect(screen.getByRole('button', { name: 'Export' })).toHaveAttribute(
-      'aria-describedby',
-      'routine-validation-error',
+    expect(screen.getByRole('button', { name: 'Export' })).toHaveAccessibleDescription(
+      /invalid data/i,
     )
   })
 
@@ -852,6 +928,7 @@ describe('empty Routine hints lifecycle', () => {
   it('shows hints for imported matching content with fresh identity', async () => {
     render(<RoutineEditor repository={repository(createRoutine({ name: 'Different' }))} />)
     expectNoHints()
+    openRoutines()
     fireEvent.change(screen.getByLabelText('Choose Routine file'), {
       target: {
         files: [

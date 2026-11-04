@@ -88,7 +88,7 @@ export function useRoutineFileActions({ routine, onImport }: UseRoutineFileActio
   }
 
   const confirmImport = () => {
-    if (!preview) return
+    if (!preview) return false
     try {
       if (!onImport(preview)) {
         setStatus(
@@ -96,10 +96,11 @@ export function useRoutineFileActions({ routine, onImport }: UseRoutineFileActio
             ? 'The Routine could not be saved. Your current Routine was kept. Retry Add routine after checking browser storage or deleting a routine.'
             : 'The Routine could not be saved. Check browser storage and retry Add routine.',
         )
-        return
+        return false
       }
       setPreview(null)
       setStatus('Routine imported.')
+      return true
     } catch (error) {
       console.warn('Routine import could not be saved', {
         error: error instanceof Error ? error.name : 'unknown',
@@ -110,6 +111,7 @@ export function useRoutineFileActions({ routine, onImport }: UseRoutineFileActio
           : 'The Routine could not be saved. Check browser storage and retry Add routine.',
       )
     }
+    return false
   }
 
   return {

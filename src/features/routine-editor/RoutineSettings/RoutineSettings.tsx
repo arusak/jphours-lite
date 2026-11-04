@@ -1,4 +1,4 @@
-import type { Ref } from 'react'
+import type { ReactNode, Ref } from 'react'
 import { useLayoutEffect, useRef, useState } from 'react'
 import { ChevronRightIcon, MetronomeSoundSheet, SettingsIcon } from '../../../components'
 import { practiceConfig } from '../../../config/practice-config'
@@ -7,6 +7,7 @@ import { Stepper } from '../Stepper/Stepper'
 import styles from './RoutineSettings.module.css'
 
 interface RoutineSettingsProps {
+  durationSummary?: ReactNode
   summaryButtonRef?: Ref<HTMLButtonElement>
   routine: Routine
   onUpdateSetting(key: 'quickRestDurationSec' | 'warningLeadTimeSec', delta: number): void
@@ -15,6 +16,7 @@ interface RoutineSettingsProps {
 }
 
 export function RoutineSettings({
+  durationSummary,
   summaryButtonRef,
   routine,
   onUpdateSetting,
@@ -41,6 +43,7 @@ export function RoutineSettings({
 
   return (
     <section className={styles.routineSettings} aria-label="Routine settings">
+      {durationSummary && <div className={styles.durationSummary}>{durationSummary}</div>}
       <div className={styles.surface} data-expanded={expanded}>
         <div className={styles.face} aria-hidden={expanded} inert={expanded}>
           <header className={styles.settingsHeader}>
@@ -58,7 +61,7 @@ export function RoutineSettings({
               >
                 <SettingsIcon aria-hidden="true" />
                 <span className={styles.summaryDetail}>
-                  Quick Rest {routine.quickRestDurationSec}s · Warning cue {warningLabel} ·{' '}
+                  Rest {routine.quickRestDurationSec}s · Cue {warningLabel} ·{' '}
                   {soundLabel} Click
                 </span>
                 <ChevronRightIcon aria-hidden="true" />

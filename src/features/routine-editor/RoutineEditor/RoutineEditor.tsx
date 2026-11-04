@@ -3,7 +3,6 @@ import { createBreak, createExercise } from '../../../domain/routine'
 import { AppUpdateBanner, PlayIcon } from '../../../components'
 import { EditorSheet } from '../EditorSheet/EditorSheet'
 import { RoutinePicker } from '../RoutinePicker/RoutinePicker'
-import { RoutineFileActions } from '../RoutineFileActions/RoutineFileActions'
 import { RoutineEntryList } from '../RoutineEntryList/RoutineEntryList'
 import { RoutineSettings } from '../RoutineSettings/RoutineSettings'
 import { useRoutineEditor } from '../hooks/useRoutineEditor'
@@ -59,34 +58,33 @@ export function RoutineEditor({ repository, onStartSession }: RoutineEditorProps
       <AppUpdateBanner onBeforeUpdate={editor.flush} />
       <div className={styles.headerWrapper}>
         <header className={styles.routineHeader}>
-          <h1 ref={editorHeading} id="routine-editor-title" tabIndex={-1}>
-            {routine.name.trim() || 'Practice routine'}
+          <h1
+            ref={editorHeading}
+            id="routine-editor-title"
+            tabIndex={-1}
+            aria-label={routine.name.trim() || 'Practice routine'}
+          >
+            <button
+              className={styles.routineTitle}
+              aria-label="Edit routine name"
+              onClick={() => editor.setSheet({ kind: 'routine', name: routine.name })}
+            >
+              {routine.name.trim() || 'Practice routine'}
+            </button>
           </h1>
-          <button
-            className={styles.routineEdit}
-            aria-label="Edit routine name"
-            onClick={() => editor.setSheet({ kind: 'routine', name: routine.name })}
-          >
-            ✎
-          </button>
-        </header>
-        <div className={styles.subMenu}>
-          <span
-            className={styles.routineTotal}
-            aria-label={`${total.approximate ? 'approximately ' : ''}${total.minutes} minutes`}
-          >
-            {total.approximate ? '≈' : ''}
-            {total.minutes} min
-          </span>
-          <RoutineFileActions
+          <RoutinePicker
             routine={routine}
             exportDisabled={!editor.valid}
-            exportErrorId={validationErrorId}
+            exportExplanation={
+              validation.form ||
+              validation.entries ||
+              validation.quickRestDurationSec ||
+              validation.warningLeadTimeSec ||
+              validation.metronomeSound ||
+              validation.alternateBeatTone ||
+              'Complete each routine entry.'
+            }
             onImport={editor.importRoutine}
-            importDisabled={editor.atRoutineLimit}
-            importErrorId="routine-count-limit"
-          />
-          <RoutinePicker
             routines={editor.routines}
             selectedRoutineId={routine.id}
             error={editor.error}
@@ -95,7 +93,27 @@ export function RoutineEditor({ repository, onStartSession }: RoutineEditorProps
             onDelete={editor.deleteRoutine}
             onRefresh={editor.refreshCollection}
           />
-        </div>
+        </header>
+        <RoutineSettings
+          durationSummary={
+            <span
+              className={styles.routineTotal}
+              aria-label={`${total.approximate ? 'approximately ' : ''}${total.minutes} minutes`}
+            >
+              {total.approximate ? '≈' : ''}
+              {total.minutes} min
+            </span>
+          }
+          summaryButtonRef={settingsRef}
+          routine={routine}
+          onUpdateSetting={editor.updateSetting}
+          onSoundChange={(sound) =>
+            editor.update((routine) => ({ ...routine, metronomeSound: sound }))
+          }
+          onAlternateBeatToneChange={(alternateBeatTone) =>
+            editor.update((routine) => ({ ...routine, alternateBeatTone }))
+          }
+        />
       </div>
       <div className={styles.contentWrapper}>
         {editor.atRoutineLimit && (
@@ -120,17 +138,6 @@ export function RoutineEditor({ repository, onStartSession }: RoutineEditorProps
             </button>
           </div>
         )}
-        <RoutineSettings
-          summaryButtonRef={settingsRef}
-          routine={routine}
-          onUpdateSetting={editor.updateSetting}
-          onSoundChange={(sound) =>
-            editor.update((routine) => ({ ...routine, metronomeSound: sound }))
-          }
-          onAlternateBeatToneChange={(alternateBeatTone) =>
-            editor.update((routine) => ({ ...routine, alternateBeatTone }))
-          }
-        />
         <RoutineEntryList
           editButtonRef={editExerciseRef}
           routine={routine}

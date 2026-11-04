@@ -207,3 +207,18 @@ export function HandDrawnArrow({ path, ...props }: IconProps & { path: string })
     </svg>
   )
 }
+
+export function MenuIcon(props: IconProps) {
+  return (
+    <svg
+      {...iconProps}
+      {...props}
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+    >
+      <path d="M4 6h16M4 12h16M4 18h16" />
+    </svg>
+  )
+}

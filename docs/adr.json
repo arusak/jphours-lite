@@ -11,6 +11,7 @@
     "docs/adr/0008-container-estimated-session-title.md": "Estimate the Current phase title from container width",
     "docs/adr/0009-multiple-local-routines.md": "Own multiple local Routines in one persisted collection",
     "docs/adr/0010-empty-collection-and-random-routines.md": "Keep an empty Routine collection and generate ordinary random Routines",
-    "docs/adr/0011-empty-routine-hints.md": "Derive passive empty Routine hints from saved entry content"
+    "docs/adr/0011-empty-routine-hints.md": "Derive passive empty Routine hints from saved entry content",
+    "docs/adr/0012-routine-header-drawer.md": "Keep Routine management in one drawer"
   }
 }

@@ -37,14 +37,14 @@ export function WelcomeScreen({
           <button className={styles.secondary} onClick={onCreateRandom}>
             Create random routine
           </button>
-          {/*<RoutineFileActions
+          <RoutineFileActions
             routine={null}
             exportDisabled
             importDisabled={importDisabled}
             importErrorId="routine-count-limit"
             importLabel="Import routine"
             onImport={onImport}
-          />*/}
+          />
         </div>
       </div>
     </main>

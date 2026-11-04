@@ -13,6 +13,9 @@ const records = [
 function setup(overrides: Partial<Parameters<typeof RoutinePicker>[0]> = {}) {
   const props = {
     routines: records,
+    routine: first,
+    onImport: vi.fn().mockReturnValue(true),
+    exportDisabled: false,
     selectedRoutineId: first.id,
     error: null,
     onSelect: vi.fn().mockReturnValue(true),
@@ -27,6 +30,15 @@ function setup(overrides: Partial<Parameters<typeof RoutinePicker>[0]> = {}) {
 }
 
 describe('RoutinePicker', () => {
+  it('keeps the drawer usable after file-picker cancellation', () => {
+    const { onCreate } = setup()
+    fireEvent.click(screen.getByRole('button', { name: 'Import' }))
+    fireEvent.change(screen.getByLabelText('Choose Routine file'), { target: { files: [] } })
+    expect(screen.getByRole('dialog', { name: 'Routines' })).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'New routine' }))
+    expect(onCreate).toHaveBeenCalledOnce()
+  })
+
   it('refreshes and displays routines by recency with totals and selected state', () => {
     const props = setup()
     expect(props.onRefresh).toHaveBeenCalledOnce()
@@ -107,11 +119,16 @@ describe('RoutinePicker', () => {
     const props = setup({ routines })
     const create = screen.getByRole('button', { name: 'New routine' })
     expect(create).toBeDisabled()
+    expect(screen.getByRole('button', { name: 'Import' })).toBeDisabled()
+    expect(screen.getByRole('button', { name: 'Import' })).toHaveAccessibleDescription(
+      /Delete a routine/,
+    )
     expect(create).toHaveAccessibleDescription(
       'You can save up to 100 routines. Delete a routine to add another.',
     )
     props.rerender(<RoutinePicker {...props} routines={routines.slice(1)} />)
     expect(screen.getByRole('button', { name: 'New routine' })).toBeEnabled()
+    expect(screen.getByRole('button', { name: 'Import' })).toBeEnabled()
   })
 
   it('preserves stored order for equal access timestamps', () => {
