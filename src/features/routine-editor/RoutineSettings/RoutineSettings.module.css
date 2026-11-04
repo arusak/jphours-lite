@@ -98,7 +98,7 @@
 
 .settingCopy small {
   color: var(--color-muted-foreground);
-  font-family: var(--font-body);
+  font-family: var(--font-sans);
   font-size: 0.75rem;
   line-height: 1.35;
 }

@@ -15,14 +15,19 @@
   --color-border: oklch(0.98 0.01 80 / 10%);
   --color-input: oklch(0.98 0.01 80 / 14%);
   --color-ring: oklch(0.81 0.145 74);
-  --font-body: "Geist", ui-sans-serif, system-ui, sans-serif;
-  --font-display: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --font-sans:
+    system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans", Ubuntu,
+    Cantarell, "Helvetica Neue", Arial, sans-serif;
+  --font-serif:
+    ui-serif, Georgia, Cambria, "Noto Serif", "Liberation Serif", "DejaVu Serif", "Times New Roman",
+    serif;
+  --font-handwriting:
+    "Segoe Print", "Bradley Hand", "Chalkboard SE", "Comic Sans MS", var(--font-serif);
   --radius-md: 0.775rem;
   --radius-xl: 1.15rem;
   --radius-2xl: 1.525rem;
   --radius-3xl: 2.025rem;
-  font: 16px/1.45 var(--font-body);
-  font-feature-settings: "ss01", "cv01";
+  font: 16px/1.45 var(--font-sans);
   color: var(--color-foreground);
   background: var(--color-background);
   font-synthesis: none;
@@ -96,7 +101,7 @@ h1,
 h2,
 h3,
 button {
-  font-family: var(--font-display);
+  font-family: var(--font-sans);
 }
 
 #root::before {

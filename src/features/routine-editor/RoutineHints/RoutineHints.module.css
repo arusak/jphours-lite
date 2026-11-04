@@ -12,12 +12,27 @@
 .label {
   width: max-content;
   position: absolute;
-  font-size: 0.8rem;
+  font-size: 1.1rem;
   line-height: 24px;
   text-align: center;
   white-space: nowrap;
   text-shadow: 0 1px 3px var(--color-background);
-  border-bottom: thin dashed;
+  font-family: var(--font-handwriting);
+  font-style: italic;
+}
+.label::after {
+  content: "";
+  position: absolute;
+  inset: auto -3px -7px;
+  height: 9px;
+  background: currentColor;
+  opacity: 0.85;
+  transform: rotate(-1deg);
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 10' preserveAspectRatio='none'%3E%3Cpath d='M2 6 C12 0 22 10 34 5 S55 2 67 6 S88 1 101 5 S122 8 135 4 S157 8 178 3' fill='none' stroke='currentColor' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E")
+    center / 100% 100% no-repeat;
+}
+.overlay > div:nth-child(even) .label::after {
+  transform: rotate(1deg) scaleX(-1);
 }
 .arrow {
   position: absolute;

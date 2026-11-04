@@ -34,7 +34,7 @@
   border-radius: var(--radius-md);
   color: var(--color-primary);
   background: oklch(0.81 0.145 74 / 15%);
-  font: 700 0.6875rem var(--font-display);
+  font: 700 0.6875rem var(--font-sans);
 }
 
 .exerciseTitleRow h3 {

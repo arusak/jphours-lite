@@ -1,6 +1,6 @@
 .ringTime {
   color: var(--color-foreground);
-  font: 700 2.625rem/1 var(--font-display);
+  font: 700 2.625rem/1 var(--font-sans);
   font-variant-numeric: tabular-nums;
 }
 
@@ -44,7 +44,7 @@
 .ringTempoControl > strong {
   display: grid;
   color: var(--color-primary);
-  font: 700 3.75rem/0.8 var(--font-display);
+  font: 700 3.75rem/0.8 var(--font-sans);
   font-variant-numeric: tabular-nums;
   padding: 1.25rem 0 0;
 }
@@ -52,7 +52,7 @@
 .ringTempoControl small {
   margin-top: 0.625rem;
   color: var(--color-muted-foreground);
-  font: 600 0.625rem/1 var(--font-body);
+  font: 600 0.625rem/1 var(--font-sans);
   letter-spacing: 0.12em;
 }
 
