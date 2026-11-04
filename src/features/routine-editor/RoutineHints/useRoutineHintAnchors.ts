@@ -58,7 +58,7 @@ export function useRoutineHintAnchors(targets: RoutineHintTargets) {
         if (tight && cardTop - settingsBottom < 88) continue
         const roomy = !!cardBottom && addTop - cardBottom >= 240
         const openCenter = ((cardBottom ?? rect.bottom) + addTop) / 2
-        const top = roomy
+        let top = roomy
           ? openCenter + { settings: -60, edit: -12, add: 60 }[key]
           : tight
             ? settingsBottom + 4 + { settings: 0, edit: 1, add: 2 }[key] * 28
@@ -68,7 +68,7 @@ export function useRoutineHintAnchors(targets: RoutineHintTargets) {
                 ? rect.bottom + 4
                 : (cardBottom || rect.bottom) + 12
         if (top < 8 || top + 24 > viewportHeight) continue
-        const labelLeft = roomy
+        let labelLeft = roomy
           ? Math.max(
               left,
               Math.min(
@@ -85,6 +85,16 @@ export function useRoutineHintAnchors(targets: RoutineHintTargets) {
         const targetRect = iconRect?.width ? iconRect : rect
         const x = targetRect.left + targetRect.width / 2
         const y = key === 'add' ? rect.top - 3 : targetRect.bottom + 3
+        // Bound the reach even when the empty space grows with viewport height.
+        if (roomy)
+          labelLeft = Math.max(
+            left,
+            Math.min(
+              right - width,
+              Math.max(x - 100 - width / 2, Math.min(x + 100 - width / 2, labelLeft)),
+            ),
+          )
+        top = y < top ? Math.min(top, y + 160) : Math.max(top, y - 160 - 24)
         const startX = labelLeft + labelWidth / 2
         const startY = y < top ? top : top + 24
         const dy = y - startY

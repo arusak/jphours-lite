@@ -106,10 +106,28 @@ it('keeps compact annotations, refreshes on resize/scroll, omits invisible targe
   addTop = 1000
   act(() => window.dispatchEvent(new Event('resize')))
   const centered = result.current
-  expect(centered.map(({ top }) => top)).toEqual([590, 638, 710])
+  expect(centered.map(({ top }) => top)).toEqual([353, 443, 813])
   for (const label of centered) {
     expect(label.left + label.width / 2).toBeGreaterThanOrEqual(136)
     expect(label.left + label.width / 2).toBeLessThanOrEqual(184)
+  }
+  // The control polygon bounds the curve length, including its curvature.
+  for (const height of [1200, 2400, 4800]) {
+    vi.stubGlobal('innerHeight', height)
+    addTop = height - 100
+    act(() => window.dispatchEvent(new Event('resize')))
+    for (const anchor of result.current) {
+      const points = anchor.path.match(/-?\d+(?:\.\d+)?/g)!.map(Number)
+      let upperLength = 0
+      for (let index = 0; index < 6; index += 2) {
+        upperLength += Math.hypot(
+          points[index + 2]! - points[index]!,
+          points[index + 3]! - points[index + 1]!,
+        )
+      }
+      expect(upperLength).toBeLessThanOrEqual(240)
+      expect(points[0]).toBe(anchor.left + anchor.width / 2)
+    }
   }
   editTop = -50
   act(() => resize([], {} as ResizeObserver))
