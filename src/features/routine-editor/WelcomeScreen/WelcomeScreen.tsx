@@ -24,6 +24,10 @@ export function WelcomeScreen({
         <h1 ref={heading} id="welcome-title" tabIndex={-1}>
           Welcome! Make time for your practice.
         </h1>
+        <p>
+          This app will help you practice rhythm by guiding you through timed, metronome-paced
+          exercises.
+        </p>
         <p>Start with a simple Routine, or let us make one for you.</p>
         {error && <p role="alert">{error}</p>}
         <div className={styles.actions}>
@@ -33,16 +37,15 @@ export function WelcomeScreen({
           <button className={styles.secondary} onClick={onCreateRandom}>
             Create random routine
           </button>
-          <RoutineFileActions
+          {/*<RoutineFileActions
             routine={null}
             exportDisabled
             importDisabled={importDisabled}
             importErrorId="routine-count-limit"
             importLabel="Import routine"
             onImport={onImport}
-          />
+          />*/}
         </div>
-        <p className={styles.helper}>20 minutes of exercises + 20 seconds of Quick Rest.</p>
       </div>
     </main>
   )

@@ -19,10 +19,12 @@
   font-size: 2rem;
   line-height: 1.1;
   letter-spacing: -0.03em;
+  text-wrap: balance;
 }
 
 .content p {
   margin: 0;
+  text-wrap: pretty;
 }
 
 .actions {

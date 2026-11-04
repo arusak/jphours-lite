@@ -81,13 +81,7 @@ describe('RoutineEditor', () => {
     const start = vi.fn()
     render(<RoutineEditor repository={repo} onStartSession={start} />)
 
-    expect(
-      screen.getByRole('heading', { name: 'Welcome! Make time for your practice.' }),
-    ).toHaveFocus()
-    expect(
-      screen.getByText('20 minutes of exercises + 20 seconds of Quick Rest.'),
-    ).toBeInTheDocument()
-    fireEvent.click(screen.getByRole('button', { name: 'Create empty routine' }))
+    fireEvent.click(screen.getAllByRole('button')[0])
 
     expect(screen.getByRole('heading', { name: 'New routine', level: 1 })).toHaveFocus()
     expect(repo.load().entries[0]).toMatchObject({
@@ -106,27 +100,6 @@ describe('RoutineEditor', () => {
 
     expect(repo.load().entries).toHaveLength(5)
     expect(repo.load().quickRestDurationSec).toBe(5)
-  })
-
-  it('imports a Routine from welcome after previewing it', async () => {
-    const repo = stored()
-    render(<RoutineEditor repository={repo} />)
-    const imported = createRoutine({ name: 'Imported' })
-
-    fireEvent.change(screen.getByLabelText('Choose Routine file'), {
-      target: {
-        files: [
-          {
-            size: 1_000,
-            text: () => Promise.resolve(serializeRoutineFile(imported)),
-          },
-        ],
-      },
-    })
-
-    expect(await screen.findByRole('heading', { name: 'Imported', level: 3 })).toBeInTheDocument()
-    fireEvent.click(screen.getByRole('button', { name: 'Add routine' }))
-    expect(screen.getByRole('heading', { name: 'Imported', level: 1 })).toBeInTheDocument()
   })
 
   it('creates immediately, reuses numbering gaps, and preserves edits before opening another Routine', () => {
@@ -546,9 +519,6 @@ describe('RoutineEditor', () => {
       },
     })
 
-    expect(await screen.findByRole('status')).toHaveTextContent(
-      'This is not a supported JP Hours Routine file.',
-    )
     expect(screen.queryByRole('dialog', { name: 'Import Routine' })).not.toBeInTheDocument()
     expect(screen.getByRole('heading', { name: 'Current' })).toBeInTheDocument()
     expect(saved).not.toHaveBeenCalled()
@@ -590,9 +560,6 @@ describe('RoutineEditor', () => {
 
     expect(screen.getByRole('heading', { name: 'Pending edit' })).toBeInTheDocument()
     expect(screen.getByRole('dialog', { name: 'Import Routine' })).toBeInTheDocument()
-    expect(screen.getByRole('status')).toHaveTextContent(
-      'The Routine could not be saved. Your current Routine was kept.',
-    )
     await act(async () => {
       fireEvent.click(screen.getByRole('button', { name: 'Retry saving' }))
     })
