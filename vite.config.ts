@@ -17,8 +17,8 @@ export default defineConfig({
         short_name: 'JPHours',
         description: 'Build and run focused rhythm practice routines.',
         display: 'standalone',
-        background_color: '#140B0A',
-        theme_color: '#F7B84B',
+        background_color: '#1b130d',
+        theme_color: '#1b130d',
         icons: [
           {
             src: 'assets/manifest-icon-192.png',
