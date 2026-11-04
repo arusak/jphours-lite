@@ -94,7 +94,7 @@ describe('SessionPlayer', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Increase tempo' }))
     expect(screen.getByText('91', { selector: 'strong' })).toBeInTheDocument()
     expect(audio.updateMetronomeTempo).toHaveBeenCalledWith(91)
-    fireEvent.click(screen.getByRole('button', { name: 'Save tempo' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Confirm tempo' }))
     expect(onSaveTempo).toHaveBeenCalledWith('scales', 91)
   })
 

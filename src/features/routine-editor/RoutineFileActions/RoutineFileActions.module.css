@@ -52,8 +52,7 @@
   color: var(--color-muted-foreground);
 }
 
-.replace,
-.cancel {
+.replace {
   width: 100%;
   min-height: 3rem;
   margin-top: 0.625rem;
@@ -65,9 +64,4 @@
 .replace {
   color: var(--color-primary-foreground);
   background: var(--color-primary);
-}
-
-.cancel {
-  border: 0.0625rem solid var(--color-border);
-  background: var(--color-secondary);
 }

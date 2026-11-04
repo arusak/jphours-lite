@@ -1,3 +1,9 @@
+input.exerciseName {
+  min-height: 2.625rem;
+  text-align: center;
+  font-size: 115%;
+}
+
 .editorStepper .controls {
   display: grid;
   grid-template-columns: 2rem minmax(0, 1fr) 2rem;
@@ -22,17 +28,6 @@
 .editorAlert {
   color: var(--color-destructive);
   font-size: 0.75rem;
-}
-
-.secondaryAction {
-  width: 100%;
-  min-height: 3rem;
-  padding: 0.75rem 1.125rem;
-  border: 0.0625rem solid var(--color-border);
-  border-radius: var(--radius-2xl);
-  color: var(--color-secondary-foreground);
-  background: var(--color-secondary);
-  font-weight: 600;
 }
 
 .sheetActions {

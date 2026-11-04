@@ -5,6 +5,7 @@ interface BottomSheetProps {
   open: boolean
   title: string
   children: ReactNode
+  initialFocus?: 'control' | 'dialog'
   onClose(): void
   onAfterClose?(): void
 }
@@ -19,7 +20,14 @@ function prefersReducedMotion() {
   return window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false
 }
 
-export function BottomSheet({ open, title, children, onClose, onAfterClose }: BottomSheetProps) {
+export function BottomSheet({
+  open,
+  title,
+  children,
+  onClose,
+  onAfterClose,
+  initialFocus = 'control',
+}: BottomSheetProps) {
   const [presence, setPresence] = useState<Presence>(open ? 'opening' : 'closed')
   const sheet = useRef<HTMLDivElement>(null)
   const onCloseRef = useRef(onClose)
@@ -83,7 +91,11 @@ export function BottomSheet({ open, title, children, onClose, onAfterClose }: Bo
   useLayoutEffect(() => {
     if (presence === 'closed') return
     document.body.classList.add('sheet-open')
-    sheet.current?.querySelector<HTMLElement>(focusable)?.focus()
+    const target =
+      initialFocus === 'dialog'
+        ? sheet.current
+        : sheet.current?.querySelector<HTMLElement>(focusable)
+    target?.focus()
     return () => {
       document.body.classList.remove('sheet-open')
       opener.current?.focus()
@@ -107,7 +119,10 @@ export function BottomSheet({ open, title, children, onClose, onAfterClose }: Bo
       if (!items.length) return
       const firstItem = items[0]
       const lastItem = items.at(-1)!
-      if (event.shiftKey && document.activeElement === firstItem) {
+      if (
+        event.shiftKey &&
+        (document.activeElement === firstItem || document.activeElement === sheet.current)
+      ) {
         event.preventDefault()
         lastItem.focus()
       } else if (!event.shiftKey && document.activeElement === lastItem) {
@@ -139,6 +154,7 @@ export function BottomSheet({ open, title, children, onClose, onAfterClose }: Bo
         className={styles.bottomSheet}
         data-state={presence}
         role="dialog"
+        tabIndex={-1}
         aria-modal="true"
         aria-labelledby={titleId}
         onAnimationEnd={(event) => {

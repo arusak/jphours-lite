@@ -47,7 +47,12 @@ export function EditorSheet({ sheet, submitted, onChange, onSave, onCancel }: Ed
         ? `Add ${entry?.kind ?? 'entry'}`
         : `Edit ${entry?.kind ?? 'entry'}`
   return (
-    <BottomSheet open={sheet !== null} title={title} onClose={onCancel}>
+    <BottomSheet
+      open={sheet !== null}
+      title={title}
+      onClose={onCancel}
+      initialFocus={entry?.kind === 'exercise' ? 'dialog' : 'control'}
+    >
       {sheet?.kind === 'routine' ? (
         <label>
           Routine name
@@ -66,6 +71,11 @@ export function EditorSheet({ sheet, submitted, onChange, onSave, onCancel }: Ed
               <label>
                 Exercise name
                 <input
+                  className={styles.exerciseName}
+                  onContextMenu={(event) => event.preventDefault()}
+                  onFocus={(event) =>
+                    event.currentTarget.setSelectionRange(0, event.currentTarget.value.length)
+                  }
                   value={entry!.title}
                   maxLength={EXERCISE_NAME_MAX_LENGTH}
                   aria-invalid={Boolean(errors.title)}
@@ -169,10 +179,7 @@ export function EditorSheet({ sheet, submitted, onChange, onSave, onCancel }: Ed
       ) : null}
       <div className={styles.sheetActions}>
         <button className={sharedStyles.primaryAction} onClick={onSave}>
-          Save
-        </button>
-        <button className={styles.secondaryAction} onClick={onCancel}>
-          Cancel
+          Confirm
         </button>
       </div>
     </BottomSheet>

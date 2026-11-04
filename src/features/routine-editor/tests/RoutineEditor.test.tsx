@@ -77,6 +77,23 @@ describe('RoutineEditor', () => {
     return repo
   }
 
+  it.each(['add', 'edit'])('focuses the dialog instead of the Exercise name on %s', (action) => {
+    render(<RoutineEditor repository={repository(createBlankRoutine('Blank'))} />)
+    fireEvent.click(
+      screen.getByRole('button', {
+        name: action === 'add' ? '＋ Add exercise' : 'Edit Practice',
+      }),
+    )
+    expect(screen.getByRole('dialog')).toHaveFocus()
+    const name = screen.getByLabelText<HTMLInputElement>('Exercise name')
+    expect(name).not.toHaveFocus()
+    name.focus()
+    expect(name).toHaveFocus()
+    expect(name.selectionStart).toBe(0)
+    expect(name.selectionEnd).toBe(name.value.length)
+    expect(fireEvent.contextMenu(name)).toBe(false)
+  })
+
   it('shows welcome for an empty collection and creates the minimal Routine without starting a Session', () => {
     const repo = stored()
     const start = vi.fn()
@@ -110,7 +127,7 @@ describe('RoutineEditor', () => {
     render(<RoutineEditor repository={repo} />)
     fireEvent.click(screen.getByRole('button', { name: 'Edit routine name' }))
     fireEvent.change(screen.getByLabelText('Routine name'), { target: { value: 'Edited' } })
-    fireEvent.click(screen.getByRole('button', { name: /^save$/i }))
+    fireEvent.click(screen.getByRole('button', { name: /^confirm$/i }))
     fireEvent.click(screen.getByRole('button', { name: 'Routines' }))
     fireEvent.click(screen.getByRole('button', { name: 'New routine' }))
     expect(screen.getByRole('heading', { name: 'New routine 2', level: 1 })).toBeInTheDocument()
@@ -166,7 +183,7 @@ describe('RoutineEditor', () => {
     render(<RoutineEditor repository={repo} />)
     fireEvent.click(screen.getByRole('button', { name: 'Edit routine name' }))
     fireEvent.change(screen.getByLabelText('Routine name'), { target: { value: 'Pending second' } })
-    fireEvent.click(screen.getByRole('button', { name: /^save$/i }))
+    fireEvent.click(screen.getByRole('button', { name: /^confirm$/i }))
     fireEvent.click(screen.getByRole('button', { name: 'Routines' }))
     fireEvent.click(screen.getByRole('button', { name: 'Open routine First' }))
     act(() => vi.advanceTimersByTime(500))
@@ -210,7 +227,7 @@ describe('RoutineEditor', () => {
     render(<RoutineEditor repository={repo} onStartSession={start} />)
     fireEvent.click(screen.getByRole('button', { name: 'Edit routine name' }))
     fireEvent.change(screen.getByLabelText('Routine name'), { target: { value: 'Pending' } })
-    fireEvent.click(screen.getByRole('button', { name: /^save$/i }))
+    fireEvent.click(screen.getByRole('button', { name: /^confirm$/i }))
     act(() => vi.advanceTimersByTime(300))
     expect(screen.getByRole('alert')).toHaveTextContent('Check browser storage and retry')
     fireEvent.click(screen.getByRole('button', { name: 'Start session' }))
@@ -255,7 +272,7 @@ describe('RoutineEditor', () => {
       />,
     )
     fireEvent.click(screen.getByRole('button', { name: /add break/i }))
-    fireEvent.click(screen.getByRole('button', { name: /^save$/i }))
+    fireEvent.click(screen.getByRole('button', { name: /^confirm$/i }))
     expect(screen.getByText('Break')).toBeInTheDocument()
     expect(screen.getByText('BPM')).toHaveClass('small-caps')
     fireEvent.click(screen.getByRole('button', { name: 'Delete Scales' }))
@@ -275,7 +292,7 @@ describe('RoutineEditor', () => {
       .find((element) => element.closest('[role="dialog"]'))
     expect(tempoUnit).toHaveClass('small-caps')
     fireEvent.change(screen.getAllByRole('spinbutton')[1], { target: { value: '6' } })
-    fireEvent.click(screen.getByRole('button', { name: /^save$/i }))
+    fireEvent.click(screen.getByRole('button', { name: /^confirm$/i }))
     expect(screen.getByLabelText('6 minutes')).toBeInTheDocument()
   })
 
@@ -484,7 +501,7 @@ describe('RoutineEditor', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Edit routine name' }))
     fireEvent.change(screen.getByLabelText('Routine name'), { target: { value: 'Pending edit' } })
-    fireEvent.click(screen.getByRole('button', { name: /^save$/i }))
+    fireEvent.click(screen.getByRole('button', { name: /^confirm$/i }))
     fireEvent.click(screen.getByRole('button', { name: 'Import' }))
 
     fireEvent.change(screen.getByLabelText('Choose Routine file'), {
@@ -499,7 +516,8 @@ describe('RoutineEditor', () => {
     })
 
     const preview = await screen.findByRole('dialog', { name: 'Import Routine' })
-    fireEvent.click(within(preview).getByRole('button', { name: 'Cancel' }))
+    expect(within(preview).queryByRole('button', { name: 'Cancel' })).not.toBeInTheDocument()
+    fireEvent.mouseDown(preview.parentElement!)
 
     expect(screen.getByRole('heading', { name: 'Pending edit' })).toBeInTheDocument()
     expect(saved).not.toHaveBeenCalled()
@@ -587,7 +605,7 @@ describe('RoutineEditor', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Edit routine name' }))
     fireEvent.change(screen.getByLabelText('Routine name'), { target: { value: 'Pending edit' } })
-    fireEvent.click(screen.getByRole('button', { name: /^save$/i }))
+    fireEvent.click(screen.getByRole('button', { name: /^confirm$/i }))
 
     fireEvent.change(screen.getByLabelText('Choose Routine file'), {
       target: {
@@ -626,7 +644,7 @@ describe('RoutineEditor', () => {
     )
     fireEvent.click(screen.getByRole('button', { name: 'Edit routine name' }))
     fireEvent.change(screen.getByLabelText('Routine name'), { target: { value: 'Pending edit' } })
-    fireEvent.click(screen.getByRole('button', { name: /^save$/i }))
+    fireEvent.click(screen.getByRole('button', { name: /^confirm$/i }))
 
     const imported = createRoutine({ name: 'Imported' })
     fireEvent.change(screen.getByLabelText('Choose Routine file'), {
@@ -775,7 +793,7 @@ describe('empty Routine hints lifecycle', () => {
         target: { value: field === 'title' ? 'Scales' : field === 'tempo' ? '110' : '6' },
       })
       expectHints()
-      fireEvent.click(screen.getByRole('button', { name: 'Save' }))
+      fireEvent.click(screen.getByRole('button', { name: 'Confirm' }))
       expectNoHints()
       fireEvent.click(
         screen.getByRole('button', { name: field === 'title' ? 'Edit Scales' : 'Edit Practice' }),
@@ -786,7 +804,7 @@ describe('empty Routine hints lifecycle', () => {
           : screen.getAllByRole('spinbutton')[field === 'tempo' ? 0 : 1],
         { target: { value: field === 'title' ? 'Practice' : field === 'tempo' ? '100' : '5' } },
       )
-      fireEvent.click(screen.getByRole('button', { name: 'Save' }))
+      fireEvent.click(screen.getByRole('button', { name: 'Confirm' }))
       expectHints()
     },
   )
@@ -800,10 +818,11 @@ describe('empty Routine hints lifecycle', () => {
       })
       fireEvent.click(add)
       expect(screen.getByRole('dialog', { name: `Add ${kind}` })).toBeInTheDocument()
-      fireEvent.click(screen.getByRole('button', { name: 'Cancel' }))
+      expect(screen.queryByRole('button', { name: 'Cancel' })).not.toBeInTheDocument()
+      fireEvent.mouseDown(screen.getByRole('dialog').parentElement!)
       expectHints()
       fireEvent.click(add)
-      fireEvent.click(screen.getByRole('button', { name: 'Save' }))
+      fireEvent.click(screen.getByRole('button', { name: 'Confirm' }))
       expectNoHints()
     },
   )
@@ -813,11 +832,12 @@ describe('empty Routine hints lifecycle', () => {
     expectHints()
     fireEvent.click(screen.getByRole('button', { name: 'Edit Practice' }))
     fireEvent.change(screen.getByLabelText('Exercise name'), { target: { value: 'Cancelled' } })
-    fireEvent.click(screen.getByRole('button', { name: 'Cancel' }))
+    expect(screen.queryByRole('button', { name: 'Cancel' })).not.toBeInTheDocument()
+    fireEvent.mouseDown(screen.getByRole('dialog').parentElement!)
     expectHints()
     fireEvent.click(screen.getByRole('button', { name: 'Edit routine name' }))
     fireEvent.change(screen.getByLabelText('Routine name'), { target: { value: 'Renamed' } })
-    fireEvent.click(screen.getByRole('button', { name: 'Save' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Confirm' }))
     expectHints()
     fireEvent.click(screen.getByRole('button', { name: /quick rest.*warning cue/i }))
     fireEvent.click(screen.getByRole('button', { name: 'Increase Quick Rest' }))

@@ -163,10 +163,10 @@ export function SessionTimer({
           </button>
           <button
             className={cn(styles.ringSave, tempo === savedTempo && styles.hidden)}
-            aria-label="Save tempo"
+            aria-label="Confirm tempo"
             onClick={onSaveTempo}
           >
-            Save
+            Confirm
           </button>
         </div>
       ) : (

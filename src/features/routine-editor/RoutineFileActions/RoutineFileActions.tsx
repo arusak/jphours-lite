@@ -83,9 +83,6 @@ export function RoutineFileActions({
             <button className={styles.replace} onClick={actions.confirmImport}>
               Add routine
             </button>
-            <button className={styles.cancel} onClick={actions.cancelImport}>
-              Cancel
-            </button>
           </div>
         )}
       </BottomSheet>
