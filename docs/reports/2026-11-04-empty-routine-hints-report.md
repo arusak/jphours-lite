@@ -26,3 +26,7 @@ No dependencies, persisted onboarding flags, storage formats, or Session behavio
 ## Dense-layout deviation
 
 When there is insufficient safe space below the card or between settings and the card, annotations temporarily hide even if their controls are visible. This avoids covering Exercise content or controls, but deviates from the plan’s requirement to annotate every visible target. Validate the viewport matrix before treating visual acceptance as complete. Final review found no remaining concrete code blocker with this limitation recorded.
+
+## Screenshot follow-up
+
+The supplied screenshot exposed curling, crossing arrows that DOM lifecycle checks did not catch. Replaced overshooting control points with bounded curves, oriented arrowheads along the final tangent, moved settings copy next to its own control, and targeted the edit button’s visual center. Added a regression assertion that control points stay between curve endpoints. Focused editor/geometry tests and type checking were rerun. Actual browser rendering remains unverified.

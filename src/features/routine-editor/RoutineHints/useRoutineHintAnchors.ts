@@ -60,22 +60,30 @@ export function useRoutineHintAnchors(targets: RoutineHintTargets) {
           ? settingsBottom + 4 + { settings: 0, edit: 1, add: 2 }[key] * 28
           : key === 'add'
             ? rect.top - (compact ? 32 : 48)
-            : (cardBottom || rect.bottom) +
-              (key === 'settings' ? (compact ? 4 : 12) : compact ? 32 : 44)
+            : key === 'settings'
+              ? rect.bottom + 4
+              : (cardBottom || rect.bottom) + 12
         if (top < 8 || top + 24 > viewportHeight) continue
         const labelLeft = key === 'add' || tight ? left : Math.max(left, right - width - 24)
         const labelWidth = width
-        const x =
+        const x = key === 'edit' ? rect.left - 3 : rect.left + rect.width / 2
+        const y =
           key === 'add'
-            ? rect.left + rect.width / 2
-            : rect.right - (key === 'settings' ? 12 : rect.width / 2)
-        const y = key === 'add' ? rect.top - 3 : rect.bottom + 3
-        const startX = key === 'add' ? labelLeft + labelWidth / 2 : labelLeft + labelWidth
-        const startY = top + 24
-        const bend = Math.min(right, Math.max(startX, x) + 18)
-        const headY = y + (key === 'add' ? -6 : 6)
-        const approachY = y + (key === 'add' ? -20 : 20)
-        const path = `M ${startX} ${startY} C ${bend} ${startY + 8}, ${bend} ${approachY}, ${x} ${y} M ${x - 4} ${headY} L ${x} ${y} L ${x + 5} ${headY}`
+            ? rect.top - 3
+            : key === 'edit'
+              ? rect.top + rect.height / 2
+              : rect.bottom + 3
+        const startX = Math.max(labelLeft + 8, Math.min(labelLeft + labelWidth - 8, x - 24))
+        const startY = y < top ? top : top + 24
+        const dx = x - startX
+        const dy = y - startY
+        const controlX = startX + dx * 0.65
+        const controlY = startY + dy * 0.65
+        // Both control points stay between the label and target: no loops or overshoot.
+        const angle = Math.atan2(y - controlY, x - controlX)
+        const head = (offset: number) =>
+          `${x - 5 * Math.cos(angle + offset)} ${y - 5 * Math.sin(angle + offset)}`
+        const path = `M ${startX} ${startY} C ${controlX} ${startY}, ${controlX} ${controlY}, ${x} ${y} M ${head(-0.55)} L ${x} ${y} L ${head(0.55)}`
         next.push({ key, left: labelLeft, top, width: labelWidth, path })
       }
       setAnchors(next)

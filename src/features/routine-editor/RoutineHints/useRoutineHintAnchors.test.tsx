@@ -54,7 +54,15 @@ it('keeps compact annotations, refreshes on resize/scroll, omits invisible targe
   }
   const { result, unmount } = renderHook(() => useRoutineHintAnchors(targets))
   expect(result.current.map(({ key }) => key)).toEqual(['settings', 'edit', 'add'])
-  expect(result.current.map(({ top }) => top)).toEqual([304, 332, 368])
+  expect(result.current.map(({ top }) => top)).toEqual([194, 312, 368])
+  // Curves must approach their target without overshooting and curling back.
+  for (const { path } of result.current) {
+    const [sx, sy, cx1, cy1, cx2, cy2, ex, ey] = path.match(/-?\d+(?:\.\d+)?/g)!.map(Number)
+    for (const x of [cx1!, cx2!]) expect(x).toBeGreaterThanOrEqual(Math.min(sx!, ex!))
+    for (const x of [cx1!, cx2!]) expect(x).toBeLessThanOrEqual(Math.max(sx!, ex!))
+    for (const y of [cy1!, cy2!]) expect(y).toBeGreaterThanOrEqual(Math.min(sy!, ey!))
+    for (const y of [cy1!, cy2!]) expect(y).toBeLessThanOrEqual(Math.max(sy!, ey!))
+  }
   editTop = -50
   act(() => window.dispatchEvent(new Event('scroll')))
   expect(result.current.map(({ key }) => key)).not.toContain('edit')
