@@ -7,6 +7,8 @@ import { RoutineFileActions } from '../RoutineFileActions/RoutineFileActions'
 import { RoutineEntryList } from '../RoutineEntryList/RoutineEntryList'
 import { RoutineSettings } from '../RoutineSettings/RoutineSettings'
 import { useRoutineEditor } from '../hooks/useRoutineEditor'
+import { RoutineHints } from '../RoutineHints/RoutineHints'
+import { hasBlankRoutineEntries } from '../routine-creation'
 import { WelcomeScreen } from '../WelcomeScreen/WelcomeScreen'
 import type { RoutineEditorProps } from '../types'
 import sharedStyles from '../shared.module.css'
@@ -19,6 +21,10 @@ const validationErrorId = 'routine-validation-error'
 
 export function RoutineEditor({ repository, onStartSession }: RoutineEditorProps) {
   const editor = useRoutineEditor(repository)
+  const containerRef = useRef<HTMLElement>(null)
+  const addExerciseRef = useRef<HTMLButtonElement>(null)
+  const settingsRef = useRef<HTMLButtonElement>(null)
+  const editExerciseRef = useRef<HTMLButtonElement>(null)
   const editorHeading = useRef<HTMLHeadingElement>(null)
   const wasWelcome = useRef(editor.routine === null)
   useEffect(() => {
@@ -45,7 +51,11 @@ export function RoutineEditor({ repository, onStartSession }: RoutineEditorProps
   const total = editor.total!
   const validation = editor.validation!
   return (
-    <section className={styles.routineEditor} aria-labelledby="routine-editor-title">
+    <section
+      ref={containerRef}
+      className={styles.routineEditor}
+      aria-labelledby="routine-editor-title"
+    >
       <AppUpdateBanner onBeforeUpdate={editor.flush} />
       <div className={styles.headerWrapper}>
         <header className={styles.routineHeader}>
@@ -111,6 +121,7 @@ export function RoutineEditor({ repository, onStartSession }: RoutineEditorProps
           </div>
         )}
         <RoutineSettings
+          summaryButtonRef={settingsRef}
           routine={routine}
           onUpdateSetting={editor.updateSetting}
           onSoundChange={(sound) =>
@@ -121,6 +132,7 @@ export function RoutineEditor({ repository, onStartSession }: RoutineEditorProps
           }
         />
         <RoutineEntryList
+          editButtonRef={editExerciseRef}
           routine={routine}
           onEdit={(index) =>
             editor.setSheet({ kind: 'entry', entry: { ...routine.entries[index]! }, index })
@@ -149,6 +161,7 @@ export function RoutineEditor({ repository, onStartSession }: RoutineEditorProps
       <footer className={styles.editorFooter}>
         <div className={styles.entryActions}>
           <button
+            ref={addExerciseRef}
             className={styles.addExercise}
             disabled={editor.atEntryLimit}
             aria-describedby={editor.atEntryLimit ? 'routine-entry-limit' : undefined}
@@ -182,6 +195,14 @@ export function RoutineEditor({ repository, onStartSession }: RoutineEditorProps
           Start session
         </button>
       </footer>
+      {hasBlankRoutineEntries(routine.entries) && (
+        <RoutineHints
+          containerRef={containerRef}
+          addExerciseRef={addExerciseRef}
+          settingsRef={settingsRef}
+          editExerciseRef={editExerciseRef}
+        />
+      )}
       <EditorSheet
         sheet={editor.sheet}
         submitted={editor.submitted}

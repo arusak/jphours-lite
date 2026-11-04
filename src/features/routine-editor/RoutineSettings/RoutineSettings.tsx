@@ -1,3 +1,4 @@
+import type { Ref } from 'react'
 import { useLayoutEffect, useRef, useState } from 'react'
 import { ChevronRightIcon, MetronomeSoundSheet } from '../../../components'
 import { practiceConfig } from '../../../config/practice-config'
@@ -6,6 +7,7 @@ import { Stepper } from '../Stepper/Stepper'
 import styles from './RoutineSettings.module.css'
 
 interface RoutineSettingsProps {
+  summaryButtonRef?: Ref<HTMLButtonElement>
   routine: Routine
   onUpdateSetting(key: 'quickRestDurationSec' | 'warningLeadTimeSec', delta: number): void
   onSoundChange(sound: Routine['metronomeSound']): void
@@ -13,6 +15,7 @@ interface RoutineSettingsProps {
 }
 
 export function RoutineSettings({
+  summaryButtonRef,
   routine,
   onUpdateSetting,
   onSoundChange,
@@ -44,7 +47,11 @@ export function RoutineSettings({
             <h2>
               <button
                 type="button"
-                ref={summaryRef}
+                ref={(node) => {
+                  summaryRef.current = node
+                  if (typeof summaryButtonRef === 'function') return summaryButtonRef(node)
+                  if (summaryButtonRef) summaryButtonRef.current = node
+                }}
                 aria-expanded={expanded}
                 aria-controls="routine-settings-panel"
                 onClick={toggle}

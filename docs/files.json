@@ -36,7 +36,7 @@
     "src/features/routine-editor/RoutinePicker/": "Routine drawer, recency ordering, capacity explanation, and slide deletion UI with focused tests.",
     "src/features/routine-editor/RoutineSettings/": "Quick Rest, warning, and Metronome sound settings UI.",
     "src/features/routine-editor/WelcomeScreen/": "Fresh-install and empty-collection welcome screen with creation and import actions.",
-    "src/features/routine-editor/routine-creation.ts": "Minimal and random Routine creation factories and fixed generation pools.",
+    "src/features/routine-editor/routine-creation.ts": "Blank Exercise template, content-derived hint eligibility, and minimal/random Routine creation factories.",
     "src/features/routine-editor/Stepper/": "Reusable increment/decrement setting control.",
     "src/features/session-player/": "Session player feature, including lifecycle, controls, timer views, styles, and tests.",
     "src/features/session-player/EndScreen/": "Completed session end-state screen.",
@@ -62,6 +62,7 @@
     "docs/reports/": "Implementation reports, bug audits, and manual verification guides.",
     "docs/UBIQUITOUS_LANGUAGE.md": "Canonical Routine and Session domain vocabulary, relationships, and ambiguities.",
     "docs/icon-creation-publishing-guide.md": "Source artwork, generated assets, platform declarations, validation, and publishing guidance for application icons.",
-    "docs/": "Architecture decisions, outstanding work, plans, reports, ubiquitous language, and this inventory."
+    "docs/": "Architecture decisions, outstanding work, plans, reports, ubiquitous language, and this inventory.",
+    "src/features/routine-editor/RoutineHints/": "Passive empty Routine annotations, target geometry hook, styles, and focused tests."
   }
 }

@@ -1,12 +1,13 @@
 import { describe, expect, it, vi } from 'vitest'
 import * as z from 'zod/mini'
-import { createExercise } from '../../../domain/routine'
+import { createBreak, createExercise } from '../../../domain/routine'
 import { exerciseSchema, routineSchema } from '../../../domain/routine-schema'
 import {
   RANDOM_ROUTINE_ADJECTIVES,
   RANDOM_ROUTINE_EXERCISE_NAMES,
   RANDOM_ROUTINE_NOUNS,
   createBlankRoutine,
+  hasBlankRoutineEntries,
   createRandomRoutine,
 } from '../routine-creation'
 
@@ -19,6 +20,45 @@ describe('routine creation', () => {
       { kind: 'exercise', title: 'Practice', durationSec: 300, tempoBpm: 100 },
     ])
     expect(z.safeParse(routineSchema, routine).success).toBe(true)
+  })
+
+  it('recognizes blank content independently of generated identities', () => {
+    const first = createBlankRoutine('First')
+    const second = createBlankRoutine('Second')
+
+    expect(first.id).not.toBe(second.id)
+    expect(first.entries[0]!.id).not.toBe(second.entries[0]!.id)
+    expect(hasBlankRoutineEntries(first.entries)).toBe(true)
+    expect(hasBlankRoutineEntries(second.entries)).toBe(true)
+    expect(
+      hasBlankRoutineEntries([
+        createExercise({ title: 'Practice', tempoBpm: 100, durationSec: 300 }),
+      ]),
+    ).toBe(true)
+  })
+
+  it.each([
+    { title: 'Other' },
+    { tempoBpm: 101 },
+    { tempoBpm: null },
+    { durationSec: 301 },
+    { durationSec: null },
+  ])('rejects differing Exercise content: %o', (overrides) => {
+    const entry = createExercise({
+      title: 'Practice',
+      tempoBpm: 100,
+      durationSec: 300,
+      ...overrides,
+    })
+    expect(hasBlankRoutineEntries([entry])).toBe(false)
+  })
+
+  it('rejects empty entries, Breaks, and additional entries', () => {
+    const entries = createBlankRoutine('Blank').entries
+    expect(hasBlankRoutineEntries([])).toBe(false)
+    expect(hasBlankRoutineEntries([createBreak({ durationSec: 300 })])).toBe(false)
+    expect(hasBlankRoutineEntries([...entries, createExercise()])).toBe(false)
+    expect(hasBlankRoutineEntries([...entries, createBreak()])).toBe(false)
   })
 
   it('defines 30 unique, short title-cased name words and 30 valid Exercise names', () => {

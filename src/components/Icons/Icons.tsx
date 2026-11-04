@@ -174,3 +174,19 @@ export function DeleteIcon(props: IconProps) {
     </svg>
   )
 }
+
+export function HandDrawnArrow({ path, ...props }: IconProps & { path: string }) {
+  return (
+    <svg
+      aria-hidden="true"
+      {...props}
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.25"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d={path} />
+    </svg>
+  )
+}

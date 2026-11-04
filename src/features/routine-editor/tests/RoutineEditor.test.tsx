@@ -1,11 +1,12 @@
 import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
-import { describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { createBreak, createExercise, createRoutine, type Routine } from '../../../domain/routine'
 import {
   LocalStorageRoutineRepository,
   type RoutineRepository,
 } from '../../../services/persistence/routine-repository'
 import { RoutineEditor, routineTotal } from '../RoutineEditor/RoutineEditor'
+import { createBlankRoutine } from '../routine-creation'
 import { serializeRoutineFile } from '../../../services/routine-files/routine-file'
 
 vi.mock('../../../components', async (importOriginal) => ({
@@ -713,5 +714,152 @@ describe('RoutineEditor', () => {
     expect(screen.getByText('＋ Add exercise').closest('button')).toBeDisabled()
     expect(screen.getByText('＋ Add break').closest('button')).toBeDisabled()
     expect(screen.getByText('This Routine has reached the limit of 1,000 entries.')).toBeVisible()
+  })
+})
+
+describe('empty Routine hints lifecycle', () => {
+  beforeEach(() => {
+    vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(
+      function (this: HTMLElement) {
+        const label = this.getAttribute('aria-label') ?? this.textContent ?? ''
+        const [x, y, width, height] =
+          this.tagName === 'BUTTON'
+            ? label === 'Edit Practice'
+              ? [330, 220, 40, 40]
+              : label.includes('Add exercise')
+                ? [20, 620, 180, 44]
+                : label.includes('Quick Rest')
+                  ? [20, 140, 380, 44]
+                  : [20, 100, 40, 40]
+            : this.tagName === 'ARTICLE'
+              ? [20, 200, 380, 80]
+              : [0, 0, 420, 760]
+        return {
+          x,
+          y,
+          width,
+          height,
+          top: y,
+          left: x,
+          right: x + width,
+          bottom: y + height,
+          toJSON() {},
+        }
+      },
+    )
+  })
+  afterEach(() => vi.restoreAllMocks())
+
+  function expectHints() {
+    for (const label of ['Add an exercise', 'Adjust routine settings', 'Edit this exercise']) {
+      expect(screen.getByText(label)).toBeInTheDocument()
+    }
+  }
+  function expectNoHints() {
+    for (const label of ['Add an exercise', 'Adjust routine settings', 'Edit this exercise']) {
+      expect(screen.queryByText(label)).not.toBeInTheDocument()
+    }
+  }
+
+  it.each(['title', 'tempo', 'duration'] as const)(
+    'hides hints only after saving a different %s and restores matching content',
+    (field) => {
+      render(<RoutineEditor repository={repository(createBlankRoutine('Blank'))} />)
+      expectHints()
+      fireEvent.click(screen.getByRole('button', { name: 'Edit Practice' }))
+      const input =
+        field === 'title'
+          ? screen.getByLabelText('Exercise name')
+          : screen.getAllByRole('spinbutton')[field === 'tempo' ? 0 : 1]
+      fireEvent.change(input, {
+        target: { value: field === 'title' ? 'Scales' : field === 'tempo' ? '110' : '6' },
+      })
+      expectHints()
+      fireEvent.click(screen.getByRole('button', { name: 'Save' }))
+      expectNoHints()
+      fireEvent.click(
+        screen.getByRole('button', { name: field === 'title' ? 'Edit Scales' : 'Edit Practice' }),
+      )
+      fireEvent.change(
+        field === 'title'
+          ? screen.getByLabelText('Exercise name')
+          : screen.getAllByRole('spinbutton')[field === 'tempo' ? 0 : 1],
+        { target: { value: field === 'title' ? 'Practice' : field === 'tempo' ? '100' : '5' } },
+      )
+      fireEvent.click(screen.getByRole('button', { name: 'Save' }))
+      expectHints()
+    },
+  )
+
+  it.each(['exercise', 'break'])(
+    'keeps hints on cancelling Add %s and hides them when adding',
+    (kind) => {
+      render(<RoutineEditor repository={repository(createBlankRoutine('Blank'))} />)
+      const add = screen.getByRole('button', {
+        name: kind === 'exercise' ? '＋ Add exercise' : '＋ Add break',
+      })
+      fireEvent.click(add)
+      expect(screen.getByRole('dialog', { name: `Add ${kind}` })).toBeInTheDocument()
+      fireEvent.click(screen.getByRole('button', { name: 'Cancel' }))
+      expectHints()
+      fireEvent.click(add)
+      fireEvent.click(screen.getByRole('button', { name: 'Save' }))
+      expectNoHints()
+    },
+  )
+
+  it('keeps eligibility through name and settings changes and cancelled Exercise drafts', () => {
+    render(<RoutineEditor repository={repository(createBlankRoutine('Blank'))} />)
+    expectHints()
+    fireEvent.click(screen.getByRole('button', { name: 'Edit Practice' }))
+    fireEvent.change(screen.getByLabelText('Exercise name'), { target: { value: 'Cancelled' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Cancel' }))
+    expectHints()
+    fireEvent.click(screen.getByRole('button', { name: 'Edit routine name' }))
+    fireEvent.change(screen.getByLabelText('Routine name'), { target: { value: 'Renamed' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }))
+    expectHints()
+    fireEvent.click(screen.getByRole('button', { name: /quick rest.*warning cue/i }))
+    fireEvent.click(screen.getByRole('button', { name: 'Increase Quick Rest' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Increase Warning cue' }))
+    expect(screen.getByText('Add an exercise')).toBeInTheDocument()
+    expect(screen.getByText('Edit this exercise')).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Collapse settings' }))
+    expectHints()
+  })
+
+  it('shows hints for imported matching content with fresh identity', async () => {
+    render(<RoutineEditor repository={repository(createRoutine({ name: 'Different' }))} />)
+    expectNoHints()
+    fireEvent.change(screen.getByLabelText('Choose Routine file'), {
+      target: {
+        files: [
+          {
+            size: 1000,
+            text: () => Promise.resolve(serializeRoutineFile(createBlankRoutine('Imported blank'))),
+          },
+        ],
+      },
+    })
+    await screen.findByRole('dialog', { name: 'Import Routine' })
+    fireEvent.click(screen.getByRole('button', { name: 'Add routine' }))
+    expect(screen.getByRole('heading', { name: 'Imported blank', level: 1 })).toBeInTheDocument()
+    expectHints()
+  })
+
+  it('derives hints again on reopening and switching between saved Routines', () => {
+    const repo = repository(createBlankRoutine('Blank'))
+    repo.add(createRoutine({ name: 'Different' }))
+    const view = render(<RoutineEditor repository={repo} />)
+    expectNoHints()
+    fireEvent.click(screen.getByRole('button', { name: 'Routines' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Open routine Blank' }))
+    expectHints()
+    view.unmount()
+    render(<RoutineEditor repository={repo} />)
+    expectHints()
+    fireEvent.click(screen.getByRole('button', { name: 'Routines' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Open routine Different' }))
+    expectNoHints()
   })
 })

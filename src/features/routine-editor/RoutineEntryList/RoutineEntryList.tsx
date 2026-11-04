@@ -2,6 +2,7 @@ import { PointerActivationConstraints } from '@dnd-kit/dom'
 import { RestrictToElement } from '@dnd-kit/dom/modifiers'
 import { DragDropProvider, DragOverlay, KeyboardSensor, PointerSensor } from '@dnd-kit/react'
 import { isSortable } from '@dnd-kit/react/sortable'
+import type { Ref } from 'react'
 import { useState } from 'react'
 import type { Routine } from '../../../domain/routine'
 import { targetRoutineEntryId } from '../moveRoutineEntry'
@@ -29,13 +30,20 @@ const modifiers = [
 ]
 
 interface RoutineEntryListProps {
+  editButtonRef?: Ref<HTMLButtonElement>
   routine: Routine
   onEdit(index: number): void
   onDelete(index: number): void
   onReorder(activeEntryId: string, targetEntryId: string): void
 }
 
-export function RoutineEntryList({ routine, onEdit, onDelete, onReorder }: RoutineEntryListProps) {
+export function RoutineEntryList({
+  routine,
+  onEdit,
+  onDelete,
+  onReorder,
+  editButtonRef,
+}: RoutineEntryListProps) {
   const [activeEntryId, setActiveEntryId] = useState<string | null>(null)
   const activeEntry = routine.entries.find(({ id }) => id === activeEntryId)
   return (
@@ -59,6 +67,7 @@ export function RoutineEntryList({ routine, onEdit, onDelete, onReorder }: Routi
         {routine.entries.map((entry, index) => (
           <SortableRoutineEntryCard
             key={entry.id}
+            editButtonRef={routine.entries.length === 1 ? editButtonRef : undefined}
             entry={entry}
             index={index}
             dragging={entry.id === activeEntryId}

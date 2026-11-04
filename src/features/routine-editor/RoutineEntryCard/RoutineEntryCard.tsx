@@ -1,10 +1,11 @@
 import { useSortable } from '@dnd-kit/react/sortable'
-import type { RefCallback } from 'react'
+import type { Ref, RefCallback } from 'react'
 import { DragHandleIcon } from '../../../components'
 import type { RoutineEntry } from '../../../domain/routine'
 import styles from './RoutineEntryCard.module.css'
 
 interface RoutineEntryCardProps {
+  editButtonRef?: Ref<HTMLButtonElement>
   entry: RoutineEntry
   onEdit(): void
   onDelete(): void
@@ -15,6 +16,7 @@ interface RoutineEntryCardProps {
 }
 
 export function RoutineEntryCard({
+  editButtonRef,
   entry,
   onEdit,
   onDelete,
@@ -57,7 +59,12 @@ export function RoutineEntryCard({
           </span>
         </div>
       </div>
-      <button className={styles.cardAction} aria-label={`Edit ${name}`} onClick={onEdit}>
+      <button
+        ref={editButtonRef}
+        className={styles.cardAction}
+        aria-label={`Edit ${name}`}
+        onClick={onEdit}
+      >
         ✎
       </button>
       <button
@@ -72,6 +79,7 @@ export function RoutineEntryCard({
 }
 
 export function SortableRoutineEntryCard({
+  editButtonRef,
   entry,
   index,
   onEdit,
@@ -84,6 +92,7 @@ export function SortableRoutineEntryCard({
   })
   return (
     <RoutineEntryCard
+      editButtonRef={editButtonRef}
       entry={entry}
       onEdit={onEdit}
       onDelete={onDelete}

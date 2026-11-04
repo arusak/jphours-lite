@@ -110,10 +110,28 @@ function shuffle<T>(source: readonly T[]): T[] {
   return result
 }
 
+export const BLANK_ROUTINE_EXERCISE = {
+  kind: 'exercise',
+  title: 'Practice',
+  tempoBpm: 100,
+  durationSec: 300,
+} as const satisfies Readonly<Omit<Exercise, 'id'>>
+
+export function hasBlankRoutineEntries(entries: Routine['entries']): boolean {
+  if (entries.length !== 1) return false
+  const entry = entries[0]!
+  return (
+    entry.kind === BLANK_ROUTINE_EXERCISE.kind &&
+    entry.title === BLANK_ROUTINE_EXERCISE.title &&
+    entry.tempoBpm === BLANK_ROUTINE_EXERCISE.tempoBpm &&
+    entry.durationSec === BLANK_ROUTINE_EXERCISE.durationSec
+  )
+}
+
 export function createBlankRoutine(name: string): Routine {
   return createRoutine({
     name,
-    entries: [createExercise({ title: 'Practice', durationSec: 300, tempoBpm: 100 })],
+    entries: [createExercise(BLANK_ROUTINE_EXERCISE)],
   })
 }
 
