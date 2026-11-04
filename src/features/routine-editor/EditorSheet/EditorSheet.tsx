@@ -80,7 +80,7 @@ export function EditorSheet({ sheet, submitted, onChange, onSave, onCancel }: Ed
             {entry!.kind === 'exercise' && (
               <label className={styles.editorStepper}>
                 Tempo (<span className="small-caps">BPM</span>)
-                <span>
+                <span className={styles.controls}>
                   <button
                     aria-label="Decrease tempo"
                     onClick={() =>
@@ -125,7 +125,7 @@ export function EditorSheet({ sheet, submitted, onChange, onSave, onCancel }: Ed
           </>
           <label className={styles.editorStepper}>
             Duration (minutes)
-            <span>
+            <span className={styles.controls}>
               <button aria-label="Decrease duration" onClick={() => durationChange(-minute)}>
                 −
               </button>
