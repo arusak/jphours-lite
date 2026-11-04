@@ -70,7 +70,7 @@ describe('RoutinePicker', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Cancel' }))
     expect(screen.queryByRole('slider')).not.toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: 'Delete routine Improv' }))
-    const slider = screen.getByRole('slider', { name: 'Slide to delete routine Improv' })
+    const slider = screen.getByRole('slider', { name: 'Slide to delete the routine' })
     fireEvent.keyDown(slider, { key: 'End' })
     expect(onDelete).toHaveBeenLastCalledWith(second.id)
     expect(slider).toHaveAttribute('aria-valuenow', '0')

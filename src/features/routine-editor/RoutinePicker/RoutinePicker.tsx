@@ -102,7 +102,7 @@ export function RoutinePicker({
                     </button>
                     <SlideToConfirm
                       label={`Slide to delete "${routine.name}"`}
-                      accessibleName={`Slide to delete routine ${routine.name}`}
+                      accessibleName={`Slide to delete the routine`}
                       icon={<DeleteIcon />}
                       threshold={practiceConfig.interaction.slideToStopThreshold}
                       onConfirm={() => {
