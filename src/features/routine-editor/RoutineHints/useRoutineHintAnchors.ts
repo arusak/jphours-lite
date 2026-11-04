@@ -80,24 +80,24 @@ export function useRoutineHintAnchors(targets: RoutineHintTargets) {
             ? left
             : Math.max(left, right - width - 24)
         const labelWidth = width
-        const x = key === 'edit' ? rect.left - 3 : rect.left + rect.width / 2
-        const y =
-          key === 'add'
-            ? rect.top - 3
-            : key === 'edit'
-              ? rect.top + rect.height / 2
-              : rect.bottom + 3
-        const startX = Math.max(labelLeft + 8, Math.min(labelLeft + labelWidth - 8, x - 24))
+        const iconRect =
+          key === 'edit' ? element.firstElementChild?.getBoundingClientRect() : undefined
+        const targetRect = iconRect?.width ? iconRect : rect
+        const x = targetRect.left + targetRect.width / 2
+        const y = key === 'add' ? rect.top - 3 : targetRect.bottom + 3
+        const startX = labelLeft + labelWidth / 2
         const startY = y < top ? top : top + 24
-        const dx = x - startX
         const dy = y - startY
-        const controlX = startX + dx * 0.65
-        const controlY = startY + dy * 0.65
-        // Both control points stay between the label and target: no loops or overshoot.
-        const angle = Math.atan2(y - controlY, x - controlX)
+        const bow = Math.min(48, Math.abs(dy) * 0.2)
+        const controlX1 = Math.max(left, Math.min(right, startX + bow))
+        const controlX2 = Math.max(left, Math.min(right, x + bow))
+        const controlY1 = startY + dy * 0.25
+        const controlY2 = startY + dy * 0.75
+        // Progress steadily toward the target while bowing gently to one side.
+        const angle = Math.atan2(y - controlY2, x - controlX2)
         const head = (offset: number) =>
           `${x - 5 * Math.cos(angle + offset)} ${y - 5 * Math.sin(angle + offset)}`
-        const path = `M ${startX} ${startY} C ${controlX} ${startY}, ${controlX} ${controlY}, ${x} ${y} M ${head(-0.55)} L ${x} ${y} L ${head(0.55)}`
+        const path = `M ${startX} ${startY} C ${controlX1} ${controlY1}, ${controlX2} ${controlY2}, ${x} ${y} M ${head(-0.55)} L ${x} ${y} L ${head(0.55)}`
         next.push({ key, left: labelLeft, top, width: labelWidth, path })
       }
       setAnchors(next)

@@ -10,6 +10,8 @@ it('keeps compact annotations, refreshes on resize/scroll, omits invisible targe
   const editor = document.createElement('section')
   const card = document.createElement('article')
   const edit = document.createElement('button')
+  const icon = document.createElement('span')
+  edit.append(icon)
   card.append(edit)
   const add = document.createElement('button')
   const settings = document.createElement('button')
@@ -31,6 +33,7 @@ it('keeps compact annotations, refreshes on resize/scroll, omits invisible targe
   vi.spyOn(editor, 'getBoundingClientRect').mockImplementation(() => rect(0, 0, 320, 568))
   vi.spyOn(card, 'getBoundingClientRect').mockImplementation(() => rect(16, cardTop, 288, 80))
   vi.spyOn(edit, 'getBoundingClientRect').mockImplementation(() => rect(250, editTop, 40, 40))
+  vi.spyOn(icon, 'getBoundingClientRect').mockImplementation(() => rect(260, editTop + 10, 20, 20))
   vi.spyOn(settings, 'getBoundingClientRect').mockImplementation(() => rect(16, 150, 288, 40))
   vi.spyOn(add, 'getBoundingClientRect').mockImplementation(() => rect(16, addTop, 140, 44))
   const disconnect = vi.fn()
@@ -55,14 +58,22 @@ it('keeps compact annotations, refreshes on resize/scroll, omits invisible targe
   const { result, unmount } = renderHook(() => useRoutineHintAnchors(targets))
   expect(result.current.map(({ key }) => key)).toEqual(['settings', 'edit', 'add'])
   expect(result.current.map(({ top }) => top)).toEqual([194, 312, 368])
-  // Curves must approach their target without overshooting and curling back.
+  // Curves may bow sideways, but must progress toward the target without curling back.
   for (const { path } of result.current) {
     const [sx, sy, cx1, cy1, cx2, cy2, ex, ey] = path.match(/-?\d+(?:\.\d+)?/g)!.map(Number)
-    for (const x of [cx1!, cx2!]) expect(x).toBeGreaterThanOrEqual(Math.min(sx!, ex!))
-    for (const x of [cx1!, cx2!]) expect(x).toBeLessThanOrEqual(Math.max(sx!, ex!))
+    for (const x of [cx1!, cx2!]) expect(x).toBeGreaterThanOrEqual(Math.min(sx!, ex!) - 48)
+    for (const x of [cx1!, cx2!]) expect(x).toBeLessThanOrEqual(Math.max(sx!, ex!) + 48)
     for (const y of [cy1!, cy2!]) expect(y).toBeGreaterThanOrEqual(Math.min(sy!, ey!))
     for (const y of [cy1!, cy2!]) expect(y).toBeLessThanOrEqual(Math.max(sy!, ey!))
   }
+  const addAnchor = result.current.find(({ key }) => key === 'add')!
+  expect(Number(addAnchor.path.split(' ')[1])).toBe(addAnchor.left + addAnchor.width / 2)
+  const editAnchor = result.current.find(({ key }) => key === 'edit')!
+  const editEndpoint = editAnchor.path
+    .match(/-?\d+(?:\.\d+)?/g)!
+    .map(Number)
+    .slice(6, 8)
+  expect(editEndpoint).toEqual([270, 283])
   editTop = -50
   act(() => window.dispatchEvent(new Event('scroll')))
   expect(result.current.map(({ key }) => key)).not.toContain('edit')

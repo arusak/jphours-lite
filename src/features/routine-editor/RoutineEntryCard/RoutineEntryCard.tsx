@@ -65,7 +65,7 @@ export function RoutineEntryCard({
         aria-label={`Edit ${name}`}
         onClick={onEdit}
       >
-        ✎
+        <span aria-hidden="true">✎</span>
       </button>
       <button
         className={`${styles.cardAction} ${styles.delete}`}
