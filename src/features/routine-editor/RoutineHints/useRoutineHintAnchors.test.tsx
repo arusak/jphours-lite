@@ -73,6 +73,9 @@ it('keeps compact annotations, refreshes on resize/scroll, omits invisible targe
   }
   const addAnchor = result.current.find(({ key }) => key === 'add')!
   expect(Number(addAnchor.path.split(' ')[1])).toBe(addAnchor.left + addAnchor.width / 2)
+  const addPoints = addAnchor.path.match(/-?\d+(?:\.\d+)?/g)!.map(Number)
+  expect(addPoints[2]).toBeLessThan(addPoints[0]!)
+  expect(addPoints[4]).toBeLessThan(addPoints[6]!)
   const editAnchor = result.current.find(({ key }) => key === 'edit')!
   const editEndpoint = editAnchor.path
     .match(/-?\d+(?:\.\d+)?/g)!

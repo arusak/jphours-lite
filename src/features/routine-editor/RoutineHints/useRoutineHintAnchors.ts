@@ -98,7 +98,7 @@ export function useRoutineHintAnchors(targets: RoutineHintTargets) {
         const startX = labelLeft + labelWidth / 2
         const startY = y < top ? top : top + 24
         const dy = y - startY
-        const bow = Math.min(48, Math.abs(dy) * 0.35)
+        const bow = Math.min(48, Math.abs(dy) * 0.35) * (key === 'add' ? -1 : 1)
         const controlX1 = Math.max(left, Math.min(right, startX + bow))
         const controlX2 = Math.max(left, Math.min(right, x + bow * 0.65))
         const controlY1 = startY + dy * 0.18

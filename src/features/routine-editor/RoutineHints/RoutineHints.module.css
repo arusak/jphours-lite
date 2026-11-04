@@ -11,7 +11,8 @@
 }
 .label {
   position: absolute;
-  font-size: 0.9rem;
+  font-size: 1rem;
+  font-style: italic;
   line-height: 24px;
   text-align: center;
   white-space: nowrap;
