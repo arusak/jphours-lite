@@ -341,10 +341,16 @@ describe('RoutineEditor', () => {
 
     fireEvent.click(disclosure)
 
-    expect(disclosure).toHaveAttribute('aria-expanded', 'true')
+    expect(
+      screen.queryByRole('button', { name: /quick rest.*warning cue/i }),
+    ).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Collapse settings' })).toHaveFocus()
     expect(panel).toHaveAttribute('aria-hidden', 'false')
     expect(panel).not.toHaveAttribute('inert')
     expect(screen.getByRole('button', { name: 'Increase Quick Rest' })).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Collapse settings' }))
+    expect(disclosure).toHaveFocus()
+    expect(panel).toHaveAttribute('inert')
   })
 
   it('auto-commits Alternate beat tone changes from the shared sound sheet', () => {
@@ -358,6 +364,47 @@ describe('RoutineEditor', () => {
     fireEvent.click(alternateBeatTone)
 
     expect(alternateBeatTone).toHaveAttribute('aria-checked', 'false')
+  })
+
+  it('preserves changed settings through repeated collapse and restores focus after the sound sheet', async () => {
+    render(<RoutineEditor repository={repository(createRoutine({ warningLeadTimeSec: 0 }))} />)
+    const summary = () => screen.getByRole('button', { name: /quick rest.*warning cue/i })
+    fireEvent.click(summary())
+    expect(screen.getByRole('button', { name: 'Decrease Warning cue' })).toBeDisabled()
+    fireEvent.click(screen.getByRole('button', { name: 'Increase Quick Rest' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Increase Warning cue' }))
+    const sound = screen.getByRole('button', { name: /metronome sound/i })
+    sound.focus()
+    fireEvent.click(sound)
+    fireEvent.click(screen.getByRole('radio', { name: 'Wood' }))
+    fireEvent.keyDown(document, { key: 'Escape' })
+    await waitFor(() => expect(sound).toHaveFocus())
+    for (let index = 0; index < 2; index++) {
+      fireEvent.click(screen.getByRole('button', { name: 'Collapse settings' }))
+      expect(summary()).toHaveTextContent('Quick Rest 35s · Warning cue 5s · Wood Click')
+      fireEvent.click(summary())
+      expect(screen.getByRole('button', { name: /metronome sound/i })).toHaveTextContent('Wood')
+    }
+  })
+
+  it('updates expanded settings when switching Routines', () => {
+    const first = createRoutine({
+      name: 'First',
+      quickRestDurationSec: 180,
+      warningLeadTimeSec: 120,
+    })
+    const second = createRoutine({ name: 'Second', quickRestDurationSec: 30 })
+    render(<RoutineEditor repository={stored(first, second)} />)
+    fireEvent.click(screen.getByRole('button', { name: /quick rest.*warning cue/i }))
+    fireEvent.click(screen.getByRole('button', { name: 'Routines' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Open routine First' }))
+    expect(screen.getByRole('button', { name: 'Collapse settings' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Increase Quick Rest' })).toBeDisabled()
+    expect(screen.getByRole('button', { name: 'Increase Warning cue' })).toBeDisabled()
+    fireEvent.click(screen.getByRole('button', { name: 'Collapse settings' }))
+    expect(screen.getByRole('button', { name: /quick rest.*warning cue/i })).toHaveTextContent(
+      'Quick Rest 180s · Warning cue 120s',
+    )
   })
 
   it('activates the dnd-kit Keyboard sensor only from the drag handle', async () => {

@@ -1,96 +1,73 @@
 .routineSettings {
-  margin: 1rem 0 0 0;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
+  margin: 1rem 0;
 }
-
-.settingsHeader {
-  overflow: hidden;
+.surface {
+  margin: 0 -0.1875rem;
   border: 0.0625rem solid var(--color-border);
   border-radius: var(--radius-xl);
-  background: transparent;
-  margin: 0 -0.1875rem;
+  overflow: hidden;
 }
-
+.face,
+.settingsDisclosure {
+  display: grid;
+  grid-template-rows: 1fr;
+  opacity: 1;
+  transition:
+    grid-template-rows 220ms ease-out,
+    opacity 220ms ease-out;
+}
+.face[aria-hidden="true"],
+.settingsDisclosure[aria-hidden="true"] {
+  grid-template-rows: 0fr;
+  opacity: 0;
+}
+.face > *,
+.settingsDisclosure > * {
+  min-height: 0;
+  overflow: hidden;
+}
 .settingsHeader h2 {
   margin: 0;
   font-size: 0.75rem;
 }
-
 .settingsHeader button {
   display: flex;
   align-items: center;
   justify-content: space-between;
   width: 100%;
   min-height: 2.25rem;
-  padding: 0 1rem;
+  padding: 0.25rem 1rem;
   color: var(--color-foreground);
   text-align: left;
   background: none;
 }
-
-.settingsHeader button > span {
-  display: grid;
-  min-width: 0;
-  gap: 0.125rem;
-}
-
-.settingsHeader strong {
-  font-size: 0.9375rem;
-  font-weight: 700;
-  letter-spacing: -0.01em;
-}
-
-.settingsHeader small {
-  color: var(--color-muted-foreground);
-  font-size: 0.75rem;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
 .settingsHeader button > svg {
   flex: 0 0 auto;
   width: 1.125rem;
   height: 1.125rem;
   color: var(--color-muted-foreground);
-  transition: transform 180ms ease-out;
 }
-
-.settingsHeader button[aria-expanded="true"] > svg {
-  transform: rotate(90deg);
-}
-
-.settingsDisclosure {
-  display: grid;
-  grid-template-rows: 0fr;
-  opacity: 0;
-  transition: grid-template-rows 180ms ease-out;
-}
-
-.settingsDisclosure[aria-hidden="false"] {
-  grid-template-rows: 1fr;
-  opacity: 1;
-}
-
-.settingsDisclosure > * {
-  min-height: 0;
-  overflow: hidden;
-}
-
 .settingsCard {
-  overflow: hidden;
-  border: 0.0625rem solid var(--color-border);
-  border-radius: var(--radius-xl);
+  position: relative;
   background: oklch(0.225 0.019 52 / 76%);
-  box-shadow: 0 1rem 2.25rem rgb(0 0 0 / 10%);
 }
-
 .settingsCard > * + * {
   border-top: 0.0625rem solid var(--color-border);
 }
-
+.collapse {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 1.75rem;
+  background: transparent;
+  color: var(--color-muted-foreground);
+}
+.collapse svg {
+  width: 1rem;
+  height: 1rem;
+  transform: rotate(-90deg);
+}
 .soundSetting {
   display: flex;
   align-items: center;
@@ -142,8 +119,14 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .settingsHeader button > svg,
+  .face,
   .settingsDisclosure {
-    transition-duration: 0ms;
+    transition: none;
   }
+}
+
+.settingsHeader button:focus-visible,
+.collapse:focus-visible,
+.soundSetting:focus-visible {
+  outline-offset: -3px;
 }

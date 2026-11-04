@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useLayoutEffect, useRef, useState } from 'react'
 import { ChevronRightIcon, MetronomeSoundSheet } from '../../../components'
 import { practiceConfig } from '../../../config/practice-config'
 import type { Routine } from '../../../domain/routine'
@@ -20,75 +20,106 @@ export function RoutineSettings({
 }: RoutineSettingsProps) {
   const [soundPickerOpen, setSoundPickerOpen] = useState(false)
   const [expanded, setExpanded] = useState(false)
+  const summaryRef = useRef<HTMLButtonElement>(null)
+  const collapseRef = useRef<HTMLButtonElement>(null)
+  const focusPending = useRef(false)
+  useLayoutEffect(() => {
+    if (focusPending.current) {
+      ;(expanded ? collapseRef : summaryRef).current?.focus()
+      focusPending.current = false
+    }
+  }, [expanded])
+  const toggle = () => {
+    focusPending.current = true
+    setExpanded((current) => !current)
+  }
   const soundLabel = routine.metronomeSound[0]!.toUpperCase() + routine.metronomeSound.slice(1)
   const warningLabel = routine.warningLeadTimeSec === 0 ? 'Off' : `${routine.warningLeadTimeSec}s`
 
   return (
-    <section className={styles.routineSettings} aria-labelledby="routine-settings-title">
-      <header className={styles.settingsHeader}>
-        <h2 id="routine-settings-title">
-          <button
-            type="button"
-            aria-expanded={expanded}
-            aria-controls="routine-settings-panel"
-            onClick={() => setExpanded((current) => !current)}
-          >
-            <span>
-              Quick Rest {routine.quickRestDurationSec}s · Warning cue {warningLabel} · {soundLabel}{' '}
-              Click
-            </span>
-            <ChevronRightIcon aria-hidden="true" />
-          </button>
-        </h2>
-      </header>
-      <div
-        id="routine-settings-panel"
-        className={styles.settingsDisclosure}
-        aria-hidden={!expanded}
-        inert={!expanded}
-      >
-        <div className={styles.settingsCard}>
-          <Stepper
-            label="Quick Rest"
-            description="Between adjacent exercises"
-            value={`${routine.quickRestDurationSec}s`}
-            decreaseDisabled={routine.quickRestDurationSec <= practiceConfig.quickRestDuration.min}
-            increaseDisabled={routine.quickRestDurationSec >= practiceConfig.quickRestDuration.max}
-            onDecrease={() =>
-              onUpdateSetting('quickRestDurationSec', -practiceConfig.quickRestDuration.increment)
-            }
-            onIncrease={() =>
-              onUpdateSetting('quickRestDurationSec', practiceConfig.quickRestDuration.increment)
-            }
-          />
-          <Stepper
-            label="Warning cue"
-            description="Before a timed step completes"
-            value={warningLabel}
-            decreaseDisabled={routine.warningLeadTimeSec <= practiceConfig.warningLeadTime.min}
-            increaseDisabled={routine.warningLeadTimeSec >= practiceConfig.warningLeadTime.max}
-            onDecrease={() =>
-              onUpdateSetting('warningLeadTimeSec', -practiceConfig.warningLeadTime.increment)
-            }
-            onIncrease={() =>
-              onUpdateSetting('warningLeadTimeSec', practiceConfig.warningLeadTime.increment)
-            }
-          />
-          <button
-            className={styles.soundSetting}
-            aria-haspopup="dialog"
-            aria-expanded={soundPickerOpen}
-            onClick={() => setSoundPickerOpen(true)}
-          >
-            <span className={styles.settingCopy}>
-              <strong>Metronome sound</strong>
-              <small>Beat character</small>
-            </span>
-            <span className={styles.soundValue}>
-              {soundLabel}
+    <section className={styles.routineSettings} aria-label="Routine settings">
+      <div className={styles.surface} data-expanded={expanded}>
+        <div className={styles.face} aria-hidden={expanded} inert={expanded}>
+          <header className={styles.settingsHeader}>
+            <h2>
+              <button
+                type="button"
+                ref={summaryRef}
+                aria-expanded={expanded}
+                aria-controls="routine-settings-panel"
+                onClick={toggle}
+              >
+                <span>
+                  Quick Rest {routine.quickRestDurationSec}s · Warning cue {warningLabel} ·{' '}
+                  {soundLabel} Click
+                </span>
+                <ChevronRightIcon aria-hidden="true" />
+              </button>
+            </h2>
+          </header>
+        </div>
+        <div
+          id="routine-settings-panel"
+          className={styles.settingsDisclosure}
+          aria-hidden={!expanded}
+          inert={!expanded}
+        >
+          <div className={styles.settingsCard}>
+            <Stepper
+              label="Quick Rest"
+              description="Between adjacent exercises"
+              value={`${routine.quickRestDurationSec}s`}
+              decreaseDisabled={
+                routine.quickRestDurationSec <= practiceConfig.quickRestDuration.min
+              }
+              increaseDisabled={
+                routine.quickRestDurationSec >= practiceConfig.quickRestDuration.max
+              }
+              onDecrease={() =>
+                onUpdateSetting('quickRestDurationSec', -practiceConfig.quickRestDuration.increment)
+              }
+              onIncrease={() =>
+                onUpdateSetting('quickRestDurationSec', practiceConfig.quickRestDuration.increment)
+              }
+            />
+            <Stepper
+              label="Warning cue"
+              description="Before a timed step completes"
+              value={warningLabel}
+              decreaseDisabled={routine.warningLeadTimeSec <= practiceConfig.warningLeadTime.min}
+              increaseDisabled={routine.warningLeadTimeSec >= practiceConfig.warningLeadTime.max}
+              onDecrease={() =>
+                onUpdateSetting('warningLeadTimeSec', -practiceConfig.warningLeadTime.increment)
+              }
+              onIncrease={() =>
+                onUpdateSetting('warningLeadTimeSec', practiceConfig.warningLeadTime.increment)
+              }
+            />
+            <button
+              className={styles.soundSetting}
+              aria-haspopup="dialog"
+              aria-expanded={soundPickerOpen}
+              onClick={() => setSoundPickerOpen(true)}
+            >
+              <span className={styles.settingCopy}>
+                <strong>Metronome sound</strong>
+                <small>Beat character</small>
+              </span>
+              <span className={styles.soundValue}>
+                {soundLabel}
+                <ChevronRightIcon aria-hidden="true" />
+              </span>
+            </button>
+            <button
+              type="button"
+              ref={collapseRef}
+              className={styles.collapse}
+              aria-label="Collapse settings"
+              onClick={toggle}
+            >
               <ChevronRightIcon aria-hidden="true" />
-            </span>
-          </button>
+            </button>
+          </div>
         </div>
       </div>
       <MetronomeSoundSheet
