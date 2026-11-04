@@ -17,18 +17,17 @@
 }
 
 .appShell::before {
-  width: 32.5rem;
-  height: 32.5rem;
-  top: -8rem;
-  left: 50%;
-  translate: -50%;
-  background: radial-gradient(circle, oklch(0.63 0.16 45 / 22%), transparent 68%);
+  width: 60vw;
+  height: 70vw;
+  top: 12%;
+  left: 20%;
+  background: radial-gradient(circle, oklch(0.63 0.16 45 / 15%), transparent 68%);
 }
 
 .appShell::after {
-  width: 26.25rem;
-  height: 26.25rem;
-  right: -10%;
-  bottom: -10%;
-  background: radial-gradient(circle, oklch(0.81 0.145 74 / 14%), transparent 70%);
+  width: 69vw;
+  height: 72vw;
+  right: -17%;
+  bottom: 21%;
+  background: radial-gradient(circle, oklch(0.81 0.145 74 / 12%), transparent 70%);
 }
